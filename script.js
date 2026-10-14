@@ -77,11 +77,24 @@
     });
     box?.addEventListener('pointerleave', home);
 
-    // Scroll-spy
-    const spy = new IntersectionObserver((entries) => {
-      entries.forEach((e) => { if (e.isIntersecting) setActive(e.target.id); });
-    }, { rootMargin: '-45% 0px -50% 0px' });
-    $$('main section[id]').forEach((s) => spy.observe(s));
+    // Keep the active link deterministic when multiple sections cross the viewport at once.
+    const sections = $$('main section[id]').filter((section) =>
+      links.some((link) => link.getAttribute('href') === '#' + section.id));
+    let spyTicking = false;
+    const updateActive = () => {
+      spyTicking = false;
+      const threshold = innerHeight * 0.5;
+      const current = sections.reduce((active, section) =>
+        section.getBoundingClientRect().top <= threshold ? section : active, sections[0]);
+      if (current) setActive(current.id);
+    };
+    const requestActiveUpdate = () => {
+      if (!spyTicking) {
+        spyTicking = true;
+        requestAnimationFrame(updateActive);
+      }
+    };
+    window.addEventListener('scroll', requestActiveUpdate, { passive: true });
 
     // Mobilā izvēlne
     const setMenu = (open) => {
@@ -95,6 +108,7 @@
     window.addEventListener('resize', () => {
       if (innerWidth > 900) setMenu(false);
       home();
+      requestActiveUpdate();
     });
 
     // Josla kļūst kompaktāka ritinot
@@ -105,6 +119,7 @@
     window.addEventListener('load', home);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(home);
     home();
+    updateActive();
   }
 
   /* ---------- 3. RITINĀŠANAS EFEKTI ---------- */
