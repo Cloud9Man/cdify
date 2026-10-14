@@ -766,19 +766,6 @@
     halo.renderOrder = -1;
     rig.add(halo);
 
-    // Orbītas gredzeni ar pavadoņiem
-    const ringMat = (color, opacity) => new THREE.MeshBasicMaterial({ color, transparent: true, opacity });
-    const ring1 = new THREE.Mesh(new THREE.TorusGeometry(3.1, 0.012, 8, 220), ringMat(0x22d3ee, 0.7));
-    const ring2 = new THREE.Mesh(new THREE.TorusGeometry(3.6, 0.01, 8, 220), ringMat(0xff5ca8, 0.6));
-    ring1.rotation.x = Math.PI / 2.4;
-    ring2.rotation.set(Math.PI / 3, 0.6, 0);
-    tilt.add(ring1, ring2);
-
-    const sat1 = new THREE.Mesh(new THREE.SphereGeometry(0.09, 16, 16), new THREE.MeshBasicMaterial({ color: 0x22d3ee }));
-    const sat2 = new THREE.Mesh(new THREE.SphereGeometry(0.075, 16, 16), new THREE.MeshBasicMaterial({ color: 0xff5ca8 }));
-    ring1.add(sat1);
-    ring2.add(sat2);
-
     // Daļiņas
     const N = isSmall() ? 700 : 1400;
     const pos = new Float32Array(N * 3);
@@ -917,7 +904,7 @@
       rig.position.set((cur.x - W / 2) * wpp, -(cur.y - H / 2) * wpp, 0);
       rig.scale.setScalar((cur.r * wpp) / R);
 
-      const targetOpacity = lerp(1, 0.3, p);
+      const targetOpacity = lerp(1, 0.1, p);          // ritinot disks kļūst gandrīz caurspīdīgs
       if (Math.abs(targetOpacity - state.opacity) > 0.01) {
         state.opacity = targetOpacity;
         canvas.style.opacity = targetOpacity.toFixed(2);
@@ -944,11 +931,6 @@
       uniforms.uPulse.value = pulse;
       uniforms.uLight.value.set(-state.x * 0.9 + Math.sin(t * 0.35) * 0.5, -state.y * 0.7 + Math.cos(t * 0.27) * 0.35 + 0.3, 1);
       halo.material.uniforms.uTime.value = t;
-
-      ring1.rotation.y = t * 0.15;
-      ring2.rotation.x = Math.PI / 3 + t * 0.1;
-      sat1.position.set(Math.cos(t * 0.8) * 3.1, Math.sin(t * 0.8) * 3.1, 0);
-      sat2.position.set(Math.cos(-t * 0.6 + 2) * 3.6, Math.sin(-t * 0.6 + 2) * 3.6, 0);
 
       particles.rotation.y = t * 0.02 + scrollY * 0.0003;
       l3.position.set(state.x * 6, -state.y * 4, 4);

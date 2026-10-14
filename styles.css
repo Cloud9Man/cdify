@@ -85,6 +85,16 @@ main, .footer { position: relative; z-index: 1; }
   box-shadow: 0 24px 60px -24px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .12);
 }
 
+/* Sekciju kartītes — gandrīz necaurspīdīgas, lai fonā redzamais disks cauri nespīd */
+.card-bg.glass,
+.proj.glass,
+.step-body.glass,
+.counter.glass,
+.form.glass,
+.filters.glass {
+  background: linear-gradient(135deg, rgba(28, 31, 56, .96), rgba(15, 17, 35, .95));
+}
+
 .gradient-text {
   background: linear-gradient(110deg, var(--secondary), var(--primary) 45%, var(--accent) 90%);
   background-size: 200% auto;
