@@ -2,7 +2,7 @@
    NOVA — Digitālā studija · script.js
    1 Palīgfunkcijas · 2 Navigācija · 3 Ritināšanas efekti
    4 Teksta animācijas · 5 Peles efekti · 6 3D kubs · 7 Process
-   8 Projekti un forma · 9 Three.js 3D skatuve · 10 Starts
+   8 Projekti un forma · 9 Three.js 3D skatuve (CD) · 10 Starts
    ========================================================== */
 (() => {
   'use strict';
@@ -13,6 +13,8 @@
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const lerp = (a, b, t) => a + (b - a) * t;
   const smooth = (t) => t * t * (3 - 2 * t);
+
+  let heroShift = 0; // cik pikseļu hero saturs ir nobīdīts ritinot (vajadzīgs diska izkārtojumam)
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -121,6 +123,7 @@
       if (heroInner && !reduceMotion) {
         if (y < innerHeight * 1.2) {
           const p = clamp(y / (innerHeight * 0.9), 0, 1);
+          heroShift = y > 0 ? y * 0.18 : 0;
           heroInner.style.transform = y > 0 ? `translate3d(0, ${y * 0.18}px, 0)` : '';
           heroInner.style.opacity = y > 0 ? String(clamp(1 - p * 1.15, 0, 1)) : '';
         }
@@ -271,21 +274,27 @@
     document.addEventListener('mouseenter', show);
 
     document.addEventListener('pointerover', (e) => {
+      if (document.body.classList.contains('is-spinning')) return; // velkot disku uzraksts nemainās
       const withLabel = e.target.closest('[data-cursor]');
       const link = e.target.closest('a, button, input, textarea, select, label');
       ring.classList.toggle('is-label', !!withLabel);
       ring.classList.toggle('is-link', !withLabel && !!link);
       label.textContent = withLabel ? withLabel.dataset.cursor : '';
     });
+    const release = () => ring.classList.remove('is-down');
     document.addEventListener('pointerdown', () => ring.classList.add('is-down'));
-    document.addEventListener('pointerup', () => ring.classList.remove('is-down'));
+    document.addEventListener('pointerup', release);
+    document.addEventListener('pointercancel', release);
+    window.addEventListener('blur', release);
 
     onFrame(() => {
       rx = lerp(rx, pointer.x, 0.22);
       ry = lerp(ry, pointer.y, 0.22);
       gx = lerp(gx, pointer.x, 0.08);
       gy = lerp(gy, pointer.y, 0.08);
-      ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+      // Pozīciju liekam uz atsevišķās `translate` īpašības: tā tiek piemērota PIRMS `scale`,
+      // tāpēc klikšķa saspiešana (scale) vairs nepārbīda apli.
+      ring.style.translate = `calc(${rx.toFixed(1)}px - 50%) calc(${ry.toFixed(1)}px - 50%)`;
       glow.style.transform = `translate3d(${gx}px, ${gy}px, 0)`;
     });
   }
@@ -452,7 +461,229 @@
     });
   }
 
-  /* ---------- 9. THREE.JS 3D SKATUVE ---------- */
+  /* ---------- 9. THREE.JS 3D SKATUVE: stilizēts interaktīvs CD ---------- */
+
+  /* ---- CD: konstantes, šeideri un uzdruka ---- */
+  // R — diska rādiuss, HOLE — caurums, HUB — caurspīdīgā centra mala (visi normalizēti pret R), T — biezums
+  const DISC = { R: 2.4, HOLE: 0.15, HUB: 0.34, T: 0.07 };
+
+  const DISC_VERT = `
+    varying vec2 vUv;
+    varying vec2 vLocal;
+    varying vec3 vRadial;
+    varying vec3 vViewDir;
+    varying vec3 vNormalV;
+
+    void main() {
+      vUv = uv;
+      vLocal = position.xy;
+      vec4 mv = modelViewMatrix * vec4(position, 1.0);
+      vViewDir = -mv.xyz;
+      vRadial = mat3(modelViewMatrix) * vec3(position.xy, 0.0);
+      vNormalV = normalMatrix * normal;
+      gl_Position = projectionMatrix * mv;
+    }
+  `;
+
+  // Hologrāfiskā virsma: krāsa atkarīga no tā, kā "pusvektors" (gaisma + skatiens) guļ attiecībā pret
+  // celiņa rādiusa virzienu — tāpat kā īstam CD, tāpēc, diskam sagāžoties, krāsu sektori slīd pāri.
+  const DISC_FRAG = `
+    uniform sampler2D uTex;
+    uniform vec3 uLight;
+    uniform float uTime;
+    uniform float uR;
+    uniform float uHole;
+    uniform float uHub;
+    uniform float uSpin;
+    uniform float uPulse;
+    uniform float uHover;
+
+    varying vec2 vUv;
+    varying vec2 vLocal;
+    varying vec3 vRadial;
+    varying vec3 vViewDir;
+    varying vec3 vNormalV;
+
+    float bump(float x, float w) {
+      float d = x * w;
+      return exp(-d * d);
+    }
+
+    vec3 holo(float t) {
+      t = fract(t) * 5.0;
+      float f = fract(t);
+      f = f * f * (3.0 - 2.0 * f);
+      vec3 c0 = vec3(0.13, 0.83, 0.93);
+      vec3 c1 = vec3(0.49, 0.36, 1.00);
+      vec3 c2 = vec3(1.00, 0.36, 0.66);
+      vec3 c3 = vec3(1.00, 0.82, 0.48);
+      vec3 c4 = vec3(0.36, 0.96, 0.66);
+      if (t < 1.0) return mix(c0, c1, f);
+      if (t < 2.0) return mix(c1, c2, f);
+      if (t < 3.0) return mix(c2, c3, f);
+      if (t < 4.0) return mix(c3, c4, f);
+      return mix(c4, c0, f);
+    }
+
+    void main() {
+      float r = length(vLocal) / uR;
+      if (r < uHole) discard;
+
+      bool front = gl_FrontFacing;
+      vec3 N = normalize(vNormalV);
+      if (!front) N = -N;
+      vec3 V = normalize(vViewDir);
+      vec3 L = normalize(uLight);
+      vec3 Rd = normalize(vRadial);
+      vec3 H = normalize(L + V);
+
+      float g = dot(H, Rd);
+      float fres = pow(1.0 - clamp(dot(N, V), 0.0, 1.0), 2.0);
+      float glare = pow(1.0 - clamp(abs(g) * 1.4, 0.0, 1.0), 3.0);
+
+      vec3 rain = holo(g * 1.9 + r * 0.25 + 0.04 * sin(uTime * 0.5));
+      vec3 metal = mix(vec3(0.10, 0.11, 0.22), vec3(0.90, 0.93, 1.0), 0.30 + 0.70 * glare);
+      vec3 col = mix(metal, rain, 0.62);
+      col += glare * 0.22 + fres * 0.10 + uHover * 0.05;
+
+      // uzdruka (celiņi, teksts, iedaļas); griežoties ātri — izplūst
+      vec2 uv = front ? vUv : vec2(1.0 - vUv.x, vUv.y);
+      vec4 tx = texture2D(uTex, uv);
+      col = mix(col, tx.rgb, tx.a * (1.0 - uSpin * 0.85));
+
+      // caurspīdīgais centrs
+      float inHub = 1.0 - smoothstep(uHub - 0.003, uHub + 0.003, r);
+      vec3 hubCol = vec3(0.82, 0.90, 1.0) * (0.45 + 0.55 * glare) + rain * 0.2;
+      float hubA = clamp(0.20 + 0.50 * fres + 0.35 * glare, 0.0, 0.9);
+      col = mix(col, hubCol, inHub);
+      float alpha = mix(1.0, hubA, inHub);
+
+      float edge = bump(r - uHub, 80.0);
+      col += edge * 0.55;
+      alpha = max(alpha, edge * 0.9);
+      float rimHole = bump(r - uHole, 90.0);
+      col += rimHole * 0.5;
+      alpha = max(alpha, rimHole);
+
+      // spilgta malas josla
+      col = mix(col, vec3(0.97, 0.98, 1.0), smoothstep(0.975, 1.0, r) * 0.55);
+
+      // klikšķa vilnis no centra uz malu
+      col += bump(r - uPulse * 1.25, 12.0) * step(uPulse, 1.0) * vec3(0.90, 0.96, 1.0) * 0.85;
+
+      if (!front) col *= 0.8;
+      gl_FragColor = vec4(col, alpha);
+    }
+  `;
+
+  // Diska uzdruka uz 2D kanvas: celiņi, apļveida teksts, iedaļas un asimetriski loki
+  function drawDiscLabel(g, size) {
+    const K = size / 2;
+    const TAU = Math.PI * 2;
+    const d = (deg) => (deg * Math.PI) / 180;
+    const ink = (a) => `rgba(12, 14, 34, ${a})`;
+    const ring = (r, w, a) => {
+      g.strokeStyle = ink(a);
+      g.lineWidth = w;
+      g.beginPath();
+      g.arc(0, 0, r * K, 0, TAU);
+      g.stroke();
+    };
+    const arc = (r, a0, a1, w, a) => {
+      g.strokeStyle = ink(a);
+      g.lineWidth = w * K;
+      g.lineCap = 'round';
+      g.beginPath();
+      g.arc(0, 0, r * K, a0, a1);
+      g.stroke();
+    };
+    // Teksts pa apli; atstarpes vienmērīgi sadalītas, lai teksts noslēdzas bez šuves
+    const arcText = (text, r, px, weight, alpha) => {
+      g.font = `${weight} ${px}px "Space Grotesk", "Inter", system-ui, sans-serif`;
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillStyle = ink(alpha);
+      const unit = [...text].reduce((s, c) => s + g.measureText(c).width, 0);
+      const circ = TAU * r * K;
+      const chars = [...text.repeat(Math.max(1, Math.floor(circ / (unit * 1.25))))];
+      const widths = chars.map((c) => g.measureText(c).width);
+      const gap = (circ - widths.reduce((s, w) => s + w, 0)) / chars.length;
+      let a = -Math.PI / 2;
+      chars.forEach((c, i) => {
+        a += widths[i] / 2 / (r * K);
+        g.save();
+        g.rotate(a);
+        g.translate(r * K, 0);
+        g.rotate(Math.PI / 2);
+        g.fillText(c, 0, 0);
+        g.restore();
+        a += (widths[i] / 2 + gap) / (r * K);
+      });
+    };
+
+    g.clearRect(0, 0, size, size);
+    g.save();
+    g.translate(K, K);
+
+    // 1) celiņi
+    g.lineWidth = Math.max(1, size / 1024);
+    for (let r = DISC.HUB + 0.08, i = 0; r < 0.985; r += 0.0055, i++) ring(r, g.lineWidth, i % 8 === 0 ? 0.11 : 0.05);
+
+    // 2) līnijas
+    ring(DISC.HUB + 0.045, size / 330, 0.55);
+    ring(DISC.HUB + 0.075, size / 900, 0.35);
+    ring(0.79, size / 700, 0.35);
+    ring(0.975, size / 420, 0.5);
+
+    // 3) iedaļas pie malas
+    for (let i = 0; i < 120; i++) {
+      const a = (i / 120) * TAU;
+      const long = i % 10 === 0;
+      const r0 = long ? 0.915 : 0.935;
+      g.strokeStyle = ink(long ? 0.75 : 0.42);
+      g.lineWidth = size / (long ? 420 : 800);
+      g.beginPath();
+      g.moveTo(Math.cos(a) * r0 * K, Math.sin(a) * r0 * K);
+      g.lineTo(Math.cos(a) * 0.96 * K, Math.sin(a) * 0.96 * K);
+      g.stroke();
+    }
+
+    // 4) teksts
+    arcText('NOVA  ·  DIGITAL STUDIO  ·  WEB  ·  3D  ·  MOTION  ·  ', 0.865, size * 0.0375, 700, 0.85);
+    arcText('SIDE A  ·  VOL. 01  ·  2026  ·  ', 0.555, size * 0.03, 600, 0.78);
+
+    // 5) asimetriski loki un "play" trijstūris — pēc tiem redzams, ka disks griežas
+    arc(0.69, d(-70), d(-10), 0.022, 0.9);
+    arc(0.69, d(15), d(32), 0.022, 0.9);
+    arc(0.69, d(40), d(46), 0.022, 0.9);
+    arc(0.69, d(110), d(190), 0.01, 0.6);
+    g.save();
+    g.rotate(d(215));
+    g.translate(0.69 * K, 0);
+    g.rotate(Math.PI / 2);
+    g.fillStyle = ink(0.9);
+    g.beginPath();
+    g.moveTo(0, -0.04 * K);
+    g.lineTo(0.035 * K, 0.03 * K);
+    g.lineTo(-0.035 * K, 0.03 * K);
+    g.closePath();
+    g.fill();
+    g.restore();
+
+    g.restore();
+  }
+  /* ---- CD: beigas ---- */
+
+  function makeDiscTexture(size, aniso) {
+    const cv = document.createElement('canvas');
+    cv.width = cv.height = size;
+    const g = cv.getContext('2d');
+    drawDiscLabel(g, size);
+    const tex = new THREE.CanvasTexture(cv);
+    tex.anisotropy = aniso;
+    return { tex, redraw() { drawDiscLabel(g, size); tex.needsUpdate = true; } };
+  }
+
   function initScene() {
     const canvas = $('#bgCanvas');
     if (!canvas || !window.THREE) { document.body.classList.add('no-webgl'); return; }
@@ -472,36 +703,76 @@
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
     camera.position.set(0, 0, 8);
+    const camHalfH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z;
 
-    const group = new THREE.Group();
-    scene.add(group);
+    // Hierarhija: rig (vieta + izmērs) → tilt (sekošana pelei) → disc (griešanās ap savu asi)
+    const rig = new THREE.Group();
+    const tilt = new THREE.Group();
+    const disc = new THREE.Group();
+    scene.add(rig);
+    rig.add(tilt);
+    tilt.add(disc);
 
-    // Kodols
-    const core = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(1.7, 1),
-      new THREE.MeshStandardMaterial({ color: 0x3a2b9e, metalness: 0.55, roughness: 0.25, flatShading: true, emissive: 0x1b1450, emissiveIntensity: 0.6 })
+    /* --- CD --- */
+    const { R, HOLE, HUB, T } = DISC;
+    const label = makeDiscTexture(isSmall() ? 1024 : 2048, Math.min(8, renderer.capabilities.getMaxAnisotropy()));
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => label.redraw());
+
+    const uniforms = {
+      uTex: { value: label.tex },
+      uLight: { value: new THREE.Vector3(0.3, 0.3, 1) },
+      uTime: { value: 0 },
+      uR: { value: R },
+      uHole: { value: HOLE - 0.004 },
+      uHub: { value: HUB },
+      uSpin: { value: 0 },
+      uPulse: { value: 2 },
+      uHover: { value: 0 },
+    };
+    const face = new THREE.Mesh(
+      new THREE.RingGeometry(R * HOLE, R, 180, 1),
+      new THREE.ShaderMaterial({ uniforms, vertexShader: DISC_VERT, fragmentShader: DISC_FRAG, side: THREE.DoubleSide, transparent: true })
     );
-    group.add(core);
 
-    const wire = new THREE.LineSegments(
-      new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(1.74, 1)),
-      new THREE.LineBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.55 })
+    // Biezums: ārmala un cauruma siena
+    const edgeMat = new THREE.MeshPhongMaterial({ color: 0xc9d2ff, specular: 0xffffff, shininess: 120, emissive: 0x2b3170, side: THREE.DoubleSide });
+    const outerGeo = new THREE.CylinderGeometry(R, R, T, 180, 1, true);
+    outerGeo.rotateX(Math.PI / 2);
+    const holeGeo = new THREE.CylinderGeometry(R * HOLE, R * HOLE, T, 72, 1, true);
+    holeGeo.rotateX(Math.PI / 2);
+    disc.add(face, new THREE.Mesh(outerGeo, edgeMat), new THREE.Mesh(holeGeo, edgeMat));
+
+    // Mīksts spīdums aiz diska
+    const halo = new THREE.Mesh(
+      new THREE.PlaneGeometry(10, 10),
+      new THREE.ShaderMaterial({
+        uniforms: { uTime: { value: 0 } },
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+        fragmentShader: `
+          varying vec2 vUv;
+          uniform float uTime;
+          void main() {
+            vec2 p = vUv - 0.5;
+            float a = pow(max(0.0, 1.0 - length(p) * 2.0), 2.2);
+            vec3 c = mix(vec3(0.49, 0.36, 1.0), vec3(0.13, 0.83, 0.93), 0.5 + 0.5 * sin(uTime * 0.4 + p.x * 3.0));
+            gl_FragColor = vec4(c * a * 0.55, a);
+          }`,
+      })
     );
-    group.add(wire);
+    halo.position.z = -0.8;
+    halo.renderOrder = -1;
+    rig.add(halo);
 
-    const shell = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(2.5, 2),
-      new THREE.MeshBasicMaterial({ color: 0x7c5cff, wireframe: true, transparent: true, opacity: 0.12 })
-    );
-    group.add(shell);
-
-    // Gredzeni ar pavadoņiem
+    // Orbītas gredzeni ar pavadoņiem
     const ringMat = (color, opacity) => new THREE.MeshBasicMaterial({ color, transparent: true, opacity });
     const ring1 = new THREE.Mesh(new THREE.TorusGeometry(3.1, 0.012, 8, 220), ringMat(0x22d3ee, 0.7));
     const ring2 = new THREE.Mesh(new THREE.TorusGeometry(3.6, 0.01, 8, 220), ringMat(0xff5ca8, 0.6));
     ring1.rotation.x = Math.PI / 2.4;
     ring2.rotation.set(Math.PI / 3, 0.6, 0);
-    group.add(ring1, ring2);
+    tilt.add(ring1, ring2);
 
     const sat1 = new THREE.Mesh(new THREE.SphereGeometry(0.09, 16, 16), new THREE.MeshBasicMaterial({ color: 0x22d3ee }));
     const sat2 = new THREE.Mesh(new THREE.SphereGeometry(0.075, 16, 16), new THREE.MeshBasicMaterial({ color: 0xff5ca8 }));
@@ -526,14 +797,14 @@
     }));
     scene.add(particles);
 
-    // Gaismas (viena seko pelei)
-    scene.add(new THREE.AmbientLight(0x6a6fff, 0.6));
+    // Gaismas (malai); trešā seko pelei
+    scene.add(new THREE.AmbientLight(0x8a90ff, 0.7));
     const l1 = new THREE.PointLight(0x22d3ee, 2.2, 30); l1.position.set(-5, 3, 5);
     const l2 = new THREE.PointLight(0xff5ca8, 1.8, 30); l2.position.set(5, -3, 4);
     const l3 = new THREE.PointLight(0x7c5cff, 2.6, 20); l3.position.set(0, 0, 4);
     scene.add(l1, l2, l3);
 
-    // Izmēri
+    /* --- izmēri un izkārtojums (pikseļos → pasaules vienības) --- */
     let lastW = 0, lastH = 0;
     const resize = () => {
       const w = innerWidth, h = innerHeight;
@@ -547,35 +818,132 @@
     window.addEventListener('resize', resize);
     resize();
 
-    const state = { x: 0, y: 0, opacity: 1 };
+    // Kur disks atrodas hero (pie .hero-visual) un kur — kad lapa noritināta (fonā)
+    const layout = { hero: { x: 0, y: 0, r: 200 }, bg: { x: 0, y: 0, r: 160 } };
+    const heroVisual = $('.hero-visual');
+    const computeLayout = () => {
+      const W = innerWidth, H = innerHeight;
+      const rect = heroVisual ? heroVisual.getBoundingClientRect() : null;
+      if (rect && rect.width > 40 && rect.height > 40) {
+        layout.hero.x = rect.left + rect.width / 2;
+        layout.hero.y = rect.top + scrollY - heroShift + rect.height / 2;
+        layout.hero.r = Math.min(rect.width, rect.height) * 0.5 * 0.9;
+      } else {
+        // mobilajā .hero-visual ir paslēpts — disks atrodas virs virsraksta
+        const top = 90, bottom = Math.max(top + 160, H * 0.4);
+        layout.hero.x = W / 2;
+        layout.hero.y = (top + bottom) / 2;
+        layout.hero.r = clamp((bottom - top) / 2 + 26, 80, W * 0.4);
+      }
+      if (W < 900) Object.assign(layout.bg, { x: W / 2, y: H * 0.5, r: W * 0.4 });
+      else Object.assign(layout.bg, { x: W * 0.2, y: H * 0.56, r: Math.min(W, H) * 0.24 });
+    };
+    computeLayout();
+    window.addEventListener('resize', computeLayout);
+    window.addEventListener('load', computeLayout);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(computeLayout);
+    if ('ResizeObserver' in window) new ResizeObserver(computeLayout).observe($('#hero') || document.body);
+
+    /* --- interaktivitāte: velc, lai griezt; klikšķis = grūdiens --- */
+    const state = { x: 0, y: 0, hover: 0, spin: 0, opacity: 1 };
+    const cur = { x: 0, y: 0, r: 1, p: 0 };      // diska pašreizējais centrs un rādiuss ekrānā (px)
     const speed = reduceMotion ? 0 : 1;
+    const IDLE = reduceMotion ? 0 : -0.55;        // brīvgaita, rad/s (negatīvs = pulksteņrādītāja virzienā)
+    let omega = IDLE;                             // pašreizējais griešanās ātrums
+    let drag = null;
+    let pulse = 2;                                // >1 = vilnis izslēgts
+    let lastMs = 0;
+
+    const inDisc = (x, y) => {
+      const dx = x - cur.x, dy = y - cur.y, rr = cur.r * 1.06;
+      return dx * dx + dy * dy <= rr * rr;
+    };
+    const blocked = (el) => !el || !el.closest || !!el.closest('a, button, input, textarea, select, label, header, .btn');
+
+    window.addEventListener('pointerdown', (e) => {
+      if ((e.pointerType === 'mouse' && e.button !== 0) || cur.p > 0.3 || blocked(e.target) || !inDisc(e.clientX, e.clientY)) return;
+      const now = performance.now();
+      drag = { id: e.pointerId, ang: Math.atan2(e.clientY - cur.y, e.clientX - cur.x), t: now, st: now, sx: e.clientX, sy: e.clientY, moved: 0 };
+      document.body.classList.add('is-spinning');
+    }, { passive: true });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      drag.moved = Math.max(drag.moved, Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy));
+      const dx = e.clientX - cur.x, dy = e.clientY - cur.y;
+      if (dx * dx + dy * dy < (cur.r * 0.12) ** 2) return;   // pārāk tuvu centram leņķis nestabils
+      const a = Math.atan2(dy, dx);
+      let da = a - drag.ang;
+      if (da > Math.PI) da -= Math.PI * 2;
+      else if (da < -Math.PI) da += Math.PI * 2;
+      drag.ang = a;
+      const now = performance.now();
+      const dt = Math.max(1, now - drag.t) / 1000;
+      drag.t = now;
+      disc.rotation.z -= da;                                  // disks seko pirksta/peles apļveida kustībai
+      omega = lerp(omega, clamp(-da / dt, -26, 26), 0.45);
+    }, { passive: true });
+
+    const endDrag = (e) => {
+      if (!drag || (e && e.pointerId !== drag.id)) return;
+      if (drag.moved < 6 && performance.now() - drag.st < 400) {   // ātrs klikšķis → grūdiens + vilnis
+        omega += (Math.sign(omega) || -1) * 11;
+        pulse = 0;
+      }
+      drag = null;
+      document.body.classList.remove('is-spinning');
+    };
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+    window.addEventListener('blur', () => endDrag());
 
     onFrame((ms) => {
       const t = ms * 0.001 * speed;
+      const dt = Math.min(0.05, Math.max(0.001, (ms - lastMs) / 1000));
+      lastMs = ms;
+      const W = innerWidth, H = innerHeight;
+      const wpp = (2 * camHalfH) / H;                         // pasaules vienības uz pikseli (z = 0 plaknē)
+
       state.x = lerp(state.x, pointer.nx, 0.05);
       state.y = lerp(state.y, pointer.ny, 0.05);
 
-      // Pozīcija atkarīga no ritināšanas: hero → fonā
-      const p = smooth(clamp(scrollY / innerHeight, 0, 1));
-      const small = isSmall();
-      const heroX = small ? 0 : 2.6, heroY = small ? 1.55 : 0, heroS = small ? 0.52 : 1;
-      const endX = small ? 0 : -3.4, endY = small ? 0.2 : -0.2, endS = 0.55;
-      group.position.set(lerp(heroX, endX, p), lerp(heroY, endY, p), 0);
-      group.scale.setScalar(lerp(heroS, endS, p));
+      // Pozīcija un izmērs: hero → fonā, atkarībā no ritināšanas
+      const p = smooth(clamp(scrollY / (H * 0.9), 0, 1));
+      cur.p = p;
+      state.hover = lerp(state.hover, finePointer && p < 0.3 && (drag || inDisc(pointer.x, pointer.y)) ? 1 : 0, 0.12);
+      cur.x = lerp(layout.hero.x, layout.bg.x, p);
+      cur.y = lerp(layout.hero.y, layout.bg.y, p);
+      cur.r = lerp(layout.hero.r, layout.bg.r, p) * (1 + state.hover * 0.035);
+      rig.position.set((cur.x - W / 2) * wpp, -(cur.y - H / 2) * wpp, 0);
+      rig.scale.setScalar((cur.r * wpp) / R);
 
-      const targetOpacity = lerp(1, 0.32, p);
+      const targetOpacity = lerp(1, 0.3, p);
       if (Math.abs(targetOpacity - state.opacity) > 0.01) {
         state.opacity = targetOpacity;
         canvas.style.opacity = targetOpacity.toFixed(2);
       }
 
-      group.rotation.y = t * 0.12 + state.x * 0.7 + scrollY * 0.0015;
-      group.rotation.x = state.y * 0.4 + Math.sin(t * 0.3) * 0.1 + scrollY * 0.0006;
+      // Griešanās: brīvgaita → inerce pēc atlaišanas
+      if (!drag) {
+        omega += (IDLE - omega) * (1 - Math.exp(-dt * 0.8));
+        disc.rotation.z += omega * dt;
+      } else if (performance.now() - drag.t > 70) {
+        omega *= 0.8;                                         // disks "turēts" — ātrums krīt
+      }
+      state.spin = lerp(state.spin, clamp((Math.abs(omega) - 3) / 9, 0, 1), 0.15);
 
-      const pulse = 1 + Math.sin(t * 1.5) * 0.015;
-      core.scale.setScalar(pulse);
-      wire.scale.setScalar(pulse);
-      shell.rotation.y = -t * 0.08;
+      // Sasvēršanās pret peli + ritināšana
+      tilt.rotation.x = lerp(-0.55, -0.15, p) + state.y * 0.38 + Math.sin(t * 0.5) * 0.04 + scrollY * 0.0004;
+      tilt.rotation.y = lerp(0.32, 0.5, p) + state.x * 0.5 + Math.cos(t * 0.4) * 0.05;
+
+      // Šeidera parametri
+      if (pulse <= 1.05) pulse += dt * 0.95;
+      uniforms.uTime.value = t;
+      uniforms.uSpin.value = state.spin;
+      uniforms.uHover.value = state.hover;
+      uniforms.uPulse.value = pulse;
+      uniforms.uLight.value.set(-state.x * 0.9 + Math.sin(t * 0.35) * 0.5, -state.y * 0.7 + Math.cos(t * 0.27) * 0.35 + 0.3, 1);
+      halo.material.uniforms.uTime.value = t;
 
       ring1.rotation.y = t * 0.15;
       ring2.rotation.x = Math.PI / 3 + t * 0.1;
@@ -593,16 +961,6 @@
   // Katru moduli palaižam atsevišķi, lai viena kļūda nenogāztu visu lapu
   const safe = (fn) => { try { fn(); } catch (err) { console.error('[NOVA]', fn.name, err); } };
 
-  let started = false;
-  function start() {
-    if (started) return;
-    started = true;
-    document.body.classList.add('is-loaded');
-    safe(initReveal);
-    safe(initCounters);
-    safe(initRotator);
-  }
-
   function init() {
     const year = $('#year');
     if (year) year.textContent = new Date().getFullYear();
@@ -613,14 +971,10 @@
     });
 
     [initNav, initScrollEffects, initMarquee, initSpotlight, initTilt, initMagnetic,
-      initCursor, initParallax, initCube, initTimeline, initFilter, initForm, initScene].forEach(safe);
+      initCursor, initParallax, initCube, initTimeline, initFilter, initForm, initScene,
+      initReveal, initCounters, initRotator].forEach(safe);
 
     requestAnimationFrame(loop);
-
-    const delay = reduceMotion ? 0 : 650;
-    if (document.readyState === 'complete') setTimeout(start, delay);
-    else window.addEventListener('load', () => setTimeout(start, delay));
-    setTimeout(start, 5000); // drošības tīkls, ja kāds resurss ielādējas pārāk ilgi
   }
 
   init();

@@ -157,38 +157,6 @@ main, .footer { position: relative; z-index: 1; }
 .reveal.is-visible { opacity: 1; translate: 0 0; filter: none; }
 
 /* ---------- 2. FONS UN EFEKTI ---------- */
-.loader {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 1.4rem;
-  background: var(--bg);
-  transition: opacity .7s var(--ease), visibility .7s;
-  animation: loaderFallback .01s 8s forwards;
-}
-.is-loaded .loader { opacity: 0; visibility: hidden; }
-.loader-mark {
-  position: relative;
-  width: 54px;
-  height: 54px;
-  border-radius: 16px;
-  background: conic-gradient(from 0deg, var(--secondary), var(--primary), var(--accent), var(--secondary));
-  animation: spin 1.6s linear infinite;
-}
-.loader-mark::after { content: ''; position: absolute; inset: 6px; border-radius: 11px; background: var(--bg); }
-.loader-bar { width: 140px; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, .1); overflow: hidden; }
-.loader-bar span {
-  display: block;
-  width: 40%;
-  height: 100%;
-  border-radius: 3px;
-  background: linear-gradient(90deg, var(--secondary), var(--primary));
-  animation: load 1.1s ease-in-out infinite;
-}
-
 .scroll-progress {
   position: fixed;
   top: 0;
@@ -400,6 +368,7 @@ main, .footer { position: relative; z-index: 1; }
 /* ---------- 4. HERO ---------- */
 .hero {
   position: relative;
+  touch-action: pan-y pinch-zoom; /* vertikālā ritināšana paliek, horizontāli var griezt disku */
   display: flex;
   align-items: center;
   min-height: 100vh;
@@ -854,15 +823,26 @@ main, .footer { position: relative; z-index: 1; }
 
 .magnetic { will-change: transform; }
 
-/* Ja WebGL nav pieejams */
+/* CD griešana ar peli / pirkstu */
+.hero-visual { cursor: grab; }
+body.is-spinning,
+body.is-spinning * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
+
+/* Ja WebGL nav pieejams — vienkāršots CSS disks */
 body.no-webgl .hero-visual::before {
   content: '';
   position: absolute;
-  inset: 8% 8%;
+  top: 50%;
+  left: 50%;
+  width: min(86%, 420px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
   border-radius: 50%;
-  background: radial-gradient(circle at 32% 30%, #8f78ff, #2a1f78 55%, transparent 70%);
-  filter: blur(1px);
-  animation: pulse 6s ease-in-out infinite;
+  background: conic-gradient(from 20deg, #22d3ee, #7c5cff, #ff5ca8, #ffd27a, #22d3ee, #7c5cff, #ff5ca8, #22d3ee);
+  -webkit-mask: radial-gradient(circle, transparent 0 9%, #000 9.5%);
+  mask: radial-gradient(circle, transparent 0 9%, #000 9.5%);
+  opacity: .85;
+  animation: spin 18s linear infinite;
 }
 
 /* ---------- 9. ANIMĀCIJAS ---------- */
@@ -876,9 +856,7 @@ body.no-webgl .hero-visual::before {
 @keyframes ping2 { 0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, .6); } 70%, 100% { box-shadow: 0 0 0 10px rgba(34, 211, 238, 0); } }
 @keyframes wheel { 0% { opacity: 0; transform: translateY(0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(12px); } }
 @keyframes pulse { 0%, 100% { opacity: .75; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } }
-@keyframes load { 0% { transform: translateX(-100%); } 100% { transform: translateX(350%); } }
 @keyframes draw { to { stroke-dashoffset: 0; } }
-@keyframes loaderFallback { to { opacity: 0; visibility: hidden; } }
 
 /* ---------- 10. RESPONSĪVS ---------- */
 @media (max-width: 1024px) {

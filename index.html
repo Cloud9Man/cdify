@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
-  <noscript><style>.loader{display:none}.reveal{opacity:1;translate:none;filter:none}</style></noscript>
+  <noscript><style>.reveal{opacity:1;translate:none;filter:none}</style></noscript>
 </head>
 
 <body>
@@ -30,12 +30,6 @@
     <symbol id="i-pin" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
   </svg>
-
-  <!-- Ielādes ekrāns -->
-  <div class="loader" id="loader" aria-hidden="true">
-    <div class="loader-mark"></div>
-    <div class="loader-bar"><span></span></div>
-  </div>
 
   <!-- Globālie efekti -->
   <div class="scroll-progress" id="scrollProgress"></div>
@@ -118,7 +112,7 @@
         </div>
 
         <!-- Peldošie stikla logi, kas seko pelei -->
-        <div class="hero-visual" aria-hidden="true">
+        <div class="hero-visual" data-cursor="Griez" aria-hidden="true">
           <div class="float float-code" data-depth="26">
             <div class="glass float-card code-card">
               <div class="win-dots"><i></i><i></i><i></i></div>
