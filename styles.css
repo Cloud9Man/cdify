@@ -521,8 +521,8 @@ main, .footer { position: relative; z-index: 1; }
   position: relative;
   display: grid;
   place-items: center;
-  width: 50px;
-  height: 50px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   font: 700 .9rem var(--font-head);
   background: conic-gradient(#34e39a calc(var(--v, 100) * 1%), rgba(255, 255, 255, .1) 0);

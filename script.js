@@ -664,7 +664,7 @@
     }
 
     // 4) teksts
-    arcText('NOVA  ·  DIGITAL STUDIO  ·  WEB  ·  3D  ·  MOTION  ·  ', 0.865, size * 0.0375, 700, 0.85);
+    arcText('  CDify  ', 0.865, size * 0.15 , 800, 0.85);
     arcText('SIDE A  ·  VOL. 01  ·  2026  ·  ', 0.555, size * 0.03, 600, 0.78);
 
     // 5) asimetriski loki un "play" trijstūris — pēc tiem redzams, ka disks griežas
