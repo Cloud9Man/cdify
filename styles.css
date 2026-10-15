@@ -11,9 +11,12 @@
   --bg-soft: #0b0d19;
   --text: #eceefb;
   --muted: #9ba1c0;
-  --primary: #7c5cff;
-  --secondary: #22d3ee;
-  --accent: #ff5ca8;
+  --primary: #ee6253;
+  --secondary:#f04937;
+  --selection: #8a0e00;
+  --dark1: #681a12;
+  --dark2: #4d0902;
+  --accent: #ffd15c;
   --glass: rgba(255, 255, 255, .055);
   --border: rgba(255, 255, 255, .12);
   --radius: 22px;
@@ -54,7 +57,7 @@ h1, h2, h3, h4, p { margin: 0; }
 button, input, textarea, select { font: inherit; color: inherit; }
 fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 [hidden] { display: none !important; }
-::selection { background: rgba(124, 92, 255, .55); color: #fff; }
+::selection { background: var(--selection); color: #fff; }
 
 :focus-visible { outline: 2px solid var(--secondary); outline-offset: 3px; }
 
@@ -78,7 +81,7 @@ main, .footer { position: relative; z-index: 1; }
 
 /* Stikla (frosted glass) pamatklase */
 .glass {
-  background: linear-gradient(135deg, rgba(255, 255, 255, .095), rgba(255, 255, 255, .03));
+  background: linear-gradient(135deg, var(--dark1), var(--dark2));
   border: 1px solid var(--border);
   -webkit-backdrop-filter: blur(18px) saturate(150%);
   backdrop-filter: blur(18px) saturate(150%);
@@ -128,8 +131,8 @@ main, .footer { position: relative; z-index: 1; }
 
 .btn-primary {
   color: #fff;
-  background: linear-gradient(135deg, var(--primary), #5b8cff);
-  box-shadow: 0 12px 32px -10px rgba(124, 92, 255, .85), inset 0 1px 0 rgba(255, 255, 255, .25);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  box-shadow: 0 12px 32px -10px var(--bg), inset 0 1px 0 rgba(255, 255, 255, .25);
 }
 .btn-primary::after {
   content: '';
@@ -140,7 +143,7 @@ main, .footer { position: relative; z-index: 1; }
   transform: translateX(-120%);
   transition: transform .8s var(--ease);
 }
-.btn-primary:hover { box-shadow: 0 16px 44px -8px rgba(124, 92, 255, 1), inset 0 1px 0 rgba(255, 255, 255, .3); }
+.btn-primary:hover { box-shadow: 0 16px 44px -8px var(--secondary), inset 0 1px 0 rgba(255, 255, 255, .3); }
 .btn-primary:hover::after { transform: translateX(120%); }
 
 .btn-ghost {
@@ -218,7 +221,6 @@ main, .footer { position: relative; z-index: 1; }
   translate: -50% -50%;
   border-radius: 50%;
   pointer-events: none;
-  background: radial-gradient(circle, rgba(124, 92, 255, .16), transparent 62%);
   opacity: 0;
   transition: opacity .5s;
 }
@@ -247,8 +249,9 @@ main, .footer { position: relative; z-index: 1; }
 .cursor-ring.is-label {
   width: 92px;
   height: 92px;
-  background: rgba(124, 92, 255, .35);
+  background: rgba(202, 62, 62, 0.7);
   border-color: rgba(255, 255, 255, .35);
+  cursor: pointer;
 }
 .cursor-ring.is-down { scale: .85; }
 
@@ -340,9 +343,9 @@ main, .footer { position: relative; z-index: 1; }
   width: 0;
   border-radius: 999px;
   opacity: 0;
-  background: linear-gradient(135deg, rgba(124, 92, 255, .5), rgba(34, 211, 238, .26));
+  background: linear-gradient(135deg, var(--primary), var(--dark1));
   border: 1px solid rgba(255, 255, 255, .16);
-  box-shadow: 0 6px 18px -6px rgba(124, 92, 255, .7);
+  box-shadow: 0 6px 18px -6px var(--dark2);
   transition: transform .5s var(--ease), width .5s var(--ease), opacity .3s;
 }
 
@@ -662,14 +665,14 @@ main, .footer { position: relative; z-index: 1; }
   transition: background .35s, color .35s;
 }
 .filter-btn:hover { color: #fff; }
-.filter-btn.is-active { color: #fff; background: linear-gradient(135deg, rgba(124, 92, 255, .55), rgba(34, 211, 238, .3)); }
+.filter-btn.is-active { color: #fff; background: linear-gradient(135deg, var(--primary), rgba(34, 211, 238, .3)); }
 
 .proj { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--radius); }
 .proj.is-out { opacity: 0; scale: .92; pointer-events: none; }
 
 .proj-visual { position: relative; height: 220px; overflow: hidden; background: var(--g); }
-.proj-visual.v1 { --g: linear-gradient(135deg, #4f3bff, #22d3ee); }
-.proj-visual.v2 { --g: linear-gradient(135deg, #ff5ca8, #7c5cff); }
+.proj-visual.v1 { --g: linear-gradient(135deg, var(--primary), var(--secondary)); }
+.proj-visual.v2 { --g: linear-gradient(135deg, var(--secondary), var(--primary)) }
 .proj-visual.v3 { --g: linear-gradient(135deg, #0ea5a4, #3b82f6); }
 .proj-visual.v4 { --g: linear-gradient(135deg, #f97316, #ff5ca8); }
 .proj-visual.v5 { --g: linear-gradient(135deg, #6d28d9, #0ea5e9); }
