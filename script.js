@@ -432,12 +432,24 @@
     const rules = {
       name: (v) => v.trim().length >= 2 || 'Lūdzu, ievadiet savu vārdu.',
       email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()) || 'Lūdzu, ievadiet derīgu e-pasta adresi.',
-      message: (v) => v.trim().length >= 10 || 'Ziņai jābūt vismaz 10 rakstzīmes garai.',
+      subject: (v) => v.trim().length >= 2 || 'Lūdzu, ievadiet e-pasta virsrakstu.',
+      details: (v) => v.trim().length >= 10 || 'Aprakstam jābūt vismaz 10 rakstzīmes garam.',
+      quantity: (v) => Number.isInteger(Number(v)) && Number(v) > 0 || 'Lūdzu, ievadiet vismaz 1 gabalu.',
+    };
+
+    const panels = $$('[data-form-panel]', form);
+    const updatePanels = () => {
+      const selectedType = form.querySelector('input[name="requestType"]:checked').value;
+      panels.forEach((panel) => {
+        const isActive = panel.dataset.formPanel === selectedType;
+        panel.hidden = !isActive;
+        $$('input, textarea, select', panel).forEach((input) => { input.disabled = !isActive; });
+      });
     };
 
     const validate = (input) => {
       const field = input.closest('.field');
-      const result = rules[input.name](input.value);
+      const result = rules[input.dataset.rule || input.name](input.value);
       const ok = result === true;
       field.classList.toggle('has-error', !ok);
       $('.field-error', field).textContent = ok ? '' : result;
@@ -445,7 +457,20 @@
       return ok;
     };
 
-    const inputs = Object.keys(rules).map((n) => form.elements[n]);
+    const validateOrderItems = () => {
+      const group = $('.order-items-group', form);
+      const checked = $$('input[name="orderItems"]:checked', group).length > 0;
+      group.classList.toggle('has-error', !checked);
+      $('.field-error', group).textContent = checked ? '' : 'Lūdzu, izvēlieties vismaz vienu pasūtījuma veidu.';
+      return checked;
+    };
+
+    const activeInputs = () => $$('[data-validate]', form).filter((input) => !input.disabled);
+
+    updatePanels();
+    $$('input[name="requestType"]', form).forEach((input) => input.addEventListener('change', updatePanels));
+
+    const inputs = $$('[data-validate]', form);
     inputs.forEach((input) => {
       input.addEventListener('blur', () => { if (input.value) validate(input); });
       input.addEventListener('input', () => {
@@ -453,11 +478,27 @@
       });
     });
 
+    $$('input[name="orderItems"]', form).forEach((input) => input.addEventListener('change', () => {
+      if ($('.order-items-group', form).classList.contains('has-error')) validateOrderItems();
+    }));
+
+    form.addEventListener('reset', () => {
+      setTimeout(() => {
+        updatePanels();
+        $$('.has-error', form).forEach((field) => field.classList.remove('has-error'));
+        $$('.field-error', form).forEach((error) => { error.textContent = ''; });
+        $$('[aria-invalid]', form).forEach((input) => input.removeAttribute('aria-invalid'));
+      }, 0);
+    });
+
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const results = inputs.map(validate);
-      if (!results.every(Boolean)) {
-        inputs[results.indexOf(false)].focus();
+      const currentInputs = activeInputs();
+      const results = currentInputs.map(validate);
+      const orderItemsValid = form.querySelector('input[name="requestType"]:checked').value !== 'order' || validateOrderItems();
+      if (!results.every(Boolean) || !orderItemsValid) {
+        if (!results.every(Boolean)) currentInputs[results.indexOf(false)].focus();
+        else $('input[name="orderItems"]', form).focus();
         return;
       }
 
