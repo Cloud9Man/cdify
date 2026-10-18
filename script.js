@@ -151,6 +151,68 @@
     update();
   }
 
+  function initRetroBackground() {
+    const canvas = $('#retroCanvas');
+    const context = canvas?.getContext('2d');
+    if (!canvas || !context) return;
+
+    let lastDraw = 0;
+    let lastPixelSize = 0;
+    let lastWidth = 0;
+    let lastHeight = 0;
+
+    const draw = (ms) => {
+      const width = innerWidth;
+      const height = innerHeight;
+      const phase = (ms % 9000) / 9000;
+      const pixelSize = reduceMotion ? 2 : phase < 0.14 ? 1 : phase < 0.25
+        ? 1 + smooth((phase - 0.14) / 0.11) * 17
+        : phase < 0.55 ? 18 : phase < 0.66
+          ? 18 - smooth((phase - 0.55) / 0.11) * 17 : 1;
+      const cellSize = Math.max(1, Math.round(pixelSize));
+
+      if (ms - lastDraw < 120 && cellSize === lastPixelSize && width === lastWidth && height === lastHeight) return;
+      lastDraw = ms;
+      lastPixelSize = cellSize;
+      lastWidth = width;
+      lastHeight = height;
+
+      const pixelWidth = Math.ceil(width / cellSize);
+      const pixelHeight = Math.ceil(height / cellSize);
+      if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+        canvas.width = pixelWidth;
+        canvas.height = pixelHeight;
+      }
+
+      const w = canvas.width;
+      const h = canvas.height;
+      const drift = reduceMotion ? 0 : Math.sin(ms * 0.00012) * w * 0.025;
+      context.clearRect(0, 0, w, h);
+      context.save();
+      context.translate(w * 0.78 + drift, h * 0.2);
+      context.rotate(-0.42);
+
+      const rings = [
+        [1, '#261342'],
+        [0.86, '#45154e'],
+        [0.7, '#64194b'],
+        [0.54, '#8a1d43'],
+        [0.38, '#b43832'],
+        [0.22, '#744568'],
+      ];
+      for (const [scale, color] of rings) {
+        context.beginPath();
+        context.ellipse(0, 0, w * 0.84 * scale, h * 0.48 * scale, 0, 0, Math.PI * 2);
+        context.fillStyle = color;
+        context.fill();
+      }
+      context.restore();
+    };
+
+    draw(0);
+    if (!reduceMotion) onFrame(draw);
+  }
+
   function initReveal() {
     // Secīga elementu parādīšanās grupās
     $$('[data-stagger]').forEach((group) => {
@@ -822,24 +884,6 @@
     halo.renderOrder = -1;
     rig.add(halo);
 
-    // Daļiņas
-    const N = isSmall() ? 700 : 1400;
-    const pos = new Float32Array(N * 3);
-    for (let i = 0; i < N; i++) {
-      const r = 4 + Math.random() * 9;
-      const th = Math.random() * Math.PI * 2;
-      const ph = Math.acos(2 * Math.random() - 1);
-      pos[i * 3] = r * Math.sin(ph) * Math.cos(th);
-      pos[i * 3 + 1] = r * Math.sin(ph) * Math.sin(th);
-      pos[i * 3 + 2] = r * Math.cos(ph) * 0.6 - 3;
-    }
-    const pGeo = new THREE.BufferGeometry();
-    pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({
-      color: 0xb8c4ff, size: 0.035, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending,
-    }));
-    scene.add(particles);
-
     // Gaismas (malai); trešā seko pelei
     scene.add(new THREE.AmbientLight(0x8a90ff, 0.7));
     const l1 = new THREE.PointLight(0x22d3ee, 2.2, 30); l1.position.set(-5, 3, 5);
@@ -988,7 +1032,6 @@
       uniforms.uLight.value.set(-state.x * 0.9 + Math.sin(t * 0.35) * 0.5, -state.y * 0.7 + Math.cos(t * 0.27) * 0.35 + 0.3, 1);
       halo.material.uniforms.uTime.value = t;
 
-      particles.rotation.y = t * 0.02 + scrollY * 0.0003;
       l3.position.set(state.x * 6, -state.y * 4, 4);
 
       renderer.render(scene, camera);
@@ -1008,7 +1051,7 @@
       if (e.target.closest('a[href="#"]')) e.preventDefault();
     });
 
-    [initNav, initScrollEffects, initMarquee, initSpotlight, initTilt, initMagnetic,
+    [initNav, initScrollEffects, initRetroBackground, initMarquee, initSpotlight, initTilt, initMagnetic,
       initCursor, initParallax, initCube, initTimeline, initFilter, initForm, initScene,
       initReveal, initCounters, initRotator].forEach(safe);
 
