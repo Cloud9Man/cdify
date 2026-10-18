@@ -5,7 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>CDify</title>
   <meta name="description" content="NOVA ir digitālā studija, kas veido ātras, skaistas un 3D mājaslapas, lietotnes un digitālus produktus." />
+  <meta name="color-scheme" content="dark light" />
   <meta name="theme-color" content="#06070d" />
+  <!-- Krāsu tēma: jānosaka pirms pirmās atveidošanas, lai nebūtu nepareizas tēmas "uzplaiksnījuma".
+       Saglabātā izvēle (localStorage 'theme': light | dark); ja tās nav — seko ierīces iestatījumam. -->
+  <script>
+    (function () {
+      var root = document.documentElement, pref = 'system', theme = 'dark';
+      try { var v = localStorage.getItem('theme'); if (v === 'light' || v === 'dark') pref = v; } catch (e) {}
+      try { theme = pref === 'system' ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : pref; } catch (e) { theme = pref === 'light' ? 'light' : 'dark'; }
+      root.setAttribute('data-theme', theme);
+      root.setAttribute('data-theme-pref', pref);
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', theme === 'light' ? '#f9f5f4' : '#06070d');
+    })();
+  </script>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2322d3ee'/%3E%3Cstop offset='1' stop-color='%237c5cff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='url(%23g)'/%3E%3Crect x='9' y='9' width='14' height='14' rx='3' fill='%2306070d'/%3E%3C/svg%3E" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -30,6 +44,9 @@
     <symbol id="i-discord" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M19.5 5.3a17 17 0 0 0-4.2-1.3l-.5 1a15 15 0 0 0-5.6 0l-.5-1a17 17 0 0 0-4.2 1.3C1.8 9.2 1.1 13 1.5 16.8a17 17 0 0 0 5.2 2.6l1.2-2a10 10 0 0 1-1.9-.9l.5-.4a12 12 0 0 0 11 0l.5.4a10 10 0 0 1-1.9.9l1.2 2a17 17 0 0 0 5.2-2.6c.5-4.4-.8-8.3-3.5-11.5ZM8.8 14.3c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Zm6.4 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Z"/></symbol>
     <symbol id="i-pin" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></symbol>
   </svg>
 
   <!-- Globālie efekti -->
@@ -68,9 +85,16 @@
         </a>
       </div>
 
-      <button class="burger" id="burger" type="button" aria-label="Atvērt izvēlni" aria-expanded="false" aria-controls="navMenu">
-        <span></span><span></span>
-      </button>
+      <div class="nav-tools">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Krāsu tēma: pēc ierīces iestatījuma" title="Krāsu tēma: pēc ierīces iestatījuma">
+          <svg class="icon i-system" aria-hidden="true"><use href="#i-monitor"/></svg>
+          <svg class="icon i-light" aria-hidden="true"><use href="#i-sun"/></svg>
+          <svg class="icon i-dark" aria-hidden="true"><use href="#i-moon"/></svg>
+        </button>
+        <button class="burger" id="burger" type="button" aria-label="Atvērt izvēlni" aria-expanded="false" aria-controls="navMenu">
+          <span></span><span></span>
+        </button>
+      </div>
     </nav>
   </header>
 
@@ -160,11 +184,7 @@
     </section>
 
     <!-- ===================== TEHNOLOĢIJU LENTE ===================== -->
-    <div class="marquee" aria-hidden="true">
-      <div class="marquee-track" id="marqueeTrack">
-        <span>CD-r</span><span>700mb</span><span>Stilizēti diski</span><span>Stilizēti futlāri</span><span>Mazāk piesārņojuma</span>
-      </div>
-    </div>
+
 
     <!-- ===================== PAKALPOJUMI ===================== -->
     <section class="section" id="services">
@@ -410,8 +430,8 @@
           </ul>
 
           <div class="socials reveal" style="--d:.28s">
-            <a class="chip-link magnetic" href="#">Instagram</a>
-            <a class="chip-link magnetic" href="#">TikTok</a>
+            <a class="chip-link magnetic" target="_blank" href="#">Instagram</a>
+            <a class="chip-link magnetic" target="_blank" href="#">TikTok</a>
           </div>
         </div>
 
@@ -510,6 +530,7 @@
 
   <!-- ===================== FOOTER ===================== -->
   <footer class="footer">
+    <footer class="footer">
     <div class="container footer-inner">
       <a href="https://home.jalatvia.lv/" target="_blank" class="logo" aria-label="NOVA — uz sākumu">
         <span class="logo"><img src="./Images/jaLVW.png" alt=""></span>

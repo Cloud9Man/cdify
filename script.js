@@ -36,6 +36,88 @@
     requestAnimationFrame(loop);
   };
 
+  /* ---------- 1b. KRĀSU TĒMA: sistēmas (noklusējums) / gaišā / tumšā ---------- */
+  // <html data-theme="light|dark"> — faktiskā tēma; <html data-theme-pref="system|light|dark"> — lietotāja izvēle.
+  // Sākotnējo tēmu pirms atveidošanas uzliek neliels skripts <head>; šeit ir slēdzis un sistēmas izmaiņu sekošana.
+  const THEME_KEY = 'theme';
+  const THEME_META = { dark: '#06070d', light: '#f9f5f4' };
+  const THEME_LABELS = {
+    system: 'Krāsu tēma: pēc ierīces iestatījuma',
+    light: 'Krāsu tēma: gaišā',
+    dark: 'Krāsu tēma: tumšā',
+  };
+  const lightMedia = window.matchMedia('(prefers-color-scheme: light)');
+  const systemTheme = () => (lightMedia.matches ? 'light' : 'dark');
+  const currentTheme = () => (document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+
+  const readThemePref = () => {
+    try {
+      const v = localStorage.getItem(THEME_KEY);
+      return v === 'light' || v === 'dark' ? v : 'system';
+    } catch (err) { return 'system'; }
+  };
+  const saveThemePref = (pref) => {
+    try {
+      if (pref === 'system') localStorage.removeItem(THEME_KEY);
+      else localStorage.setItem(THEME_KEY, pref);
+    } catch (err) { /* privātais režīms / file:// — izvēle neuzglabājas, bet slēdzis strādā */ }
+  };
+
+  function applyTheme(pref) {
+    const root = document.documentElement;
+    const resolved = pref === 'system' ? systemTheme() : pref;
+    const changed = root.dataset.theme !== resolved;
+    root.dataset.theme = resolved;
+    root.dataset.themePref = pref;
+    const meta = $('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', THEME_META[resolved]);
+    // Canvas / WebGL elementi nevar lasīt CSS — tie klausās šajā notikumā
+    if (changed) window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: resolved } }));
+  }
+
+  function initTheme() {
+    const btn = $('#themeToggle');
+    let pref = readThemePref();
+
+    const sync = () => {
+      if (!btn) return;
+      btn.setAttribute('aria-label', THEME_LABELS[pref]);
+      btn.title = THEME_LABELS[pref];
+    };
+    // Secība: sistēma → pretējā tēma → tā pati tēma (skaidri izvēlēta) → sistēma.
+    // Tā katrs klikšķis redzami kaut ko maina, arī tad, ja ierīce jau ir gaišā režīmā.
+    const nextPref = (cur) => {
+      const sys = systemTheme();
+      const opposite = sys === 'light' ? 'dark' : 'light';
+      if (cur === 'system') return opposite;
+      if (cur === opposite) return sys;
+      return 'system';
+    };
+
+    applyTheme(pref);
+    sync();
+
+    btn?.addEventListener('click', () => {
+      pref = nextPref(pref);
+      saveThemePref(pref);
+      applyTheme(pref);
+      sync();
+    });
+
+    // Ierīces tēma mainās (piem., automātiski vakarā) — seko tikai tad, ja izvēlēts "sistēma"
+    const onSystemChange = () => { if (pref === 'system') applyTheme('system'); };
+    if (lightMedia.addEventListener) lightMedia.addEventListener('change', onSystemChange);
+    else if (lightMedia.addListener) lightMedia.addListener(onSystemChange);
+
+    // Izvēle mainīta citā cilnē
+    window.addEventListener('storage', (e) => {
+      if (e.key !== THEME_KEY && e.key !== null) return;
+      pref = readThemePref();
+      applyTheme(pref);
+      sync();
+    });
+  }
+
   /* ---------- 2. NAVIGĀCIJA ---------- */
   function initNav() {
     const wrap = $('#navbar');
@@ -151,6 +233,26 @@
     update();
   }
 
+  // Tumšā palete ir oriģinālā; gaišā — tās pašas nokrāsas, bet pasteļtoņos
+  const RETRO_RINGS = {
+    dark: [
+      [1, '#261342'],
+      [0.86, '#45154e'],
+      [0.7, '#64194b'],
+      [0.54, '#8a1d43'],
+      [0.38, '#b43832'],
+      [0.22, '#744568'],
+    ],
+    light: [
+      [1, '#e6d9f5'],
+      [0.86, '#efd2ee'],
+      [0.7, '#f6c9dc'],
+      [0.54, '#fabfc8'],
+      [0.38, '#fcae9f'],
+      [0.22, '#e9bcd0'],
+    ],
+  };
+
   function initRetroBackground() {
     const canvas = $('#retroCanvas');
     const context = canvas?.getContext('2d');
@@ -192,14 +294,7 @@
       context.translate(w * 0.78 + drift, h * 0.2);
       context.rotate(-0.42);
 
-      const rings = [
-        [1, '#261342'],
-        [0.86, '#45154e'],
-        [0.7, '#64194b'],
-        [0.54, '#8a1d43'],
-        [0.38, '#b43832'],
-        [0.22, '#744568'],
-      ];
+      const rings = RETRO_RINGS[currentTheme()];
       for (const [scale, color] of rings) {
         context.beginPath();
         context.ellipse(0, 0, w * 0.84 * scale, h * 0.48 * scale, 0, 0, Math.PI * 2);
@@ -211,6 +306,8 @@
 
     draw(0);
     if (!reduceMotion) onFrame(draw);
+    // Pārzīmējam uzreiz (arī ja kustības samazinātas un nav animācijas cilpas)
+    window.addEventListener('themechange', () => { lastWidth = -1; draw(performance.now()); });
   }
 
   function initReveal() {
@@ -864,7 +961,7 @@
     const halo = new THREE.Mesh(
       new THREE.PlaneGeometry(10, 10),
       new THREE.ShaderMaterial({
-        uniforms: { uTime: { value: 0 } },
+        uniforms: { uTime: { value: 0 }, uGain: { value: 0.55 }, uAlpha: { value: 1 } },
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
@@ -872,17 +969,31 @@
         fragmentShader: `
           varying vec2 vUv;
           uniform float uTime;
+          uniform float uGain;
+          uniform float uAlpha;
           void main() {
             vec2 p = vUv - 0.5;
             float a = pow(max(0.0, 1.0 - length(p) * 2.0), 2.2);
             vec3 c = mix(vec3(0.49, 0.36, 1.0), vec3(0.13, 0.83, 0.93), 0.5 + 0.5 * sin(uTime * 0.4 + p.x * 3.0));
-            gl_FragColor = vec4(c * a * 0.55, a);
+            gl_FragColor = vec4(c * a * uGain, a * uAlpha);
           }`,
       })
     );
     halo.position.z = -0.8;
     halo.renderOrder = -1;
     rig.add(halo);
+
+    // Tumšajā tēmā halo "spīd" (additīvs); gaišajā additīvs maisījums pazustu, tāpēc tur — mīksts, tonēts caurspīdīgums
+    const applySceneTheme = () => {
+      const light = currentTheme() === 'light';
+      const m = halo.material;
+      m.blending = light ? THREE.NormalBlending : THREE.AdditiveBlending;
+      m.premultipliedAlpha = light;
+      m.uniforms.uGain.value = light ? 1.0 : 0.55;
+      m.uniforms.uAlpha.value = light ? 0.32 : 1.0;
+    };
+    applySceneTheme();
+    window.addEventListener('themechange', applySceneTheme);
 
     // Gaismas (malai); trešā seko pelei
     scene.add(new THREE.AmbientLight(0x8a90ff, 0.7));
@@ -1051,7 +1162,7 @@
       if (e.target.closest('a[href="#"]')) e.preventDefault();
     });
 
-    [initNav, initScrollEffects, initRetroBackground, initMarquee, initSpotlight, initTilt, initMagnetic,
+    [initTheme, initNav, initScrollEffects, initRetroBackground, initMarquee, initSpotlight, initTilt, initMagnetic,
       initCursor, initParallax, initCube, initTimeline, initFilter, initForm, initScene,
       initReveal, initCounters, initRotator].forEach(safe);
 
