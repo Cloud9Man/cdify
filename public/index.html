@@ -7,6 +7,7 @@
   <meta name="description" content="NOVA ir digitālā studija, kas veido ātras, skaistas un 3D mājaslapas, lietotnes un digitālus produktus." />
   <meta name="color-scheme" content="dark light" />
   <meta name="theme-color" content="#06070d" />
+  
   <!-- Krāsu tēma: jānosaka pirms pirmās atveidošanas, lai nebūtu nepareizas tēmas "uzplaiksnījuma".
        Saglabātā izvēle (localStorage 'theme': light | dark); ja tās nav — seko ierīces iestatījumam. -->
   <script>
@@ -22,9 +23,6 @@
   </script>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2322d3ee'/%3E%3Cstop offset='1' stop-color='%237c5cff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='url(%23g)'/%3E%3Crect x='9' y='9' width='14' height='14' rx='3' fill='%2306070d'/%3E%3C/svg%3E" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <noscript><style>.reveal{opacity:1;translate:none;filter:none}</style></noscript>
 </head>
@@ -37,7 +35,6 @@
     <symbol id="i-layout" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></symbol>
     <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
     <symbol id="i-phone-app" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></symbol>
-    <symbol id="i-server" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></symbol>
     <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></symbol>
     <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></symbol>
     <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
@@ -73,7 +70,7 @@
           <ul class="nav-list">
             <li style="--i:0"><a href="#hero" class="nav-link active">Sākums</a></li>
             <li style="--i:1"><a href="#services" class="nav-link">Pakalpojumi</a></li>
-            <li style="--i:2"><a href="#projects" class="nav-link">Projekti</a></li>
+            <li style="--i:2"><a href="#projects" class="nav-link">Galerija</a></li>
             <li style="--i:3"><a href="#about" class="nav-link">Par mums</a></li>
             <li style="--i:4"><a href="#process" class="nav-link">Process</a></li>
           </ul>
@@ -124,9 +121,9 @@
           </div>
 
           <div class="hero-stats reveal" style="--d:.32s">
-            <div class="stat"><strong data-count="50" data-suffix="+">50+</strong><span>pabeigti projekti</span></div>
-            <div class="stat"><strong data-count="8" data-suffix="">8</strong><span>gadi pieredzes</span></div>
-            <div class="stat"><strong data-count="99" data-suffix="%">99%</strong><span>apmierināti klienti</span></div>
+            <div class="stat"><strong>iespēja</strong><span>laicīgi rezervēt</span></div>
+            <div class="stat"><strong>ātrs</strong><span>atbalsts/komunikācija</span></div>
+            <div class="stat"><strong>vairāki</strong><span>pieejamie pakalpojumi</span></div>
           </div>
         </div>
 
@@ -239,20 +236,19 @@
     <section class="section" id="projects">
       <div class="container">
         <header class="section-head">
-          <span class="eyebrow reveal">Izlase</span>
+          <span class="eyebrow reveal">Galerija</span>
           <h2 class="section-title reveal" style="--d:.08s">Darbi, ar kuriem <span class="gradient-text">lepojamies</span></h2>
-          <p class="section-lead reveal" style="--d:.16s">Daži no projektiem, kuros apvienojām stratēģiju, dizainu un tehnoloģijas.</p>
+          <p class="section-lead reveal" style="--d:.16s">Piemēri no tā, ko var paveikt kopā ar mums</p>
         </header>
 
         <div class="filters glass reveal" role="group" aria-label="Projektu filtrs">
           <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true">Visi</button>
-          <button class="filter-btn" type="button" data-filter="web" aria-pressed="false">Web</button>
-          <button class="filter-btn" type="button" data-filter="app" aria-pressed="false">Lietotnes</button>
-          <button class="filter-btn" type="button" data-filter="3d" aria-pressed="false">3D</button>
+          <button class="filter-btn" type="button" data-filter="disc" aria-pressed="false">Diski</button>
+          <button class="filter-btn" type="button" data-filter="case" aria-pressed="false">Futlāri</button>
         </div>
 
         <div class="grid proj-grid" id="projGrid" data-stagger>
-          <article class="proj glass tilt spot reveal" data-cat="web" data-cursor="Skatīt" data-tilt="6">
+          <article class="proj glass tilt spot reveal" data-cat="disc" data-cursor="Skatīt" data-tilt="6">
             <div class="proj-visual v1"><div class="mock"><i></i><i></i><i></i></div></div>
             <div class="proj-body">
               <div class="tags"><span>Web</span><span>Fintech</span></div>
@@ -262,7 +258,7 @@
             </div>
           </article>
 
-          <article class="proj glass tilt spot reveal" data-cat="3d web" data-cursor="Skatīt" data-tilt="6">
+          <article class="proj glass tilt spot reveal" data-cat="case" data-cursor="Skatīt" data-tilt="6">
             <div class="proj-visual v2"><div class="mock"><i></i><i></i><i></i></div></div>
             <div class="proj-body">
               <div class="tags"><span>3D</span><span>WebGL</span></div>
@@ -272,7 +268,7 @@
             </div>
           </article>
 
-          <article class="proj glass tilt spot reveal" data-cat="app" data-cursor="Skatīt" data-tilt="6">
+          <article class="proj glass tilt spot reveal" data-cat="disc" data-cursor="Skatīt" data-tilt="6">
             <div class="proj-visual v3"><div class="mock mock--phone"><i></i><i></i><i></i></div></div>
             <div class="proj-body">
               <div class="tags"><span>Mobilā</span><span>Veselība</span></div>
@@ -282,7 +278,7 @@
             </div>
           </article>
 
-          <article class="proj glass tilt spot reveal" data-cat="web" data-cursor="Skatīt" data-tilt="6">
+          <article class="proj glass tilt spot reveal" data-cat="disc" data-cursor="Skatīt" data-tilt="6">
             <div class="proj-visual v4"><div class="mock"><i></i><i></i><i></i></div></div>
             <div class="proj-body">
               <div class="tags"><span>Web</span><span>CMS</span></div>
@@ -292,7 +288,7 @@
             </div>
           </article>
 
-          <article class="proj glass tilt spot reveal" data-cat="3d" data-cursor="Skatīt" data-tilt="6">
+          <article class="proj glass tilt spot reveal" data-cat="disc" data-cursor="Skatīt" data-tilt="6">
             <div class="proj-visual v5"><div class="mock"><i></i><i></i><i></i></div></div>
             <div class="proj-body">
               <div class="tags"><span>3D</span><span>Portfolio</span></div>
@@ -302,7 +298,7 @@
             </div>
           </article>
 
-          <article class="proj glass tilt spot reveal" data-cat="app" data-cursor="Skatīt" data-tilt="6">
+          <article class="proj glass tilt spot reveal" data-cat="disc" data-cursor="Skatīt" data-tilt="6">
             <div class="proj-visual v6"><div class="mock mock--phone"><i></i><i></i><i></i></div></div>
             <div class="proj-body">
               <div class="tags"><span>Mobilā</span><span>Loģistika</span></div>
@@ -320,42 +316,26 @@
       <div class="container about-grid">
         <div class="about-copy">
           <span class="eyebrow reveal">Par mums</span>
-          <h2 class="section-title reveal" style="--d:.08s">Dizains satiekas ar <span class="gradient-text">inženieriju</span></h2>
+          <h2 class="section-title reveal" style="--d:.08s">Jaunieši satiekas ar <span class="gradient-text">pagātni</span></h2>
           <p class="section-lead reveal" style="--d:.16s">
-            Mēs esam maza, bet kompakta komanda — dizaineri un izstrādātāji, kas strādā plecu pie pleca.
-            Nav starpnieku un liekas birokrātijas: tikai skaidra komunikācija un rezultāts, ko var izmērīt.
+            Mēs esam neliela komanda, kuras pamatā ir interese par dizaina un tehnoloģiju apvienošana. Kaut arī šo spēj veikt jebkurš, ne visiem ir iespēja to izdarīt, tādēļ palīgā nākam mēs!
           </p>
 
           <ul class="checklist reveal" style="--d:.22s">
-            <li><svg class="icon"><use href="#i-check"/></svg> Dizains un kods vienā komandā</li>
-            <li><svg class="icon"><use href="#i-check"/></svg> Veiktspēja un pieejamība no pirmās dienas</li>
-            <li><svg class="icon"><use href="#i-check"/></svg> Caurspīdīgs process un regulāri atjauninājumi</li>
+            <li><svg class="icon"><use href="#i-pin"/></svg> RV3Ģ pārstāvji</li>
+            <li><svg class="icon"><use href="#i-sun"/></svg> 11. klases skolēni</li>
+            <li><svg class="icon"><use href="#i-check"/></svg> Ar vēlmi atdzīvināt ko aizmirstu</li>
           </ul>
 
           <div class="counters reveal" style="--d:.28s">
-            <div class="counter glass"><strong data-count="50" data-suffix="+">50+</strong><span>projekti</span></div>
-            <div class="counter glass"><strong data-count="30" data-suffix="+">30+</strong><span>klienti</span></div>
-            <div class="counter glass"><strong data-count="12" data-suffix="">12</strong><span>balvas</span></div>
+            <div class="counter glass"><strong data-count="4">4</strong><span>personas</span></div>
+            <div class="counter glass"><strong data-count="8" data-suffix="">8</strong><span>rokas</span></div>
+            <div class="counter glass"><strong data-count="1" data-suffix="">1</strong><span>vienota ideja</span></div>
           </div>
         </div>
 
         <div class="about-visual reveal">
-          <div class="cube-wrap">
-            <span class="cube-ring r1"></span>
-            <span class="cube-ring r2"></span>
-            <div class="cube-glow"></div>
-            <div class="cube-scene" id="cubeScene" data-cursor="Velc" role="img" aria-label="Interaktīvs 3D kubs — velciet, lai pagrieztu">
-              <div class="cube" id="cube">
-                <div class="cube-face f-front">HTML<small>Struktūra</small></div>
-                <div class="cube-face f-back">CSS<small>Stils</small></div>
-                <div class="cube-face f-right">JS<small>Loģika</small></div>
-                <div class="cube-face f-left">3D<small>WebGL</small></div>
-                <div class="cube-face f-top">UX<small>Dizains</small></div>
-                <div class="cube-face f-bottom">API<small>Dati</small></div>
-              </div>
-            </div>
-            <p class="cube-hint">Velciet, lai pagrieztu</p>
-          </div>
+          
         </div>
       </div>
     </section>
@@ -458,28 +438,123 @@
           </fieldset>
 
           <div data-form-panel="order">
-            <fieldset class="field-group order-items-group">
-              <legend>Ko vēlaties pasūtīt?</legend>
-              <div class="chips">
-                <label class="chip"><input type="checkbox" name="orderItems" value="diska-zimejums-augsa" /><span>Diska zīmējums uz augšas</span></label>
-                <label class="chip"><input type="checkbox" name="orderItems" value="diska-zimejums-apaksa" /><span>Diska zīmējums uz apakšas</span></label>
-                <label class="chip"><input type="checkbox" name="orderItems" value="futlara-apdare" /><span>Diska futlāra apdare</span></label>
-                <label class="chip"><input type="checkbox" name="orderItems" value="diska-iededzinasana" /><span>Diska iededzināšana</span></label>
-                <label class="chip"><input type="checkbox" name="orderItems" value="tirs-disks" /><span>Tīra diska pirkšana</span></label>
-                <label class="chip"><input type="checkbox" name="orderItems" value="tukss-futlaris" /><span>Neapdarināta futlāra pirkšana</span></label>
-              </div>
-              <span class="field-error" aria-live="polite"></span>
-            </fieldset>
+            <p class="order-intro">Norādiet daudzumu katram produktam un pēc tam izvēlieties vajadzīgās opcijas. Apdares cena ir 0,50&nbsp;€ par gabalu, iededzināšana — 0,25&nbsp;€ par disku.</p>
 
-            <div class="field">
-              <input type="number" id="f-quantity" name="quantity" min="1" step="1" placeholder=" " required data-validate data-rule="quantity" />
-              <label for="f-quantity">Daudzums (gab.)</label>
-              <span class="field-error" aria-live="polite"></span>
+            <section class="order-section" data-order-section="vinyl" data-unit-price="1.5">
+              <div class="field quantity-field">
+                <input type="number" id="f-quantity-vinyl" name="quantityVinyl" min="0" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
+                <label for="f-quantity-vinyl">Vinila stila disku skaits</label>
+                <span class="unit-price">1,50&nbsp;€ / gab.</span>
+                <span class="field-error" aria-live="polite"></span>
+              </div>
+              <fieldset class="field-group section-options" data-options-for="vinyl" disabled>
+                <legend>Vinila stila disku opcijas</legend>
+                <div class="chips">
+                  <label class="chip"><input type="checkbox" name="optionVinylBurn" value="burning" data-burning-option /><span>Diska iededzināšana (+0,25&nbsp;€ / gab.)</span></label>
+                </div>
+                <div class="upload-panel" data-burning-panel="vinyl" hidden>
+                  <label class="upload-label" for="f-burning-vinyl">Faili iededzināšanai</label>
+                  <input type="file" id="f-burning-vinyl" name="burningVinyl" multiple data-burning-input />
+                  <button type="button" class="btn btn-ghost add-files-btn" data-add-burning-files="f-burning-vinyl">Pievienot vēl failus</button>
+                  <span class="upload-help">Var pievienot neierobežotu failu skaitu; visu iededzināšanas failu kopējais lielums nedrīkst pārsniegt 700&nbsp;MB.</span>
+                  <ul class="file-list" data-file-list-for="burning-vinyl" aria-live="polite"></ul>
+                </div>
+              </fieldset>
+            </section>
+
+            <section class="order-section" data-order-section="lightscribe" data-unit-price="2">
+              <div class="field quantity-field">
+                <input type="number" id="f-quantity-lightscribe" name="quantityLightscribe" min="0" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
+                <label for="f-quantity-lightscribe">LightScribe disku skaits</label>
+                <span class="unit-price">2,00&nbsp;€ / gab.</span>
+                <span class="field-error" aria-live="polite"></span>
+              </div>
+              <fieldset class="field-group section-options" data-options-for="lightscribe" disabled>
+                <legend>LightScribe disku opcijas</legend>
+                <div class="chips">
+                  <label class="chip"><input type="checkbox" name="optionLightscribeReadableFinish" value="readable-finish" data-finish-option data-artwork-option="lightscribe-readable" /><span>Lasāmās daļas apdare (+0,50&nbsp;€ / gab.)</span></label>
+                  <label class="chip"><input type="checkbox" name="optionLightscribeUnreadableFinish" value="unreadable-finish" data-finish-option data-artwork-option="lightscribe-unreadable" /><span>Nelasāmās daļas apdare (+0,50&nbsp;€ / gab.)</span></label>
+                  <label class="chip"><input type="checkbox" name="optionLightscribeBurn" value="burning" data-burning-option /><span>Diska iededzināšana (+0,25&nbsp;€ / gab.)</span></label>
+                </div>
+                <div class="upload-panel" data-artwork-panel="lightscribe-readable" hidden>
+                  <label class="upload-label" for="f-artwork-lightscribe-readable">Izvēlētais zīmējums — lasāmās daļas apdarei</label>
+                  <input type="file" id="f-artwork-lightscribe-readable" name="artworkLightscribeReadable" accept="image/*" data-artwork-input />
+                  <ul class="file-list" data-file-list-for="artwork-lightscribe-readable" aria-live="polite"></ul>
+                </div>
+                <div class="upload-panel" data-artwork-panel="lightscribe-unreadable" hidden>
+                  <label class="upload-label" for="f-artwork-lightscribe-unreadable">Izvēlētais zīmējums — nelasāmās daļas apdarei</label>
+                  <input type="file" id="f-artwork-lightscribe-unreadable" name="artworkLightscribeUnreadable" accept="image/*" data-artwork-input />
+                  <ul class="file-list" data-file-list-for="artwork-lightscribe-unreadable" aria-live="polite"></ul>
+                </div>
+                <div class="upload-panel" data-burning-panel="lightscribe" hidden>
+                  <label class="upload-label" for="f-burning-lightscribe">Faili iededzināšanai</label>
+                  <input type="file" id="f-burning-lightscribe" name="burningLightscribe" multiple data-burning-input />
+                  <button type="button" class="btn btn-ghost add-files-btn" data-add-burning-files="f-burning-lightscribe">Pievienot vēl failus</button>
+                  <span class="upload-help">Var pievienot neierobežotu failu skaitu; visu iededzināšanas failu kopējais lielums nedrīkst pārsniegt 700&nbsp;MB.</span>
+                  <ul class="file-list" data-file-list-for="burning-lightscribe" aria-live="polite"></ul>
+                </div>
+              </fieldset>
+            </section>
+
+            <section class="order-section" data-order-section="standard" data-unit-price="1">
+              <div class="field quantity-field">
+                <input type="number" id="f-quantity-standard" name="quantityStandard" min="0" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
+                <label for="f-quantity-standard">Parasto disku skaits</label>
+                <span class="unit-price">1,00&nbsp;€ / gab.</span>
+                <span class="field-error" aria-live="polite"></span>
+              </div>
+              <fieldset class="field-group section-options" data-options-for="standard" disabled>
+                <legend>Parasto disku opcijas</legend>
+                <div class="chips">
+                  <label class="chip"><input type="checkbox" name="optionStandardReadableFinish" value="readable-finish" data-finish-option data-artwork-option="standard-readable" /><span>Lasāmās daļas apdare (+0,50&nbsp;€ / gab.)</span></label>
+                  <label class="chip"><input type="checkbox" name="optionStandardBurn" value="burning" data-burning-option /><span>Diska iededzināšana (+0,25&nbsp;€ / gab.)</span></label>
+                </div>
+                <div class="upload-panel" data-artwork-panel="standard-readable" hidden>
+                  <label class="upload-label" for="f-artwork-standard-readable">Izvēlētais zīmējums — lasāmās daļas apdarei</label>
+                  <input type="file" id="f-artwork-standard-readable" name="artworkStandardReadable" accept="image/*" data-artwork-input />
+                  <ul class="file-list" data-file-list-for="artwork-standard-readable" aria-live="polite"></ul>
+                </div>
+                <div class="upload-panel" data-burning-panel="standard" hidden>
+                  <label class="upload-label" for="f-burning-standard">Faili iededzināšanai</label>
+                  <input type="file" id="f-burning-standard" name="burningStandard" multiple data-burning-input />
+                  <button type="button" class="btn btn-ghost add-files-btn" data-add-burning-files="f-burning-standard">Pievienot vēl failus</button>
+                  <span class="upload-help">Var pievienot neierobežotu failu skaitu; visu iededzināšanas failu kopējais lielums nedrīkst pārsniegt 700&nbsp;MB.</span>
+                  <ul class="file-list" data-file-list-for="burning-standard" aria-live="polite"></ul>
+                </div>
+              </fieldset>
+            </section>
+
+            <section class="order-section" data-order-section="cases" data-unit-price="1">
+              <div class="field quantity-field">
+                <input type="number" id="f-quantity-cases" name="quantityCases" min="0" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
+                <label for="f-quantity-cases">Disku futlāru skaits</label>
+                <span class="unit-price">1,00&nbsp;€ / gab.</span>
+                <span class="field-error" aria-live="polite"></span>
+              </div>
+              <fieldset class="field-group section-options" data-options-for="cases" disabled>
+                <legend>Disku futlāru opcijas</legend>
+                <div class="chips">
+                  <label class="chip"><input type="checkbox" name="optionCasesFinish" value="case-finish" data-finish-option data-case-artwork-option /><span>Futlāra apdare un zīmējums priekšai un aizmugurei (+0,50&nbsp;€ / gab.)</span></label>
+                </div>
+                <div class="upload-panel case-artwork" data-case-artwork-panel hidden>
+                  <label class="upload-label" for="f-artwork-case-front">Izvēlētais zīmējums — futlāra priekšpuse</label>
+                  <input type="file" id="f-artwork-case-front" name="artworkCaseFront" accept="image/*" required data-artwork-input />
+                  <ul class="file-list" data-file-list-for="artwork-case-front" aria-live="polite"></ul>
+                  <label class="upload-label" for="f-artwork-case-back">Izvēlētais zīmējums — futlāra aizmugure</label>
+                  <input type="file" id="f-artwork-case-back" name="artworkCaseBack" accept="image/*" required data-artwork-input />
+                  <ul class="file-list" data-file-list-for="artwork-case-back" aria-live="polite"></ul>
+                </div>
+              </fieldset>
+            </section>
+
+            <div class="order-total" aria-live="polite">
+              <span>Provizoriskā kopsumma</span>
+              <strong id="orderTotal">0,00&nbsp;€</strong>
             </div>
 
             <div class="field">
               <textarea id="f-order-details" name="orderDetails" placeholder=" " rows="5" required data-validate data-rule="details"></textarea>
-              <label for="f-order-details">Aprakstiet savu pirkumu</label>
+              <label for="f-order-details">Papildu informācija par pasūtījumu</label>
               <span class="field-error" aria-live="polite"></span>
             </div>
           </div>
@@ -513,15 +588,16 @@
           </div>
 
           <button type="submit" class="btn btn-primary btn-block magnetic" id="submitBtn">
-            <span class="btn-label">Nosūtīt ziņu</span>
+            <span class="btn-label">Pabeigt pasūtījuma noformēšanu</span>
             <svg class="icon"><use href="#i-arrow"/></svg>
-            <span class="spinner" aria-hidden="true"></span>
           </button>
 
+          <p class="field-error form-error" role="alert" hidden></p>
+          <p class="order-intro">Iesniedzot formu, pasūtījuma informācija tiek saglabāta Firebase, bet pievienotie faili — Cloudflare R2.</p>
           <div class="form-success" role="status">
             <svg class="check-draw" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M15 27l8 8 14-16"/></svg>
-            <h3>Paldies!</h3>
-            <p>Ziņa saņemta — drīzumā sazināsimies.</p>
+            <h3>Noformēšana pabeigta</h3>
+            <p>Informācija ir nosūtīta un saglabāta.</p>
           </div>
         </form>
       </div>
@@ -530,18 +606,15 @@
 
   <!-- ===================== FOOTER ===================== -->
   <footer class="footer">
-    <footer class="footer">
-    <div class="container footer-inner">
-      <a href="https://home.jalatvia.lv/" target="_blank" class="logo" aria-label="NOVA — uz sākumu">
-        <span class="logo"><img src="./Images/jaLVW.png" alt=""></span>
-      </a>
-      <p>© <span id="year">2026</span> SMU "CDify".</p>
-      <a href="#hero" class="to-top magnetic" aria-label="Uz augšu"><svg class="icon"><use href="#i-arrow"/></svg></a>
-    </div>
-  </footer>
+      <div class="container footer-inner">
+        <a href="https://home.jalatvia.lv/" target="_blank" class="logo" aria-label="NOVA — uz sākumu">
+          <span class="logo"><img src="./Images/jaLVW.png" alt=""></span>
+        </a>
+        <p>© <span id="year">2026</span> SMU "CDify".</p>
+        <a href="#hero" class="to-top magnetic" aria-label="Uz augšu"><svg class="icon"><use href="#i-arrow"/></svg></a>
+      </div>
+    </footer>
 
-  <!-- Three.js (klasiskā versija — darbojas arī atverot failu tieši no diska) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
   <script src="script.js" defer></script>
 </body>
 </html>

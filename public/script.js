@@ -588,22 +588,37 @@
     const form = $('#contactForm');
     if (!form) return;
 
+    const apiBaseUrl = '/api';
+    const submitButton = $('#submitBtn', form);
+    const submitLabel = $('.btn-label', submitButton);
+    const formError = $('.form-error', form);
+
     const rules = {
       name: (v) => v.trim().length >= 2 || 'Lūdzu, ievadiet savu vārdu.',
       email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()) || 'Lūdzu, ievadiet derīgu e-pasta adresi.',
       subject: (v) => v.trim().length >= 2 || 'Lūdzu, ievadiet e-pasta virsrakstu.',
       details: (v) => v.trim().length >= 10 || 'Aprakstam jābūt vismaz 10 rakstzīmes garam.',
       quantity: (v) => Number.isInteger(Number(v)) && Number(v) > 0 || 'Lūdzu, ievadiet vismaz 1 gabalu.',
+      nonnegativeQuantity: (v) => /^\d+$/.test(v) || 'Lūdzu, ievadiet veselu skaitli, kas nav mazāks par 0.',
     };
 
     const panels = $$('[data-form-panel]', form);
+    const sections = $$('[data-order-section]', form);
+    const artworkInputs = $$('[data-artwork-input]', form);
+    const fileLimit = 700 * 1024 * 1024;
+    const euro = new Intl.NumberFormat('lv-LV', { style: 'currency', currency: 'EUR' });
+
     const updatePanels = () => {
       const selectedType = form.querySelector('input[name="requestType"]:checked').value;
+      $('#submitBtn .btn-label').textContent = selectedType === 'order'
+        ? 'Pabeigt pasūtījuma noformēšanu'
+        : 'Pabeigt ziņas noformēšanu';
       panels.forEach((panel) => {
         const isActive = panel.dataset.formPanel === selectedType;
         panel.hidden = !isActive;
         $$('input, textarea, select', panel).forEach((input) => { input.disabled = !isActive; });
       });
+      updateSections();
     };
 
     const validate = (input) => {
@@ -616,15 +631,195 @@
       return ok;
     };
 
-    const validateOrderItems = () => {
-      const group = $('.order-items-group', form);
-      const checked = $$('input[name="orderItems"]:checked', group).length > 0;
-      group.classList.toggle('has-error', !checked);
-      $('.field-error', group).textContent = checked ? '' : 'Lūdzu, izvēlieties vismaz vienu pasūtījuma veidu.';
-      return checked;
+    const selectedQuantity = (section) => Number($(`[name="quantity${section.dataset.orderSection[0].toUpperCase()}${section.dataset.orderSection.slice(1)}"]`, section).value);
+
+    const updatePrices = () => {
+      let total = 0;
+      sections.forEach((section) => {
+        const quantity = selectedQuantity(section);
+        if (!quantity) return;
+        const options = $$('[data-finish-option]:checked', section).length;
+        const burning = $$('[data-burning-option]:checked', section).length;
+        total += quantity * (Number(section.dataset.unitPrice) + options * 0.5 + burning * 0.25);
+      });
+      $('#orderTotal').textContent = euro.format(total);
+      return total;
+    };
+
+    const updateFileList = (input) => {
+      const panel = input.closest('.upload-panel');
+      if (!panel) return;
+      const key = input.name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+      const list = $(`[data-file-list-for="${key}"]`, panel);
+      if (!list) return;
+      list.replaceChildren();
+      const relatedInputs = $$('input[type="file"]', panel).filter((fileInput) => fileInput.name === input.name);
+      relatedInputs.flatMap((fileInput) => Array.from(fileInput.files || [])).forEach((file) => {
+        const item = document.createElement('li');
+        const name = document.createElement('span');
+        const details = document.createElement('small');
+        const extension = file.name.includes('.') ? file.name.split('.').pop().toUpperCase() : 'Fails';
+        name.className = 'file-name';
+        name.textContent = file.name;
+        details.textContent = `${extension} · ${file.type || 'nezināms tips'} · ${formatBytes(file.size)}`;
+        item.append(name, details);
+        list.append(item);
+      });
+    };
+
+    const formatBytes = (bytes) => {
+      if (bytes < 1024) return `${bytes} B`;
+      const units = ['KB', 'MB', 'GB'];
+      let size = bytes / 1024;
+      let unit = 0;
+      while (size >= 1024 && unit < units.length - 1) {
+        size /= 1024;
+        unit += 1;
+      }
+      return `${new Intl.NumberFormat('lv-LV', { maximumFractionDigits: 1 }).format(size)} ${units[unit]}`;
+    };
+
+    const burningInputs = () => $$('[data-burning-input]', form);
+
+    const totalBurningSize = () => burningInputs()
+      .filter((input) => !input.disabled)
+      .reduce((sum, input) => sum + Array.from(input.files || []).reduce((size, file) => size + file.size, 0), 0);
+
+    const updateBurningSizeError = () => {
+      const totalSize = totalBurningSize();
+      const overLimit = totalSize > fileLimit;
+      burningInputs().forEach((input) => {
+        const panel = input.closest('.upload-panel');
+        let error = $('.upload-error', panel);
+        if (!error) {
+          error = document.createElement('span');
+          error.className = 'field-error upload-error';
+          error.setAttribute('role', 'alert');
+          panel.append(error);
+        }
+        const showError = overLimit && !input.disabled;
+        error.textContent = showError ? `Iededzināšanas failu kopējais lielums (${formatBytes(totalSize)}) pārsniedz 700 MB.` : '';
+        input.setAttribute('aria-invalid', String(showError));
+      });
+      return !overLimit;
+    };
+
+    const updateSections = () => {
+      sections.forEach((section) => {
+        const quantityInput = $('input[type="number"]', section);
+        const options = $('.section-options', section);
+        const enabled = !quantityInput.disabled && Number(quantityInput.value) > 0;
+        options.disabled = !enabled;
+
+        $$('[data-artwork-panel]', section).forEach((artworkPanel) => {
+          const selected = !!$(`[data-artwork-option="${artworkPanel.dataset.artworkPanel}"]:checked`, section);
+          artworkPanel.hidden = !enabled || !selected;
+          $$('[data-artwork-input]', artworkPanel).forEach((input) => {
+            input.disabled = !enabled || !selected;
+            input.required = enabled && selected;
+          });
+        });
+
+        const caseArtworkPanel = $('[data-case-artwork-panel]', section);
+        if (caseArtworkPanel) {
+          const selected = !!$('[data-case-artwork-option]:checked', section);
+          caseArtworkPanel.hidden = !enabled || !selected;
+          $$('[data-artwork-input]', caseArtworkPanel).forEach((input) => {
+            input.disabled = !enabled || !selected;
+            input.required = enabled && selected;
+          });
+        }
+
+        const burningSelected = !!$('[data-burning-option]:checked', section);
+        const burningPanel = $('[data-burning-panel]', section);
+        if (burningPanel) {
+          burningPanel.hidden = !enabled || !burningSelected;
+          $$('[data-burning-input]', burningPanel).forEach((input) => { input.disabled = !enabled || !burningSelected; });
+        }
+      });
+      updatePrices();
+      updateBurningSizeError();
+    };
+
+    const validateArtwork = () => {
+      let valid = true;
+      $$('[data-artwork-input]', form).filter((input) => !input.disabled).forEach((input) => {
+        const panel = input.closest('.upload-panel');
+        let error = $('.upload-error', panel);
+        if (!error) {
+          error = document.createElement('span');
+          error.className = 'field-error upload-error';
+          error.setAttribute('role', 'alert');
+          panel.append(error);
+        }
+        const hasFile = input.files && input.files.length > 0;
+        error.textContent = hasFile ? '' : 'Lūdzu, pievienojiet izvēlēto zīmējumu.';
+        input.setAttribute('aria-invalid', String(!hasFile));
+        if (!hasFile) valid = false;
+      });
+      return valid;
+    };
+
+    const validateBurningUploads = () => {
+      let valid = true;
+      sections.forEach((section) => {
+        if (!Number($('input[type="number"]', section).value) || !$('[data-burning-option]:checked', section)) return;
+        const inputs = $$('[data-burning-input]', section).filter((fileInput) => fileInput.files && fileInput.files.length);
+        const input = $('[data-burning-input]', section);
+        const panel = input.closest('.upload-panel');
+        let error = $('.upload-error', panel);
+        if (!error) {
+          error = document.createElement('span');
+          error.className = 'field-error upload-error';
+          error.setAttribute('role', 'alert');
+          panel.append(error);
+        }
+        const hasFiles = inputs.length > 0;
+        error.textContent = hasFiles ? '' : 'Lūdzu, pievienojiet vismaz vienu failu iededzināšanai.';
+        input.setAttribute('aria-invalid', String(!hasFiles));
+        if (!hasFiles) valid = false;
+      });
+      return valid;
+    };
+
+    const validateOrder = () => {
+      const quantities = sections.map((section) => $('input[type="number"]', section));
+      const validQuantities = quantities.map((input) => validate(input));
+      const hasItems = sections.some((section) => selectedQuantity(section) > 0);
+      const firstQuantity = quantities[0];
+      const firstField = firstQuantity.closest('.field');
+      firstField.classList.toggle('has-error', !hasItems);
+      $('.field-error', firstField).textContent = hasItems ? '' : 'Lūdzu, norādiet vismaz viena produkta daudzumu.';
+      const artworkValid = validateArtwork();
+      const burningFilesValid = validateBurningUploads();
+      const fileSizeValid = updateBurningSizeError();
+      return validQuantities.every(Boolean) && hasItems && artworkValid && burningFilesValid && fileSizeValid;
     };
 
     const activeInputs = () => $$('[data-validate]', form).filter((input) => !input.disabled);
+    const onBurningFilesChanged = (input) => {
+      const panel = input.closest('.upload-panel');
+      if (!panel) return;
+      updateFileList(input);
+      const overLimit = totalBurningSize() > fileLimit;
+      let error = $('.upload-error', panel);
+      if (!error) {
+        error = document.createElement('span');
+        error.className = 'field-error upload-error';
+        error.setAttribute('role', 'alert');
+        panel.append(error);
+      }
+      if (overLimit) {
+        error.textContent = 'Iededzināšanas failu kopējais lielums pārsniedz 700 MB. Izvēlieties mazākus failus.';
+        const primaryInput = $('[data-burning-input]', panel);
+        if (input !== primaryInput) input.closest('.additional-file-input').remove();
+        else input.value = '';
+        updateFileList(primaryInput);
+      } else {
+        error.textContent = '';
+      }
+      updateBurningSizeError();
+    };
 
     updatePanels();
     $$('input[name="requestType"]', form).forEach((input) => input.addEventListener('change', updatePanels));
@@ -634,45 +829,178 @@
       input.addEventListener('blur', () => { if (input.value) validate(input); });
       input.addEventListener('input', () => {
         if (input.closest('.field').classList.contains('has-error')) validate(input);
+        if (input.matches('[type="number"]')) updateSections();
       });
     });
 
-    $$('input[name="orderItems"]', form).forEach((input) => input.addEventListener('change', () => {
-      if ($('.order-items-group', form).classList.contains('has-error')) validateOrderItems();
+    $$('[data-finish-option], [data-burning-option], [data-artwork-option], [data-case-artwork-option]', form)
+      .forEach((input) => input.addEventListener('change', updateSections));
+    [...artworkInputs, ...burningInputs()].forEach((input) => input.addEventListener('change', () => {
+      if (input.hasAttribute('data-burning-input')) {
+        onBurningFilesChanged(input);
+        return;
+      }
+      updateFileList(input);
+      const uploadError = $('.upload-error', input.closest('.upload-panel'));
+      if (uploadError && input.files && input.files.length) {
+        uploadError.textContent = '';
+        input.removeAttribute('aria-invalid');
+      }
+      updateBurningSizeError();
+    }));
+    $$('[data-add-burning-files]', form).forEach((button) => button.addEventListener('click', () => {
+      const original = $(`#${button.dataset.addBurningFiles}`);
+      const wrapper = document.createElement('div');
+      wrapper.className = 'additional-file-input';
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.multiple = true;
+      input.name = original.name;
+      input.dataset.burningInput = '';
+      input.setAttribute('aria-label', 'Papildu faili iededzināšanai');
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'remove-files-btn';
+      remove.textContent = 'Noņemt šo failu izvēli';
+      remove.addEventListener('click', () => {
+        wrapper.remove();
+        updateFileList(original);
+        updateBurningSizeError();
+      });
+      input.addEventListener('change', () => onBurningFilesChanged(input));
+      wrapper.append(input, remove);
+      button.before(wrapper);
+      input.click();
     }));
 
     form.addEventListener('reset', () => {
       setTimeout(() => {
         updatePanels();
+        $$('.additional-file-input', form).forEach((wrapper) => wrapper.remove());
         $$('.has-error', form).forEach((field) => field.classList.remove('has-error'));
         $$('.field-error', form).forEach((error) => { error.textContent = ''; });
         $$('[aria-invalid]', form).forEach((input) => input.removeAttribute('aria-invalid'));
+        artworkInputs.forEach(updateFileList);
+        burningInputs().filter((input) => !input.closest('.additional-file-input')).forEach(updateFileList);
+        updateBurningSizeError();
+        formError.hidden = true;
       }, 0);
     });
 
-    form.addEventListener('submit', (e) => {
+    const postApi = async (path, body) => {
+      const response = await fetch(`${apiBaseUrl}/${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify(body),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `Pieprasījums neizdevās (${response.status}).`);
+      return result;
+    };
+
+    const submitForm = async (selectedType) => {
+      const files = $$('input[type="file"]', form)
+        .filter((input) => !input.disabled)
+        .flatMap((input) => Array.from(input.files || []).map((file) => ({
+          file,
+          field: input.name,
+        })));
+      if (files.some((item) => item.file.size < 1 || item.file.size > fileLimit)) {
+        throw new Error('Fails nedrīkst būt tukšs vai lielāks par 700 MB.');
+      }
+      const submission = {
+        requestType: selectedType,
+        name: $('[name="name"]', form).value.trim(),
+        email: $('[name="email"]', form).value.trim(),
+        files: [],
+      };
+
+      if (selectedType === 'order') {
+        submission.items = sections
+          .map((section) => ({
+            product: section.dataset.orderSection,
+            quantity: selectedQuantity(section),
+            options: $$('input[type="checkbox"]:checked', section).map((input) => input.name),
+          }))
+          .filter((item) => item.quantity > 0);
+        submission.details = $('[name="orderDetails"]', form).value.trim();
+        submission.estimatedTotalCents = Math.round(updatePrices() * 100);
+      } else {
+        submission.subject = $(`[name="${selectedType}Subject"]`, form).value.trim();
+        submission.details = $(`[name="${selectedType}Details"]`, form).value.trim();
+      }
+
+      for (const [index, item] of files.entries()) {
+        submitLabel.textContent = `Augšupielādē failu ${index + 1}/${files.length}...`;
+        const contentType = item.file.type || 'application/octet-stream';
+        const signedUpload = await postApi('get-upload-url', {
+          fileName: item.file.name,
+          fileType: contentType,
+          fileSize: item.file.size,
+          field: item.field,
+        });
+        const uploadResponse = await fetch(signedUpload.uploadUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': contentType },
+          body: item.file,
+        });
+        if (!uploadResponse.ok) {
+          throw new Error(`Neizdevās augšupielādēt failu "${item.file.name}" (HTTP ${uploadResponse.status}).`);
+        }
+        submission.files.push({
+          key: signedUpload.fileKey,
+          name: item.file.name,
+          contentType,
+          size: item.file.size,
+          field: item.field,
+        });
+      }
+
+      submitLabel.textContent = 'Nosūta informāciju...';
+      await postApi('submit-order', submission);
+    };
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const currentInputs = activeInputs();
+      const selectedType = form.querySelector('input[name="requestType"]:checked').value;
+      const currentInputs = activeInputs().filter((input) => !input.matches('[type="number"]') || selectedType === 'order');
       const results = currentInputs.map(validate);
-      const orderItemsValid = form.querySelector('input[name="requestType"]:checked').value !== 'order' || validateOrderItems();
-      if (!results.every(Boolean) || !orderItemsValid) {
-        if (!results.every(Boolean)) currentInputs[results.indexOf(false)].focus();
-        else $('input[name="orderItems"]', form).focus();
+      const orderValid = selectedType !== 'order' || validateOrder();
+      if (!results.every(Boolean) || !orderValid) {
+        const firstInvalid = currentInputs.find((input) => input.getAttribute('aria-invalid') === 'true');
+        if (firstInvalid) firstInvalid.focus();
+        else if (selectedType === 'order') {
+          const missingUpload = $('[data-artwork-input][aria-invalid="true"], [data-burning-input][aria-invalid="true"]', form);
+          if (missingUpload) missingUpload.focus();
+          else $('input[type="number"]', sections[0]).focus();
+        }
         return;
       }
 
-      const btn = $('#submitBtn');
-      btn.classList.add('is-loading');
-      btn.disabled = true;
-
-      // TODO: šeit jāpievieno īsta sūtīšana (fetch uz savu API, Formspree, EmailJS u.c.)
-      setTimeout(() => {
-        btn.classList.remove('is-loading');
-        btn.disabled = false;
+      submitButton.disabled = true;
+      formError.hidden = true;
+      formError.textContent = '';
+      try {
+        await submitForm(selectedType);
+        const successMessage = selectedType === 'order'
+          ? 'Pasūtījums ir nosūtīts. Faili saglabāti Cloudflare R2, bet informācija — Firebase.'
+          : 'Ziņa ir nosūtīta un saglabāta Firebase.';
         form.reset();
         form.classList.add('is-sent');
+        $('.form-success p', form).textContent = successMessage;
         setTimeout(() => form.classList.remove('is-sent'), 6000);
-      }, 1400);
+      } catch (error) {
+        console.error('Neizdevās nosūtīt formu:', error);
+        formError.textContent = error.message || 'Neizdevās nosūtīt formu. Lūdzu, mēģiniet vēlreiz.';
+        formError.hidden = false;
+      } finally {
+        submitButton.disabled = false;
+        if (!form.classList.contains('is-sent')) {
+          submitLabel.textContent = selectedType === 'order'
+            ? 'Pabeigt pasūtījuma noformēšanu'
+            : 'Pabeigt ziņas noformēšanu';
+        }
+      }
     });
   }
 
