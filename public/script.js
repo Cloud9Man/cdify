@@ -930,10 +930,16 @@
         submission.details = $(`[name="${selectedType}Details"]`, form).value.trim();
       }
 
+      if (selectedType === 'order') {
+        const startedOrder = await postApi('start-order', {});
+        submission.orderNumber = startedOrder.orderNumber;
+      }
+
       for (const [index, item] of files.entries()) {
         submitLabel.textContent = `Augšupielādē failu ${index + 1}/${files.length}...`;
         const contentType = item.file.type || 'application/octet-stream';
         const signedUpload = await postApi('get-upload-url', {
+          orderNumber: submission.orderNumber,
           fileName: item.file.name,
           fileType: contentType,
           fileSize: item.file.size,
@@ -941,7 +947,7 @@
         });
         const uploadResponse = await fetch(signedUpload.uploadUrl, {
           method: 'PUT',
-          headers: { 'Content-Type': contentType },
+          headers: { 'Content-Type': contentType, ...signedUpload.uploadHeaders },
           body: item.file,
         });
         if (!uploadResponse.ok) {
@@ -957,7 +963,7 @@
       }
 
       submitLabel.textContent = 'Nosūta informāciju...';
-      await postApi('submit-order', submission);
+      return postApi('submit-order', submission);
     };
 
     form.addEventListener('submit', async (e) => {
@@ -981,9 +987,9 @@
       formError.hidden = true;
       formError.textContent = '';
       try {
-        await submitForm(selectedType);
+        const result = await submitForm(selectedType);
         const successMessage = selectedType === 'order'
-          ? 'Pasūtījums ir nosūtīts. Faili saglabāti Cloudflare R2, bet informācija — Firebase.'
+          ? `Pasūtījums ir nosūtīts. Numurs: ${result.orderNumber}. Faili saglabāti Cloudflare R2, bet informācija — Firebase.`
           : 'Ziņa ir nosūtīta un saglabāta Firebase.';
         form.reset();
         form.classList.add('is-sent');

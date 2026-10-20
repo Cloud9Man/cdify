@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "cors": "^2.8.6",
     "firebase": "^13.0.0"
   },
   "allowScripts": {

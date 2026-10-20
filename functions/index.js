@@ -9,15 +9,31 @@ const {
 } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
+// CORS konfigurācija, iekļaujot atļautās izcelsmes un exposedHeaders
+const cors = require("cors")({
+  origin: [
+    "https://cdify-smu.web.app",
+    "https://cdify-smu.firebaseapp.com",
+    "https://home.jalatvia.lv",
+    "http://localhost:5000",
+    "http://127.0.0.1:5000",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+  ],
+  exposedHeaders: ["ETag"],
+});
+
 admin.initializeApp();
 const db = admin.firestore();
 
-const R2_ACCOUNT_ID = defineString("R2_ACCOUNT_ID");
+const R2_ACCOUNT_ID = defineSecret("R2_ACCOUNT_ID");
 const R2_BUCKET_NAME = defineString("R2_BUCKET_NAME", { default: "r2cdify" });
 const R2_PUBLIC_DOMAIN = defineString("R2_PUBLIC_DOMAIN", { default: "" });
 const R2_ACCESS_KEY_ID = defineSecret("R2_ACCESS_KEY_ID");
 const R2_SECRET_ACCESS_KEY = defineSecret("R2_SECRET_ACCESS_KEY");
 const MAX_FILE_SIZE = 700 * 1024 * 1024;
+const ORDER_NUMBER_PATTERN = /^100-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const FILE_KEY_PATTERN = /^uploads\/100-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-[a-zA-Z0-9._-]{1,120}$/;
 
 const ORDER_PRODUCTS = {
   vinyl: { unitPrice: 1.5, options: { optionVinylBurn: 0.25 } },
@@ -81,7 +97,7 @@ function validateContact(body) {
   return true;
 }
 
-function validateFiles(files) {
+function validateFiles(files, orderNumber) {
   if (!Array.isArray(files)) return false;
   const keys = new Set();
 
@@ -89,7 +105,8 @@ function validateFiles(files) {
     if (
       !file ||
       typeof file.key !== "string" ||
-      !/^uploads\/[a-f0-9-]{36}-[a-zA-Z0-9._-]{1,120}$/.test(file.key) ||
+      !FILE_KEY_PATTERN.test(file.key) ||
+      !file.key.startsWith(`uploads/${orderNumber}-`) ||
       keys.has(file.key) ||
       typeof file.name !== "string" ||
       file.name.length < 1 ||
@@ -141,7 +158,12 @@ function normalizeSubmission(body) {
   }
 
   const requestType = body.requestType;
-  if (!["order", "question", "suggestion"].includes(requestType) || !validateFiles(body.files)) {
+  const orderNumber = requestType === "order" ? body.orderNumber : null;
+  if (
+    !["order", "question", "suggestion"].includes(requestType) ||
+    (requestType === "order" && !ORDER_NUMBER_PATTERN.test(orderNumber || "")) ||
+    !validateFiles(body.files, orderNumber)
+  ) {
     return null;
   }
 
@@ -203,6 +225,7 @@ function normalizeSubmission(body) {
     }
 
     if (!filesMatchOrder(items, submission.files)) return null;
+    submission.orderNumber = orderNumber;
     submission.items = items;
     submission.details = body.details.trim();
     submission.estimatedTotalCents = estimatedTotalCents;
@@ -239,87 +262,122 @@ function parseRequestBody(body) {
 
 exports.api = onRequest({
   region: "europe-west1",
-  cors: [
-    "https://cdify-smu.web.app",
-    "https://cdify-smu.firebaseapp.com",
-    "https://home.jalatvia.lv",
-    "http://localhost:5000",
-    "http://127.0.0.1:5000",
-    "http://localhost:5500",
-    "http://127.0.0.1:5500",
-  ],
-  secrets: [R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY],
+  secrets: [R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY],
 }, async (req, res) => {
-  try {
-    const path = req.path.replace(/^\/api(?=\/)/, "");
-    const body = parseRequestBody(req.body);
-    const bucketName = R2_BUCKET_NAME.value();
+  return cors(req, res, async () => {
+    try {
+      const path = req.path.replace(/^\/api(?=\/)/, "");
+      const body = parseRequestBody(req.body);
+      const bucketName = R2_BUCKET_NAME.value();
 
-    if (req.method === "POST" && path === "/get-upload-url") {
-      const { fileName, fileType, fileSize, field } = body || {};
-      if (
-        typeof fileName !== "string" ||
-        fileName.trim().length < 1 ||
-        fileName.length > 255 ||
-        typeof fileType !== "string" ||
-        fileType.length > 128 ||
-        !/^[\w.+-]+\/[\w.+-]+$/.test(fileType) ||
-        !Number.isSafeInteger(fileSize) ||
-        fileSize < 1 ||
-        fileSize > MAX_FILE_SIZE ||
-        !ALLOWED_FILE_FIELDS.has(field)
-      ) {
-        return res.status(400).json({ error: "Faila informācija nav derīga." });
+      if (req.method === "POST" && path === "/start-order") {
+        return res.json({ orderNumber: `100-${randomUUID()}` });
       }
 
-      const safeFileName = fileName.trim().replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 120) || "file";
-      const fileKey = `uploads/${randomUUID()}-${safeFileName}`;
-      
-      const command = new PutObjectCommand({
-        Bucket: bucketName,
-        Key: fileKey,
-        ContentType: fileType, // Pievienots, lai sakristu ar klienta sūtīto Content-Type galveni
-      });
-      const uploadUrl = await getSignedUrl(createS3Client(), command, { expiresIn: 3600 });
-      const publicDomain = R2_PUBLIC_DOMAIN.value().trim().replace(/\/+$/, "");
+      if (req.method === "POST" && path === "/get-upload-url") {
+        const { orderNumber, fileName, fileType, fileSize, field } = body || {};
+        if (
+          !ORDER_NUMBER_PATTERN.test(orderNumber || "") ||
+          typeof fileName !== "string" ||
+          fileName.trim().length < 1 ||
+          fileName.length > 255 ||
+          typeof fileType !== "string" ||
+          fileType.length > 128 ||
+          !/^[\w.+-]+\/[\w.+-]+$/.test(fileType) ||
+          !Number.isSafeInteger(fileSize) ||
+          fileSize < 1 ||
+          fileSize > MAX_FILE_SIZE ||
+          !ALLOWED_FILE_FIELDS.has(field)
+        ) {
+          return res.status(400).json({ error: "Faila informācija nav derīga." });
+        }
 
-      return res.json({
-        uploadUrl,
-        fileKey,
-        publicUrl: publicDomain ? `${publicDomain}/${fileKey}` : null,
-      });
-    }
+        const safeFileName = fileName.trim().replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 120) || "file";
+        const fileKey = `uploads/${orderNumber}-${randomUUID()}-${safeFileName}`;
 
-    if (req.method === "POST" && path === "/submit-order") {
-      const submission = normalizeSubmission(body);
-      if (!submission) {
-        return res.status(400).json({ error: "Iesniegtie dati nav derīgi." });
+        const command = new PutObjectCommand({
+          Bucket: bucketName,
+          Key: fileKey,
+          ContentType: fileType,
+          Metadata: {
+            "order-number": orderNumber,
+            "file-field": field,
+          },
+        });
+        const uploadUrl = await getSignedUrl(createS3Client(), command, {
+          expiresIn: 3600,
+          unhoistableHeaders: new Set([
+            "x-amz-meta-order-number",
+            "x-amz-meta-file-field",
+          ]),
+        });
+        const publicDomain = R2_PUBLIC_DOMAIN.value().trim().replace(/\/+$/, "");
+
+        return res.json({
+          uploadUrl,
+          fileKey,
+          uploadHeaders: {
+            "x-amz-meta-order-number": orderNumber,
+            "x-amz-meta-file-field": field,
+          },
+          publicUrl: publicDomain ? `${publicDomain}/${fileKey}` : null,
+        });
       }
 
-      if (submission.files.length) {
-        const s3Client = createS3Client();
-        for (const file of submission.files) {
-          const uploaded = await s3Client.send(new HeadObjectCommand({
-            Bucket: bucketName,
-            Key: file.key,
-          }));
-          if (uploaded.ContentLength !== file.size) {
-            return res.status(400).json({ error: "Augšupielādētā faila dati nesakrīt." });
+      if (req.method === "POST" && path === "/submit-order") {
+        const submission = normalizeSubmission(body);
+        if (!submission) {
+          return res.status(400).json({ error: "Iesniegtie dati nav derīgi." });
+        }
+
+        const verifiedFiles = [];
+        const publicDomain = R2_PUBLIC_DOMAIN.value().trim().replace(/\/+$/, "");
+        if (submission.files.length) {
+          const s3Client = createS3Client();
+          for (const file of submission.files) {
+            const uploaded = await s3Client.send(new HeadObjectCommand({
+              Bucket: bucketName,
+              Key: file.key,
+            }));
+            if (
+              uploaded.ContentLength !== file.size ||
+              uploaded.Metadata?.["order-number"] !== submission.orderNumber ||
+              uploaded.Metadata?.["file-field"] !== file.field
+            ) {
+              return res.status(400).json({ error: "Augšupielādētā faila dati nesakrīt." });
+            }
+
+            verifiedFiles.push({
+              ...file,
+              contentType: uploaded.ContentType || file.contentType,
+              size: uploaded.ContentLength,
+              storage: {
+                provider: "cloudflare-r2",
+                bucket: bucketName,
+                etag: uploaded.ETag || null,
+                uploadedAt: uploaded.LastModified || null,
+                publicUrl: publicDomain ? `${publicDomain}/${file.key}` : null,
+              },
+            });
           }
         }
+
+        const docRef = submission.requestType === "order"
+          ? db.collection("orders").doc(submission.orderNumber)
+          : db.collection("orders").doc();
+        await docRef.create({
+          ...submission,
+          files: verifiedFiles,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        return res.json({ success: true, orderId: docRef.id, orderNumber: submission.orderNumber });
       }
 
-      const docRef = await db.collection("orders").add({
-        ...submission,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
-
-      return res.json({ success: true, orderId: docRef.id });
+      return res.status(404).send("Not Found");
+    } catch (error) {
+      console.error("API Kļūda:", error);
+      return res.status(500).json({ error: "Servera kļūda. Lūdzu, mēģiniet vēlreiz." });
     }
-
-    return res.status(404).send("Not Found");
-  } catch (error) {
-    console.error("API Kļūda:", error);
-    return res.status(500).json({ error: "Servera kļūda. Lūdzu, mēģiniet vēlreiz." });
-  }
+  });
 });
