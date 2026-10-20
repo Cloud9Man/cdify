@@ -890,7 +890,7 @@
     const postApi = async (path, body) => {
       const response = await fetch(`${apiBaseUrl}/${path}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
         body: JSON.stringify(body),
       });
       const result = await response.json();
@@ -931,7 +931,7 @@
       }
 
       if (selectedType === 'order') {
-        const startedOrder = await postApi('start-order', {});
+        const startedOrder = await postApi('start-order', { name: submission.name });
         submission.orderNumber = startedOrder.orderNumber;
       }
 

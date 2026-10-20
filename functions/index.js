@@ -32,8 +32,8 @@ const R2_PUBLIC_DOMAIN = defineString("R2_PUBLIC_DOMAIN", { default: "" });
 const R2_ACCESS_KEY_ID = defineSecret("R2_ACCESS_KEY_ID");
 const R2_SECRET_ACCESS_KEY = defineSecret("R2_SECRET_ACCESS_KEY");
 const MAX_FILE_SIZE = 700 * 1024 * 1024;
-const ORDER_NUMBER_PATTERN = /^100-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-const FILE_KEY_PATTERN = /^uploads\/100-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-[a-zA-Z0-9._-]{1,120}$/;
+const ORDER_NUMBER_PATTERN = /^\d+-[A-Za-z0-9-]{1,60}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const FILE_KEY_PATTERN = /^uploads\/\d+-[A-Za-z0-9-]{1,60}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-[a-zA-Z0-9._-]{1,120}$/;
 
 const ORDER_PRODUCTS = {
   vinyl: { unitPrice: 1.5, options: { optionVinylBurn: 0.25 } },
@@ -95,6 +95,14 @@ function validateContact(body) {
     return false;
   }
   return true;
+}
+
+function toOrderNameSlug(name) {
+  const words = name.normalize("NFD").replace(/\p{Diacritic}/gu, "").match(/[A-Za-z0-9]+/g) || [];
+  const slug = words.map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase()).join("-")
+    .slice(0, 60)
+    .replace(/-+$/, "");
+  return slug || "Klients";
 }
 
 function validateFiles(files, orderNumber) {
@@ -249,15 +257,23 @@ function normalizeSubmission(body) {
   return submission;
 }
 
-function parseRequestBody(body) {
-  if (typeof body === "string") {
-    try {
-      return JSON.parse(body);
-    } catch {
-      return null;
+function parseRequestBody(body, rawBody) {
+  // For text/plain, Firebase may expose an empty req.body while preserving the
+  // actual JSON payload in rawBody. Prefer rawBody so the empty object cannot mask it.
+  for (let candidate of [rawBody, body]) {
+    if (Buffer.isBuffer(candidate)) candidate = candidate.toString("utf8");
+    if (typeof candidate === "string") {
+      try {
+        candidate = JSON.parse(candidate);
+      } catch {
+        continue;
+      }
+    }
+    if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
+      return candidate;
     }
   }
-  return body;
+  return null;
 }
 
 exports.api = onRequest({
@@ -267,11 +283,42 @@ exports.api = onRequest({
   return cors(req, res, async () => {
     try {
       const path = req.path.replace(/^\/api(?=\/)/, "");
-      const body = parseRequestBody(req.body);
+      const body = parseRequestBody(req.body, req.rawBody);
       const bucketName = R2_BUCKET_NAME.value();
 
       if (req.method === "POST" && path === "/start-order") {
-        return res.json({ orderNumber: `100-${randomUUID()}` });
+        if (typeof body?.name !== "string" || body.name.trim().length < 2 || body.name.length > 120) {
+          return res.status(400).json({ error: "Lūdzu, norādiet derīgu vārdu un uzvārdu." });
+        }
+
+        const nameSlug = toOrderNameSlug(body.name.trim());
+        const sequenceRef = db.collection("_system").doc("order-sequence");
+        const orderNumber = await db.runTransaction(async (transaction) => {
+          const sequenceSnapshot = await transaction.get(sequenceRef);
+          const previousSequence = sequenceSnapshot.exists ? sequenceSnapshot.get("lastSequence") : 0;
+          if (!Number.isSafeInteger(previousSequence) || previousSequence < 0) {
+            throw new Error("Order sequence in Firestore is invalid.");
+          }
+
+          const nextSequence = previousSequence + 1;
+          if (!Number.isSafeInteger(nextSequence)) {
+            throw new Error("Order sequence has reached its maximum value.");
+          }
+
+          const nextOrderNumber = `${nextSequence}-${nameSlug}-${randomUUID()}`;
+          transaction.set(sequenceRef, {
+            lastSequence: nextSequence,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          transaction.create(db.collection("_orderReservations").doc(nextOrderNumber), {
+            orderNumber: nextOrderNumber,
+            nameSlug,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          return nextOrderNumber;
+        });
+
+        return res.json({ orderNumber });
       }
 
       if (req.method === "POST" && path === "/get-upload-url") {
@@ -365,11 +412,35 @@ exports.api = onRequest({
         const docRef = submission.requestType === "order"
           ? db.collection("orders").doc(submission.orderNumber)
           : db.collection("orders").doc();
-        await docRef.create({
+        const orderData = {
           ...submission,
           files: verifiedFiles,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
+        };
+
+        if (submission.requestType === "order") {
+          const reservationRef = db.collection("_orderReservations").doc(submission.orderNumber);
+          const reservationUsed = await db.runTransaction(async (transaction) => {
+            const reservationSnapshot = await transaction.get(reservationRef);
+            const existingOrderSnapshot = await transaction.get(docRef);
+            if (
+              !reservationSnapshot.exists ||
+              reservationSnapshot.get("nameSlug") !== toOrderNameSlug(submission.name) ||
+              existingOrderSnapshot.exists
+            ) {
+              return false;
+            }
+
+            transaction.create(docRef, orderData);
+            transaction.delete(reservationRef);
+            return true;
+          });
+          if (!reservationUsed) {
+            return res.status(400).json({ error: "Pasūtījuma numurs nav derīgs vai jau izmantots." });
+          }
+        } else {
+          await docRef.create(orderData);
+        }
 
         return res.json({ success: true, orderId: docRef.id, orderNumber: submission.orderNumber });
       }
