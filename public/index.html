@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>CDify</title>
-  <meta name="description" content="NOVA ir digitālā studija, kas veido ātras, skaistas un 3D mājaslapas, lietotnes un digitālus produktus." />
-  <meta name="color-scheme" content="dark light" />
+  <meta property="og:image" content="./Images/header.png" />
+  <link rel="icon" href="./Images/TLogo.png">
+  <meta name="description" content="CDify ir SMU, kura mērķis ir nodrošināt esošo un nevajadzīgo priekšmetu utilizēšana, saskaņā ar mūsdienu cilvēku vajadzībām." />
+  <meta name="color-scheme" content="dark light"/>
   <meta name="theme-color" content="#06070d" />
   
-  <!-- Krāsu tēma: jānosaka pirms pirmās atveidošanas, lai nebūtu nepareizas tēmas "uzplaiksnījuma".
-       Saglabātā izvēle (localStorage 'theme': light | dark); ja tās nav — seko ierīces iestatījumam. -->
   <script>
     (function () {
       var root = document.documentElement, pref = 'system', theme = 'dark';
@@ -21,8 +21,6 @@
       if (meta) meta.setAttribute('content', theme === 'light' ? '#f9f5f4' : '#06070d');
     })();
   </script>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2322d3ee'/%3E%3Cstop offset='1' stop-color='%237c5cff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='url(%23g)'/%3E%3Crect x='9' y='9' width='14' height='14' rx='3' fill='%2306070d'/%3E%3C/svg%3E" />
-
   <link rel="stylesheet" href="styles.css" />
   <noscript><style>.reveal{opacity:1;translate:none;filter:none}</style></noscript>
 </head>
@@ -60,8 +58,8 @@
   <!-- ===================== AUGŠĒJĀ JOSLA ===================== -->
   <header class="nav-wrap" id="navbar">
     <nav class="nav" aria-label="Galvenā navigācija">
-      <a href="#hero" class="logo" aria-label="NOVA — uz sākumu">
-        <span class="logo-mark"></span>
+      <a href="#hero" class="logo" aria-label="CDify — uz sākumu">
+        <span class="logo-mark"><img src="./Images/favicon.ico" alt="CDify logo"></span>
         <span class="logo-text">CDify<span></span></span>
       </a>
 
@@ -216,7 +214,7 @@
             <div class="card-body">
               <div class="icon-box"><svg class="icon"><use href="#i-box"/></svg></div>
               <h3>Nenolasāmās puses apstrāde</h3>
-              <p>Ar LightScribe tehnoloģiju uz diska daļas, kas nesatur datus, iededzināt zīmējumus, kas neietekmē diska darbīu. (Disks paliek lietojams)</p>
+              <p>Ar LightScribe tehnoloģiju uz diska daļas, kas nesatur datus, iededzināt zīmējumus, kas neietekmē diska darbību. (Disks paliek lietojams)</p>
             </div>
           </article>
 
@@ -251,9 +249,9 @@
           <article class="proj glass tilt spot reveal" data-cat="disc" data-cursor="Skatīt" data-tilt="6">
             <div class="proj-visual v1"><div class="mock"><i></i><i></i><i></i></div></div>
             <div class="proj-body">
-              <div class="tags"><span>Web</span><span>Fintech</span></div>
-              <h3>Aurora Finance</h3>
-              <p>Reāllaika finanšu panelis ar interaktīviem grafikiem un tumšo režīmu.</p>
+              <div class="tags"><span>Diski</span><span>Mūzika</span></div>
+              <h3>Disks 1</h3>
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
               <a class="proj-link" href="#">Skatīt projektu <svg class="icon"><use href="#i-arrow"/></svg></a>
             </div>
           </article>
@@ -261,9 +259,9 @@
           <article class="proj glass tilt spot reveal" data-cat="case" data-cursor="Skatīt" data-tilt="6">
             <div class="proj-visual v2"><div class="mock"><i></i><i></i><i></i></div></div>
             <div class="proj-body">
-              <div class="tags"><span>3D</span><span>WebGL</span></div>
-              <h3>Orbit Configurator</h3>
-              <p>Interaktīvs 3D produktu konfigurators, kas pārdod vairāk nekā jebkurš katalogs.</p>
+              <div class="tags"><span>Futlāri</span><span>Apdare</span></div>
+              <h3>Futlāris 1</h3>
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
               <a class="proj-link" href="#">Skatīt projektu <svg class="icon"><use href="#i-arrow"/></svg></a>
             </div>
           </article>
@@ -271,9 +269,9 @@
           <article class="proj glass tilt spot reveal" data-cat="disc" data-cursor="Skatīt" data-tilt="6">
             <div class="proj-visual v3"><div class="mock mock--phone"><i></i><i></i><i></i></div></div>
             <div class="proj-body">
-              <div class="tags"><span>Mobilā</span><span>Veselība</span></div>
-              <h3>PulseFit</h3>
-              <p>Treniņu un ieradumu lietotne ar personalizētiem plāniem un gamifikāciju.</p>
+              <div class="tags"><span>Diski</span><span>Bildes</span></div>
+              <h3>Disks 2</h3>
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
               <a class="proj-link" href="#">Skatīt projektu <svg class="icon"><use href="#i-arrow"/></svg></a>
             </div>
           </article>
@@ -281,9 +279,9 @@
           <article class="proj glass tilt spot reveal" data-cat="disc" data-cursor="Skatīt" data-tilt="6">
             <div class="proj-visual v4"><div class="mock"><i></i><i></i><i></i></div></div>
             <div class="proj-body">
-              <div class="tags"><span>Web</span><span>CMS</span></div>
-              <h3>Nimbus CMS</h3>
-              <p>Headless satura pārvaldības sistēma komandām, kas vērtē ātrumu un elastību.</p>
+              <div class="tags"><span>Diski</span><span>Dokumenti</span></div>
+              <h3>Disks 3</h3>
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
               <a class="proj-link" href="#">Skatīt projektu <svg class="icon"><use href="#i-arrow"/></svg></a>
             </div>
           </article>
@@ -291,19 +289,19 @@
           <article class="proj glass tilt spot reveal" data-cat="disc" data-cursor="Skatīt" data-tilt="6">
             <div class="proj-visual v5"><div class="mock"><i></i><i></i><i></i></div></div>
             <div class="proj-body">
-              <div class="tags"><span>3D</span><span>Portfolio</span></div>
-              <h3>Vertex Studio</h3>
-              <p>Arhitektūras biroja portfolio ar iegremdējošu 3D telpu pārlūkošanu.</p>
+              <div class="tags"><span>Diski</span><span>Dāvana</span></div>
+              <h3>Disks 4</h3>
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
               <a class="proj-link" href="#">Skatīt projektu <svg class="icon"><use href="#i-arrow"/></svg></a>
             </div>
           </article>
 
-          <article class="proj glass tilt spot reveal" data-cat="disc" data-cursor="Skatīt" data-tilt="6">
+          <article class="proj glass tilt spot reveal" data-cat="case" data-cursor="Skatīt" data-tilt="6">
             <div class="proj-visual v6"><div class="mock mock--phone"><i></i><i></i><i></i></div></div>
             <div class="proj-body">
-              <div class="tags"><span>Mobilā</span><span>Loģistika</span></div>
-              <h3>Kite Delivery</h3>
-              <p>Piegādes izsekošanas lietotne ar dzīvo karti un gudriem paziņojumiem.</p>
+              <div class="tags"><span>Futlāri</span><span>Dizains</span></div>
+              <h3>Futlāris 2</h3>
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. </p>
               <a class="proj-link" href="#">Skatīt projektu <svg class="icon"><use href="#i-arrow"/></svg></a>
             </div>
           </article>
@@ -318,7 +316,7 @@
           <span class="eyebrow reveal">Par mums</span>
           <h2 class="section-title reveal" style="--d:.08s">Jaunieši satiekas ar <span class="gradient-text">pagātni</span></h2>
           <p class="section-lead reveal" style="--d:.16s">
-            Mēs esam neliela komanda, kuras pamatā ir interese par dizaina un tehnoloģiju apvienošana. Kaut arī šo spēj veikt jebkurš, ne visiem ir iespēja to izdarīt, tādēļ palīgā nākam mēs!
+            Mēs esam neliela komanda, kuras pamatā ir interese par dizaina un tehnoloģiju apvienošanu.
           </p>
 
           <ul class="checklist reveal" style="--d:.22s">
@@ -363,7 +361,7 @@
             <div class="step-dot">02</div>
             <div class="step-body glass spot">
               <h3>Dizains</h3>
-              <p>Nonākam pie kopīga dizaina risinājuma un vēlamā izskata.</p>
+              <p>Nonākam pie kopīga dizaina risinājuma.</p>
             </div>
           </div>
 
@@ -379,7 +377,7 @@
             <div class="step-dot">04</div>
             <div class="step-body glass spot">
               <h3>Testēšana</h3>
-              <p>Ievietojam disku lasītājā un pāŗbaudām vai ir vēlams iznākums.</p>
+              <p>Ievietojam disku lasītājā un pārbaudām vai ir vēlams iznākums.</p>
             </div>
           </div>
         </div>
@@ -593,7 +591,7 @@
           </button>
 
           <p class="field-error form-error" role="alert" hidden></p>
-          <p class="order-intro">Iesniedzot formu, mēs saņemsim jūsu datus un tie tiks saglabāti datubāzē. Pēc pasūtījuma īstenošanas, tie tiks izdzēsti.</p>
+          <p class="order-intro">Iesniedzot formu, mēs saņemsim jūsu datus un tie tiks saglabāti datubāzē. Pēc pasūtījuma īstenošanas, tie tiks dzēsti.</p>
           <div class="form-success" role="status">
             <svg class="check-draw" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M15 27l8 8 14-16"/></svg>
             <h3>Noformēšana pabeigta</h3>
@@ -607,10 +605,10 @@
   <!-- ===================== FOOTER ===================== -->
   <footer class="footer">
       <div class="container footer-inner">
-        <a href="https://home.jalatvia.lv/" target="_blank" class="logo" aria-label="NOVA — uz sākumu">
+        <a href="https://home.jalatvia.lv/" target="_blank" class="logo" aria-label="CDify — uz sākumu">
           <span class="logo"><img src="./Images/jaLVW.png" alt=""></span>
         </a>
-        <p>© <span id="year">2026</span> SMU "CDify".</p>
+        <p><span id="year">2026</span> SMU "CDify".</p>
         <a href="#hero" class="to-top magnetic" aria-label="Uz augšu"><svg class="icon"><use href="#i-arrow"/></svg></a>
       </div>
     </footer>
