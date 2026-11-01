@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="lv" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>CD vāku redaktors — CDify</title>
+  <meta name="description" content="Izveido CD jewel case vāku un Epson XP-7100 diska dizainu. Projekti tiek saglabāti tikai tavā ierīcē." />
+  <meta name="theme-color" content="#06070d" />
+  <link rel="icon" href="./Images/TLogo.png" />
+  <script>
+    (() => { let p = 'system'; try { const v = localStorage.getItem('theme'); if (v === 'light' || v === 'dark') p = v; } catch {} const t = p === 'system' ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : p; document.documentElement.dataset.theme = t; document.documentElement.dataset.themePref = p; })();
+  </script>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="editor.css" />
+</head>
+<body class="editor-page">
+  <div class="bg-layer" aria-hidden="true"></div><div class="noise" aria-hidden="true"></div>
+  <header class="nav-wrap" id="navbar">
+    <nav class="nav" aria-label="Galvenā navigācija">
+      <a href="index.html#hero" class="logo" aria-label="CDify — uz sākumu"><span class="logo-mark"><img src="./Images/favicon.ico" alt=""></span><span class="logo-text">CDify<span></span></span></a>
+      <div class="nav-menu editor-nav-menu"><div class="nav-links"><ul class="nav-list"><li><a href="index.html#hero" class="nav-link">Sākums</a></li><li><a href="index.html#services" class="nav-link">Pakalpojumi</a></li><li><a href="editor.html" class="nav-link active" aria-current="page">Vāku redaktors</a></li></ul></div><a href="index.html#contact" class="btn btn-primary nav-cta"><span class="btn-label">Sazināties</span></a></div>
+      <div class="nav-tools"><button class="theme-toggle" id="themeToggle" type="button" aria-label="Mainīt krāsu tēmu" title="Mainīt krāsu tēmu"><span aria-hidden="true">◐</span></button><button class="burger" id="editorBurger" type="button" aria-label="Atvērt izvēlni" aria-expanded="false"><span></span><span></span></button></div>
+    </nav>
+  </header>
+
+  <main class="editor-main container">
+    <section class="editor-intro">
+      <span class="eyebrow">CDify · lokālais rīks</span>
+      <h1 class="section-title">CD vāku <span class="gradient-text">redaktors</span></h1>
+      <p class="section-lead">Pielāgo attēlu standarta 10,4 mm CD jewel case ieliktnim vai Epson Expression Premium XP-7100 disku apdrukai.</p>
+    </section>
+
+    <section class="editor-layout" aria-label="Attēla redaktors">
+      <aside class="editor-controls glass">
+        <label class="control-label" for="template">Sagatave</label>
+        <select id="template">
+          <option value="front">Priekšējais vāks · viena lapa · 120 × 120 mm</option>
+          <option value="frontBooklet">Priekšējais vāks · salocīta lapa (2 puses) · 242 × 120 mm</option>
+          <option value="tray">Aizmugures ieliktnis · vienpusējs · 151 × 118 mm</option>
+          <option value="backBooklet">Aizmugure · bukleta izklājums (2 lpp.) · 240 × 120 mm</option>
+          <option value="disc">Diska etiķete · Epson XP-7100 · 120 mm</option>
+        </select>
+
+        <div class="control-group">
+          <div class="control-heading"><label class="control-label" for="imageFile">Attēli</label><span class="local-tag">Tikai ierīcē</span></div>
+          <input id="imageFile" type="file" accept="image/*" multiple />
+          <input id="backgroundFile" type="file" accept="image/*" hidden />
+          <button type="button" class="small-action" id="replaceBackground">Nomainīt fona attēlu</button>
+          <p class="control-hint">Izvēloties vairākus, pirmais attēls kļūst par fonu, pārējie - par atsevišķiem slāņiem. Velc objektu, lai pārvietotu; velc tā stūri, lai mainītu izmēru.</p>
+        </div>
+
+        <div class="control-group base-image-tools">
+          <span class="control-label">Fona attēla pielāgošana</span>
+          <label class="object-field">Mērogs <output id="zoomOut">100%</output><input id="zoom" type="range" min="50" max="300" value="100" /></label>
+          <label class="object-field">Pagrieziens <output id="rotationOut">0°</output><input id="rotation" type="range" min="-180" max="180" value="0" /></label>
+          <label class="object-field">Gaišums <output id="brightnessOut">100%</output><input id="brightness" type="range" min="30" max="180" value="100" /></label>
+          <label class="object-field">Kontrasts <output id="contrastOut">100%</output><input id="contrast" type="range" min="30" max="180" value="100" /></label>
+          <label class="object-field">Piesātinājums <output id="saturationOut">100%</output><input id="saturation" type="range" min="0" max="200" value="100" /></label>
+        </div>
+
+        <div class="control-group">
+          <span class="control-label">Pievienot objektu</span>
+          <div class="add-object-actions">
+            <button type="button" class="btn btn-ghost" id="addText">＋ Tekstlodziņš</button>
+            <button type="button" class="btn btn-ghost" id="addRect">＋ Taisnstūris</button>
+            <button type="button" class="btn btn-ghost" id="addCircle">＋ Aplis</button>
+            <button type="button" class="btn btn-ghost" id="addLine">＋ Līnija</button>
+          </div>
+        </div>
+
+        <div class="control-group guide-toggles">
+          <span class="control-label">Palīglīnijas</span>
+          <label><input id="toggleGuides" type="checkbox" checked /> Sagataves locījuma / griezuma līnijas</label>
+          <label><input id="toggleGrid" type="checkbox" /> Režģis (5 mm)</label>
+          <p class="control-hint">Palīglīnijas redzamas tikai priekšskatījumā, tās netiek saglabātas PNG vai drukā.</p>
+        </div>
+
+        <div class="control-group layer-list-group">
+          <div class="control-heading"><span class="control-label">Slāņi</span><span id="layerCount" class="local-tag">0 objekti</span></div>
+          <div id="layerList" class="layer-list"><p class="control-hint">Pievieno attēlu, tekstu vai formu.</p></div>
+        </div>
+
+        <div class="control-group selected-object" id="selectedObject" hidden>
+          <div class="control-heading"><span class="control-label">Atlasītais objekts</span><button type="button" id="deleteObject" class="small-action">Dzēst</button></div>
+          <p id="selectedType" class="control-hint"></p>
+          <label class="object-field" id="textField" hidden>Teksts<textarea id="objectText" rows="3" maxlength="500"></textarea></label>
+          <label class="object-field" id="colorField" hidden>Krāsa<input id="objectColor" type="color" value="#ee6253" /></label>
+          <label class="object-field">Platums <output id="objectWidthOut">40%</output><input id="objectWidth" type="range" min="5" max="200" value="40" /></label>
+          <label class="object-field">Augstums <output id="objectHeightOut">20%</output><input id="objectHeight" type="range" min="1" max="200" value="20" /></label>
+          <label class="object-field">Pagrieziens <output id="objectRotationOut">0°</output><input id="objectRotation" type="range" min="-180" max="180" value="0" /></label>
+          <label class="object-field">Necaurspīdīgums <output id="objectOpacityOut">100%</output><input id="objectOpacity" type="range" min="10" max="100" value="100" /></label>
+          <label class="object-field" id="fontSizeField" hidden>Teksta lielums <output id="fontSizeOut">6%</output><input id="fontSize" type="range" min="2" max="20" value="6" /></label>
+          <div class="layer-order"><button type="button" id="layerDown" class="small-action">Uz leju</button><button type="button" id="layerUp" class="small-action">Uz augšu</button></div>
+        </div>
+
+        <div class="control-group print-queue">
+          <div class="control-heading"><span class="control-label">Drukas rinda</span><span id="queueCount" class="local-tag">0 attēli</span></div>
+          <input id="queueFiles" type="file" accept="image/*" multiple />
+          <button type="button" id="queueCurrent" class="small-action">Pievienot pašreizējo dizainu</button>
+          <div id="queueList" class="queue-list"><p class="control-hint">Pievieno attēlus vai pašreizējo dizainu drukas rindai.</p></div>
+          <canvas id="queuePreview" width="594" height="420" aria-label="Drukas rindas pirmās A4 lapas izvietojuma priekšskatījums" hidden></canvas>
+          <div id="queueAnalysis" class="queue-analysis" role="status">Lapas: A4 ainava · 5 mm malas · 3 mm atstarpe.</div>
+          <button type="button" class="btn btn-primary queue-print" id="printQueue"><span class="btn-label">Drukāt visu rindu</span></button>
+          <p class="control-hint">Atsevišķi attēli aizpilda izvēlēto izmēru un var tikt apgriezti; saliktam dizainam pievieno priekšskatījumu. Attēli tiek pagriezti un sakārtoti, lai uz lapas ietilptu pēc iespējas vairāk.</p>
+        </div>
+
+        <div class="editor-actions"><button class="btn btn-primary" id="download" type="button"><span class="btn-label">Lejupielādēt PNG</span></button><button class="btn btn-ghost" id="print" type="button">Drukāt uz A4</button><button class="btn btn-ghost" id="reset" type="button">Notīrīt dizainu</button></div>
+        <p class="control-hint">Drukājot izvēlies A4 papīru un 100% mērogu. Lapa ietver 100 mm pārbaudes līniju un +0,5 mm izmēra kompensāciju.</p>
+        <p class="save-status" id="saveStatus" role="status">Projekts tiek saglabāts šajā ierīcē.</p>
+      </aside>
+
+      <div class="preview-column">
+        <div class="preview-top"><div><span class="eyebrow">Priekšskatījums</span><p id="dimensions">120 × 120 mm · 300 dpi</p></div><span id="guideLegend" class="guide-legend">Gaišās līnijas ir locījuma / griešanas norādes</span></div>
+        <div class="preview-shell glass" id="previewShell" tabindex="0" aria-label="Attēla priekšskatījums. Velc, lai pārvietotu attēlu.">
+          <canvas id="artwork" aria-label="Rediģētā attēla priekšskatījums"></canvas>
+          <canvas id="guides" aria-hidden="true"></canvas>
+          <div class="empty-hint" id="emptyHint"><strong>Pievieno attēlu vai objektu</strong><span>PNG, JPG, WebP, teksts vai forma</span></div>
+          <div class="disc-hint" id="discHint" hidden>Svītrotais centrs netiek drukāts · 18 mm</div>
+        </div>
+        <div class="editor-note" id="templateNote"></div>
+        <details class="size-sources"><summary>Izmēri un avoti</summary><p>Priekšējā ieliktņa lapa: 120 × 120 mm; salocīts divu pušu vāks: 242 × 120 mm. Aizmugures tray card: 151 × 118 mm, ieskaitot 6,5 mm muguriņas. XP-7100 diskam iestatāmais ārējais diametrs ir 114–120 mm, iekšējais 18–46 mm; šeit izmantoti 120 mm un 18 mm kā sagataves diametri. Jewel case ieliktņu izmēri dažādiem ražotājiem var nedaudz atšķirties, tāpēc pirms gala izdrukas ieteicams izmēģināt uz parasta papīra.</p><p><a href="https://download.epson-europe.com/pub/download/6308/epson630813eu.pdf" target="_blank" rel="noreferrer">Epson XP-7100 lietotāja rokasgrāmata</a> · <a href="https://www.kyoceradocumentsolutions.us/content/download-center-americas/us/documents/user-guides/ECOSYS_P3045dn_P3050DN_P3055DN_P3060dnENOGR42017_6_pdf.download.pdf" target="_blank" rel="noreferrer">Kyocera ECOSYS P3055dn darbības rokasgrāmata</a> · <a href="https://en.wikipedia.org/wiki/Optical_disc_packaging" target="_blank" rel="noreferrer">CD bukletu un vāku izmēru pārskats</a> · <a href="https://takuya.fr/en/album-cover-design/cd-booklet-packaging-design.html" target="_blank" rel="noreferrer">Tray card un muguriņu izmēri</a> · <a href="https://www.shop4link.com/displayproductdetail.php?i=3&mcID=3&pcID=8&scID=10" target="_blank" rel="noreferrer">10,4 mm jewel case specifikācija</a></p></details>
+      </div>
+    </section>
+  </main>
+  <footer class="footer"><div class="container footer-inner"><a href="index.html" class="logo"><span class="logo-text">CDify<span></span></span></a><p><span>2026</span> SMU “CDify” · Redaktora projekti tiek glabāti lokāli.</p><a href="index.html#hero" class="to-top" aria-label="Uz sākumu">↑</a></div></footer>
+  <script src="editor.js" defer></script>
+</body>
+</html>
