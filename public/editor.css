@@ -73,3 +73,38 @@
 @media (max-width: 900px) { .editor-layout { grid-template-columns: 1fr; } .editor-controls { order: 2; } .preview-column { order: 1; } .preview-shell { min-height: 42vh; } #artwork,#guides { max-height: 55vh; } }
 @media (max-width: 900px) { .editor-nav-menu { display: flex; position: static; opacity: 1; visibility: visible; background: transparent; border: 0; box-shadow: none; padding: 0; transform: none; } .editor-nav-menu .nav-links,.editor-nav-menu .nav-cta { display: none; } .editor-page.menu-open .editor-nav-menu .nav-links { display: block; position: fixed; top: 86px; left: var(--gutter); right: var(--gutter); padding: 10px; border: 1px solid var(--border); border-radius: 18px; background: var(--menu-bg); box-shadow: var(--nav-shadow); } .editor-page.menu-open .editor-nav-menu .nav-list { flex-direction: column; } .editor-nav-menu .nav-link { padding: 12px; opacity: 1; translate: none; } .editor-page .burger { display: flex; } .editor-main { padding-top: 110px; } .preview-top { align-items: start; flex-direction: column; } .guide-legend { text-align: left; } .preview-shell { padding: 16px; min-height: 34vh; } }
 @media print { body * { visibility: hidden !important; } #artwork, #artwork * { visibility: visible !important; } }
+
+/* Priekšskatījuma ātrās darbības */
+.preview-tools { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin: -2px 0 10px; }
+.preview-tools .small-action { min-height: 40px; padding: 8px 12px; transition: border-color .2s, background .2s, transform .2s; }
+.preview-tools .small-action:hover:not(:disabled) { background: rgba(var(--ink-rgb), .08); transform: translateY(-1px); }
+.preview-tools .small-action:disabled { cursor: not-allowed; opacity: .45; }
+.preview-tools .small-action:focus-visible, .editor-controls button:focus-visible, .editor-controls select:focus-visible, .editor-controls input:focus-visible, .editor-controls textarea:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.editor-shortcuts { margin: 8px 2px 0; color: var(--muted); font-size: .72rem; text-align: right; }
+.editor-shortcuts kbd { padding: 2px 5px; border: 1px solid var(--border); border-radius: 5px; background: var(--glass); color: var(--text); font: inherit; }
+
+@media (max-width: 900px) {
+  .preview-tools { position: sticky; bottom: max(8px, env(safe-area-inset-bottom)); z-index: 5; justify-content: center; width: fit-content; max-width: 100%; margin: 0 auto -54px; padding: 6px; border: 1px solid var(--border); border-radius: 14px; background: var(--menu-bg); box-shadow: var(--nav-shadow); }
+  .preview-tools .small-action { min-height: 44px; padding: 9px 12px; }
+  .preview-shell { min-height: 40vh; padding: 12px; }
+  #artwork, #guides { max-height: 48vh; }
+  .editor-controls { padding: 18px; }
+  .editor-controls select, .editor-controls input[type="text"], .editor-controls input[type="file"], .object-field textarea { min-height: 44px; }
+  .editor-controls input[type="range"] { min-height: 34px; }
+  .guide-toggles > label { min-height: 40px; }
+  .guide-toggles input { width: 20px; height: 20px; }
+  .layer-item, .small-action, .queue-item-remove { min-height: 40px; }
+  .editor-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .editor-actions .btn { min-height: 48px; padding: .6rem .45rem; font-size: .78rem; }
+  .editor-shortcuts { display: none; }
+}
+
+@media (max-width: 480px) {
+  .preview-top { gap: 8px; }
+  .preview-tools { width: 100%; }
+  .preview-tools .small-action { flex: 1 1 auto; padding-inline: 8px; font-size: .72rem; }
+  .editor-controls { padding: 15px; }
+  .queue-item-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .editor-actions { grid-template-columns: 1fr; }
+  .editor-actions .btn { width: 100%; font-size: .9rem; }
+}

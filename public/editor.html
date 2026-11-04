@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="lv" data-theme="dark">
+<html lang="lv" data-theme="dark" data-theme-pref="system">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -19,7 +19,11 @@
     <nav class="nav" aria-label="Galvenā navigācija">
       <a href="index.html#hero" class="logo" aria-label="CDify — uz sākumu"><span class="logo-mark"><img src="./Images/favicon.ico" alt=""></span><span class="logo-text">CDify<span></span></span></a>
       <div class="nav-menu editor-nav-menu"><div class="nav-links"><ul class="nav-list"><li><a href="index.html#hero" class="nav-link">Sākums</a></li><li><a href="index.html#services" class="nav-link">Pakalpojumi</a></li><li><a href="editor.html" class="nav-link active" aria-current="page">Vāku redaktors</a></li></ul></div><a href="index.html#contact" class="btn btn-primary nav-cta"><span class="btn-label">Sazināties</span></a></div>
-      <div class="nav-tools"><button class="theme-toggle" id="themeToggle" type="button" aria-label="Mainīt krāsu tēmu" title="Mainīt krāsu tēmu"><span aria-hidden="true">◐</span></button><button class="burger" id="editorBurger" type="button" aria-label="Atvērt izvēlni" aria-expanded="false"><span></span><span></span></button></div>
+      <div class="nav-tools"><button class="theme-toggle" id="themeToggle" type="button" aria-label="Krāsu tēma: pēc ierīces iestatījuma" title="Krāsu tēma: pēc ierīces iestatījuma">
+        <svg class="icon i-system" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        <svg class="icon i-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon i-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+      </button><button class="burger" id="editorBurger" type="button" aria-label="Atvērt izvēlni" aria-expanded="false"><span></span><span></span></button></div>
     </nav>
   </header>
 
@@ -111,6 +115,12 @@
 
       <div class="preview-column">
         <div class="preview-top"><div><span class="eyebrow">Priekšskatījums</span><p id="dimensions">120 × 120 mm · 300 dpi</p></div><span id="guideLegend" class="guide-legend">Gaišās līnijas ir locījuma / griešanas norādes</span></div>
+        <div class="preview-tools" role="toolbar" aria-label="Ātrās rediģēšanas darbības">
+          <button type="button" class="small-action" id="quickAddImage">＋ Attēls</button>
+          <button type="button" class="small-action" id="quickAddText">＋ Teksts</button>
+          <button type="button" class="small-action" id="duplicateObject" disabled>Dublēt</button>
+          <button type="button" class="small-action" id="quickDeleteObject" disabled>Dzēst atlasi</button>
+        </div>
         <div class="preview-shell glass" id="previewShell" tabindex="0" aria-label="Attēla priekšskatījums. Velc, lai pārvietotu attēlu.">
           <canvas id="artwork" aria-label="Rediģētā attēla priekšskatījums"></canvas>
           <canvas id="guides" aria-hidden="true"></canvas>
@@ -118,11 +128,20 @@
           <div class="disc-hint" id="discHint" hidden>Svītrotais centrs netiek drukāts · 18 mm</div>
         </div>
         <div class="editor-note" id="templateNote"></div>
+        <p class="editor-shortcuts">Īsceļi: <kbd>Ctrl</kbd>+<kbd>D</kbd> dublē · bulttaustiņi pārvieto · <kbd>Delete</kbd> dzēš</p>
         <details class="size-sources"><summary>Izmēri un avoti</summary><p>Priekšējā ieliktņa lapa: 120 × 120 mm; salocīts divu pušu vāks: 242 × 120 mm. Aizmugures tray card: 151 × 118 mm, ieskaitot 6,5 mm muguriņas. XP-7100 diskam iestatāmais ārējais diametrs ir 114–120 mm, iekšējais 18–46 mm; šeit izmantoti 120 mm un 18 mm kā sagataves diametri. Jewel case ieliktņu izmēri dažādiem ražotājiem var nedaudz atšķirties, tāpēc pirms gala izdrukas ieteicams izmēģināt uz parasta papīra.</p><p><a href="https://download.epson-europe.com/pub/download/6308/epson630813eu.pdf" target="_blank" rel="noreferrer">Epson XP-7100 lietotāja rokasgrāmata</a> · <a href="https://www.kyoceradocumentsolutions.us/content/download-center-americas/us/documents/user-guides/ECOSYS_P3045dn_P3050DN_P3055DN_P3060dnENOGR42017_6_pdf.download.pdf" target="_blank" rel="noreferrer">Kyocera ECOSYS P3055dn darbības rokasgrāmata</a> · <a href="https://en.wikipedia.org/wiki/Optical_disc_packaging" target="_blank" rel="noreferrer">CD bukletu un vāku izmēru pārskats</a> · <a href="https://takuya.fr/en/album-cover-design/cd-booklet-packaging-design.html" target="_blank" rel="noreferrer">Tray card un muguriņu izmēri</a> · <a href="https://www.shop4link.com/displayproductdetail.php?i=3&mcID=3&pcID=8&scID=10" target="_blank" rel="noreferrer">10,4 mm jewel case specifikācija</a></p></details>
       </div>
     </section>
   </main>
-  <footer class="footer"><div class="container footer-inner"><a href="index.html" class="logo"><span class="logo-text">CDify<span></span></span></a><p><span>2026</span> SMU “CDify” · Redaktora projekti tiek glabāti lokāli.</p><a href="index.html#hero" class="to-top" aria-label="Uz sākumu">↑</a></div></footer>
+  <footer class="footer">
+      <div class="container footer-inner">
+        <a href="https://home.jalatvia.lv/" target="_blank" class="logo" aria-label="CDify — uz sākumu">
+          <span class="logo"><img src="./Images/jaLVW.png" alt=""></span>
+        </a>
+        <p><span id="year">2026</span> SMU "CDify".</p>
+        <a href="#" id="editorBackToTop" class="to-top" aria-label="Uz lapas augšu"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+      </div>
+    </footer>
   <script src="editor.js" defer></script>
 </body>
 </html>

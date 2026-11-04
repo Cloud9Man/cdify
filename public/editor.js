@@ -11,6 +11,7 @@
   const state = { template: 'front', imageBlob: null, zoom: 1, rotation: 0, brightness: 1, contrast: 1, saturation: 1, text: '', textColor: '#ffffff', tx: 0, ty: 0, layers: [], selectedId: null, guidelines: true, grid: false, printQueue: [] };
   let sourceImage = null;
   const layerImages = new Map();
+  const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
   let saveTimer;
   let drag = null;
   const DPI = 300;
@@ -87,6 +88,8 @@
     });
     const selected = state.layers.find((layer) => layer.id === state.selectedId);
     $('#selectedObject').hidden = !selected;
+    $('#duplicateObject').disabled = !selected;
+    $('#quickDeleteObject').disabled = !selected;
     if (!selected) return;
     $('#selectedType').textContent = layerName(selected, state.layers.indexOf(selected));
     $('#textField').hidden = selected.type !== 'text'; $('#colorField').hidden = !['text','rect','circle','line'].includes(selected.type);
@@ -249,7 +252,7 @@
       guides.setLineDash([w / 150, w / 220]); guides.shadowColor = '#00131a'; guides.shadowBlur = Math.max(10, w / 100);
       guides.strokeStyle = 'rgba(0,0,0,.95)'; guides.lineWidth = Math.max(12, w / 160); guides.strokeRect(-selected.w * w / 2, -selected.h * h / 2, selected.w * w, selected.h * h);
       guides.shadowBlur = 0; guides.strokeStyle = '#00e5ff'; guides.lineWidth = Math.max(6, w / 320); guides.strokeRect(-selected.w * w / 2, -selected.h * h / 2, selected.w * w, selected.h * h);
-      guides.setLineDash([]); const handle = Math.max(24, w / 60); const hx = selected.w * w / 2 - handle / 2, hy = selected.h * h / 2 - handle / 2;
+      guides.setLineDash([]); const handle = Math.max(24, (coarsePointer ? 44 : 28) * (w / Math.max(1, canvas.clientWidth))); const hx = selected.w * w / 2 - handle / 2, hy = selected.h * h / 2 - handle / 2;
       guides.fillStyle = '#00e5ff'; guides.fillRect(hx, hy, handle, handle); guides.strokeStyle = '#00131a'; guides.lineWidth = Math.max(3, w / 600); guides.strokeRect(hx, hy, handle, handle); guides.restore();
     }
     guides.restore();
@@ -368,11 +371,23 @@
     render(); localSave();
   }
   ['objectWidth','objectHeight','objectRotation','objectOpacity','objectText','objectColor','fontSize'].forEach((id) => $(`#${id}`).addEventListener('input', updateSelectedLayer));
-  $('#deleteObject').addEventListener('click', () => {
+  function deleteSelectedLayer() {
     const index = state.layers.findIndex((layer) => layer.id === state.selectedId); if (index < 0) return;
     layerImages.get(state.selectedId)?.close?.(); layerImages.delete(state.selectedId); state.layers.splice(index, 1);
     state.selectedId = state.layers[Math.min(index, state.layers.length - 1)]?.id || null; syncLayerPanel(); render(); localSave();
-  });
+  }
+  $('#deleteObject').addEventListener('click', deleteSelectedLayer);
+  $('#quickDeleteObject').addEventListener('click', deleteSelectedLayer);
+  async function duplicateSelectedLayer() {
+    const layer = selectedLayer(); if (!layer) return;
+    const index = state.layers.indexOf(layer), id = makeId();
+    if (layer.type === 'image' && layer.blob) {
+      try { layerImages.set(id, await createImageBitmap(layer.blob)); }
+      catch { $('#saveStatus').textContent = 'Neizdevās dublēt attēla slāni.'; return; }
+    }
+    addLayer({ ...layer, id, name: `${layerName(layer, index)} · kopija`, x: Math.max(layer.w / 2, Math.min(1 - layer.w / 2, layer.x + .04)), y: Math.max(layer.h / 2, Math.min(1 - layer.h / 2, layer.y + .04)) });
+  }
+  $('#duplicateObject').addEventListener('click', duplicateSelectedLayer);
   function shiftLayer(delta) {
     const index = state.layers.findIndex((layer) => layer.id === state.selectedId), next = index + delta;
     if (index < 0 || next < 0 || next >= state.layers.length) return;
@@ -397,7 +412,8 @@
     const px = (x - (selected?.x || 0)) * canvas.width, py = (y - (selected?.y || 0)) * canvas.height;
     const dx = selected ? px * Math.cos(a) - py * Math.sin(a) : 0;
     const dy = selected ? px * Math.sin(a) + py * Math.cos(a) : 0;
-    const onHandle = selected && dx > selected.w * canvas.width / 2 - 18 && dy > selected.h * canvas.height / 2 - 18;
+    const handleSize = (e.pointerType === 'touch' ? 44 : 28) / rect.width * canvas.width;
+    const onHandle = selected && dx > selected.w * canvas.width / 2 - handleSize && dx < selected.w * canvas.width / 2 + 8 && dy > selected.h * canvas.height / 2 - handleSize && dy < selected.h * canvas.height / 2 + 8;
     if (!onHandle) layer = layerAt(x, y);
     if (layer) {
       state.selectedId = layer.id; syncLayerPanel();
@@ -417,6 +433,7 @@
     render();
   });
   shell.addEventListener('pointerup', () => { if (drag) { syncLayerPanel(); localSave(); } drag = null; });
+  shell.addEventListener('pointercancel', () => { if (drag) { syncLayerPanel(); localSave(); } drag = null; });
   function addToQueue(blob, name, widthMm, heightMm) {
     if (state.printQueue.length >= 100) { $('#queueAnalysis').textContent = 'Drukas rindā var būt līdz 100 attēlu failiem. Noņem kādu attēlu, lai pievienotu citus.'; return; }
     if (state.printQueue.reduce((sum, item) => sum + Math.max(1, Number(item.copies) || 1), 0) >= 300) { $('#queueAnalysis').textContent = 'Drukas rindā var būt līdz 300 kopijām vienā aprēķinā. Samazini kopiju skaitu, lai pievienotu attēlus.'; return; }
@@ -485,10 +502,62 @@
     $('#zoom').value = 100; $('#rotation').value = 0; $('#brightness').value = 100; $('#contrast').value = 100; $('#saturation').value = 100;
     syncLayerPanel(); render(); localSave();
   });
-  $('#themeToggle').addEventListener('click', () => {
-    const root = document.documentElement; const next = root.dataset.theme === 'dark' ? 'light' : 'dark'; root.dataset.theme = next; root.dataset.themePref = next;
-    try { localStorage.setItem('theme', next); } catch {}
-    $('meta[name="theme-color"]').content = next === 'light' ? '#f9f5f4' : '#06070d';
+  const themeButton = $('#themeToggle');
+  const themeLabels = { system: 'Krāsu tēma: pēc ierīces iestatījuma', light: 'Krāsu tēma: gaišā', dark: 'Krāsu tēma: tumšā' };
+  const lightMedia = window.matchMedia('(prefers-color-scheme: light)');
+  const systemTheme = () => lightMedia.matches ? 'light' : 'dark';
+  const readThemePreference = () => { try { const value = localStorage.getItem('theme'); return value === 'light' || value === 'dark' ? value : 'system'; } catch { return 'system'; } };
+  let themePreference = readThemePreference();
+  function applyThemePreference() {
+    const resolved = themePreference === 'system' ? systemTheme() : themePreference;
+    const root = document.documentElement;
+    root.dataset.theme = resolved; root.dataset.themePref = themePreference;
+    themeButton.setAttribute('aria-label', themeLabels[themePreference]); themeButton.title = themeLabels[themePreference];
+    const meta = $('meta[name="theme-color"]'); if (meta) meta.content = resolved === 'light' ? '#f9f5f4' : '#06070d';
+  }
+  function nextThemePreference(current) {
+    const opposite = systemTheme() === 'light' ? 'dark' : 'light';
+    return current === 'system' ? opposite : current === opposite ? systemTheme() : 'system';
+  }
+  applyThemePreference();
+  themeButton.addEventListener('click', () => {
+    themePreference = nextThemePreference(themePreference);
+    try { if (themePreference === 'system') localStorage.removeItem('theme'); else localStorage.setItem('theme', themePreference); } catch {}
+    applyThemePreference();
+  });
+  const onSystemThemeChange = () => { if (themePreference === 'system') applyThemePreference(); };
+  if (lightMedia.addEventListener) lightMedia.addEventListener('change', onSystemThemeChange); else lightMedia.addListener(onSystemThemeChange);
+  window.addEventListener('storage', (event) => {
+    if (event.key !== 'theme' && event.key !== null) return;
+    themePreference = readThemePreference(); applyThemePreference();
+  });
+  $('#editorBackToTop').addEventListener('click', (event) => {
+    event.preventDefault();
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  });
+  $('#quickAddImage').addEventListener('click', () => $('#imageFile').click());
+  $('#quickAddText').addEventListener('click', () => $('#addText').click());
+  window.addEventListener('keydown', (event) => {
+    if (event.target.closest?.('input, textarea, select, button, a, summary, [contenteditable="true"]')) return;
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'd') { event.preventDefault(); duplicateSelectedLayer(); return; }
+    if (event.key === 'Delete' || event.key === 'Backspace') { if (selectedLayer()) { event.preventDefault(); deleteSelectedLayer(); } return; }
+    if (event.key === 'Escape') { state.selectedId = null; syncLayerPanel(); render(); return; }
+    if (!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)) return;
+    const layer = selectedLayer(), step = event.shiftKey ? .02 : .005;
+    if (layer) {
+      if (event.key === 'ArrowLeft') layer.x -= step;
+      if (event.key === 'ArrowRight') layer.x += step;
+      if (event.key === 'ArrowUp') layer.y -= step;
+      if (event.key === 'ArrowDown') layer.y += step;
+      layer.x = Math.max(layer.w / 2, Math.min(1 - layer.w / 2, layer.x));
+      layer.y = Math.max(layer.h / 2, Math.min(1 - layer.h / 2, layer.y));
+    } else if (sourceImage) {
+      if (event.key === 'ArrowLeft') state.tx -= step;
+      if (event.key === 'ArrowRight') state.tx += step;
+      if (event.key === 'ArrowUp') state.ty -= step;
+      if (event.key === 'ArrowDown') state.ty += step;
+    } else return;
+    event.preventDefault(); render(); if (layer) syncLayerPanel(); localSave();
   });
   $('#editorBurger').addEventListener('click', (e) => { const open = document.body.classList.toggle('menu-open'); e.currentTarget.setAttribute('aria-expanded', String(open)); e.currentTarget.setAttribute('aria-label', open ? 'Aizvērt izvēlni' : 'Atvērt izvēlni'); });
   const resize = new ResizeObserver(() => { guides.style.width = `${canvas.clientWidth}px`; guides.style.height = `${canvas.clientHeight}px`; }); resize.observe(shell);
