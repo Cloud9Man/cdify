@@ -123,7 +123,7 @@
     });
   }
   function packPage(items, pageWidth, pageHeight) {
-    const margin = 5, gap = 3, freeRects = [{ x: margin, y: margin, w: pageWidth - margin * 2, h: pageHeight - margin * 2 }];
+    const margin = 5, bottomReserve = 10, gap = 3, freeRects = [{ x: margin, y: margin, w: pageWidth - margin * 2, h: pageHeight - margin - bottomReserve }];
     const placements = [], remaining = [];
     const sorted = [...items].sort((a, b) => (b.widthMm * b.heightMm) - (a.widthMm * a.heightMm));
     const intersects = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
@@ -178,8 +178,8 @@
     return { copies, sheets, remaining, truncated: requested > copies.length || (remaining.length > 0 && sheets.length >= 200) };
   }
   function maxCopiesOfSize(widthMm, heightMm) {
-    const margin = 5, gap = 3, w = widthMm + .5, h = heightMm + .5;
-    const count = (pageW, pageH, itemW, itemH) => Math.floor((pageW - margin * 2 + gap) / (itemW + gap)) * Math.floor((pageH - margin * 2 + gap) / (itemH + gap));
+    const margin = 5, bottomReserve = 10, gap = 3, w = widthMm + .5, h = heightMm + .5;
+    const count = (pageW, pageH, itemW, itemH) => Math.floor((pageW - margin * 2 + gap) / (itemW + gap)) * Math.floor((pageH - margin - bottomReserve + gap) / (itemH + gap));
     return Math.max(count(297,210,w,h), count(297,210,h,w));
   }
   function drawQueuePreview(page) {
@@ -188,21 +188,25 @@
     const scale = queueCanvas.width / page.pageWidth;
     queueCtx.clearRect(0,0,queueCanvas.width,queueCanvas.height); queueCtx.fillStyle = '#fff'; queueCtx.fillRect(0,0,queueCanvas.width,queueCanvas.height);
     queueCtx.strokeStyle = '#20242d'; queueCtx.lineWidth = 2; queueCtx.strokeRect(1,1,queueCanvas.width-2,queueCanvas.height-2);
-    queueCtx.strokeStyle = '#73c8d8'; queueCtx.lineWidth = 1.5; queueCtx.setLineDash([5,5]); queueCtx.strokeRect(5*scale,5*scale,(page.pageWidth-10)*scale,(page.pageHeight-10)*scale); queueCtx.setLineDash([]);
+    queueCtx.strokeStyle = '#73c8d8'; queueCtx.lineWidth = 1.5; queueCtx.setLineDash([5,5]); queueCtx.strokeRect(5*scale,5*scale,(page.pageWidth-10)*scale,(page.pageHeight-15)*scale); queueCtx.setLineDash([]);
     const colors = ['#fee0db','#dff5ff','#e8e0ff','#e0f3d9','#fff1c9','#f6dff0'];
     page.placements.forEach((placement, index) => {
       const x=placement.x*scale, y=placement.y*scale, w=placement.artW*scale, h=placement.artH*scale;
       queueCtx.fillStyle = colors[index % colors.length]; queueCtx.fillRect(x,y,w,h); queueCtx.strokeStyle='#263039'; queueCtx.lineWidth=1.5; queueCtx.strokeRect(x,y,w,h);
       queueCtx.fillStyle='#182027'; queueCtx.font='bold 13px system-ui'; queueCtx.textAlign='center'; queueCtx.textBaseline='middle'; queueCtx.fillText(String(index+1),x+w/2,y+h/2);
     });
+    const rulerW=100.5*scale, rulerX=(queueCanvas.width-rulerW)/2, rulerY=(page.pageHeight-10)*scale;
+    queueCtx.strokeStyle='#111'; queueCtx.lineWidth=2; queueCtx.beginPath(); queueCtx.moveTo(rulerX,rulerY); queueCtx.lineTo(rulerX+rulerW,rulerY); queueCtx.stroke();
+    queueCtx.beginPath(); queueCtx.moveTo(rulerX,rulerY-6); queueCtx.lineTo(rulerX,rulerY+6); queueCtx.moveTo(rulerX+rulerW,rulerY-6); queueCtx.lineTo(rulerX+rulerW,rulerY+6); queueCtx.stroke();
+    queueCtx.fillStyle='#111'; queueCtx.font='12px system-ui'; queueCtx.textAlign='center'; queueCtx.textBaseline='top'; queueCtx.fillText('100 mm',queueCanvas.width/2,rulerY+7);
   }
   function calculateQueue() {
-    if (!state.printQueue.length) { $('#queueAnalysis').textContent = 'A4 lapa · 5 mm malas · 3 mm atstarpe. Pievieno attēlus, lai aprēķinātu izvietojumu.'; drawQueuePreview(null); return; }
+    if (!state.printQueue.length) { $('#queueAnalysis').textContent = 'A4 ainava · 5 mm malas · 3 mm atstarpe · 100 mm pārbaudes līnija apakšā. Pievieno attēlus, lai aprēķinātu izvietojumu.'; drawQueuePreview(null); return; }
     const result = packQueue(), first = result.sheets[0];
     const firstItem = state.printQueue[0], identicalMax = maxCopiesOfSize(Number(firstItem.widthMm), Number(firstItem.heightMm));
     const total = result.copies.length, placed = result.sheets.reduce((sum, page) => sum + page.placements.length, 0);
     const sheetLines = result.sheets.map((page, index) => `Lapa ${index+1}: ${page.placements.length} attēli · A4 ${page.pageWidth > page.pageHeight ? 'ainava' : 'portrets'}`);
-    let message = `Rindā ${total} kopijas. Pirmajā lapā ietilpst ${first?.placements.length || 0}; kopā vajadzīgas ${result.sheets.length} A4 lapas.\n${sheetLines.join('\n')}\nVienāda izmēra ${firstItem.widthMm} × ${firstItem.heightMm} mm attēlu režģa ietilpība: līdz ${identicalMax} uz A4 ainavas lapas (ar +0,5 mm drukas kompensāciju).`;
+    let message = `Rindā ${total} kopijas. Pirmajā lapā ietilpst ${first?.placements.length || 0}; kopā vajadzīgas ${result.sheets.length} A4 lapas.\n${sheetLines.join('\n')}\nVienāda izmēra ${firstItem.widthMm} × ${firstItem.heightMm} mm attēlu režģa ietilpība: līdz ${identicalMax} uz lapas. Aprēķinā rezervēta vieta 100 mm līnijai apakšā.`;
     if (result.remaining.length) message += `\n${result.remaining.length} kopijas palikušas ārpus aprēķinātā izkārtojuma.`;
     if (result.truncated) message += '\nAprēķina limits ir 300 kopijas; samazini kopiju skaitu, lai varētu sagatavot visu rindu.';
     if (total > placed && !result.remaining.length) message += `\nIzvietojums ir automātisks; dažādu izmēru kombinācijām cits izkārtojums reizēm var izmantot vietu labāk.`;
@@ -448,9 +452,9 @@
           const rotation = placement.rotated ? 'rotate(90deg)' : 'none';
           return `<img src="${sources.get(placement.item.id)}" alt="" style="left:${left}mm;top:${top}mm;width:${itemW}mm;height:${itemH}mm;transform:${rotation}">`;
         }).join('');
-        return `<main class="sheet">${images}</main>`;
+        return `<main class="sheet">${images}<div class="calibration"><div class="rule"></div><span>100 mm</span></div></main>`;
       }).join('');
-      win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>CDify drukas rinda</title><style>@page{size:A4 landscape;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff}.sheet{position:relative;width:297mm;height:210mm;overflow:hidden;break-after:page;page-break-after:always}.sheet:last-child{break-after:auto;page-break-after:auto}.sheet img{position:absolute;display:block;object-fit:cover;transform-origin:center}</style></head><body>${sheets}<script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`);
+      win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>CDify drukas rinda</title><style>@page{size:A4 landscape;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff}.sheet{position:relative;width:297mm;height:210mm;overflow:hidden;break-after:page;page-break-after:always}.sheet:last-child{break-after:auto;page-break-after:auto}.sheet img{position:absolute;display:block;object-fit:cover;transform-origin:center}.calibration{position:absolute;left:50%;bottom:5mm;transform:translateX(-50%);width:100.5mm;height:5mm;text-align:center;color:#000;font:6pt Arial,sans-serif}.calibration .rule{position:absolute;left:0;top:0;width:100.5mm;border-top:.45mm solid #000}.calibration .rule:before,.calibration .rule:after{content:"";position:absolute;top:-.8mm;height:2.5mm;border-left:.45mm solid #000}.calibration .rule:before{left:0}.calibration .rule:after{right:0}.calibration span{position:absolute;left:0;right:0;top:1mm;background:#fff}</style></head><body>${sheets}<script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`);
       win.document.close();
     } catch (error) { win.close(); $('#queueAnalysis').textContent = 'Neizdevās sagatavot drukas rindu. Pārbaudi, vai attēlus var atvērt.'; }
   });

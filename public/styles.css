@@ -176,7 +176,7 @@ main, .footer { position: relative; z-index: 1; }
 }
 
 .gradient-text {
-  background: linear-gradient(110deg, var(--gt-a), var(--gt-b) 45%, var(--gt-c) 90%);
+  background: repeating-linear-gradient(110deg, var(--gt-a) 0%, var(--gt-b) 25%, var(--gt-c) 50%, var(--gt-a) 75%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
