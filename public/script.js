@@ -623,7 +623,9 @@
 
     const validate = (input) => {
       const field = input.closest('.field');
-      const result = rules[input.dataset.rule || input.name](input.value);
+      const result = input.matches('input[type="number"]') && Number(input.value) > Number(input.max)
+        ? `Vienā pasūtījumā var pievienot ne vairāk kā ${input.max} diskus.`
+        : rules[input.dataset.rule || input.name](input.value);
       const ok = result === true;
       field.classList.toggle('has-error', !ok);
       $('.field-error', field).textContent = ok ? '' : result;
@@ -647,14 +649,12 @@
     };
 
     const updateFileList = (input) => {
-      const panel = input.closest('.upload-panel');
+      const panel = input.closest('.upload-panel, .disc-card-upload');
       if (!panel) return;
-      const key = input.name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-      const list = $(`[data-file-list-for="${key}"]`, panel);
+      const list = $('.file-list', panel);
       if (!list) return;
       list.replaceChildren();
-      const relatedInputs = $$('input[type="file"]', panel).filter((fileInput) => fileInput.name === input.name);
-      relatedInputs.flatMap((fileInput) => Array.from(fileInput.files || [])).forEach((file) => {
+      Array.from(input.files || []).forEach((file) => {
         const item = document.createElement('li');
         const name = document.createElement('span');
         const details = document.createElement('small');
@@ -689,7 +689,7 @@
       const totalSize = totalBurningSize();
       const overLimit = totalSize > fileLimit;
       burningInputs().forEach((input) => {
-        const panel = input.closest('.upload-panel');
+        const panel = input.closest('.upload-panel, .disc-card-upload');
         let error = $('.upload-error', panel);
         if (!error) {
           error = document.createElement('span');
@@ -702,6 +702,34 @@
         input.setAttribute('aria-invalid', String(showError));
       });
       return !overLimit;
+    };
+
+    const createDiscCard = (product, section, disk, individual) => {
+      const card = document.createElement('article'); card.className = 'disc-card'; card.dataset.discCard = String(disk);
+      const title = document.createElement('h4'); title.textContent = `Disks ${disk}`; card.append(title);
+      const addUpload = (purpose, field, labelText, multiple) => {
+        const label = document.createElement('label'); label.className = 'upload-label'; label.textContent = labelText;
+        const input = document.createElement('input'); input.type = 'file'; input.name = field; input.multiple = multiple; input.dataset.product = product; input.dataset.diskNumber = String(disk); input.dataset.scope = 'disk'; input.dataset.purpose = purpose;
+        input.id = `file-${product}-${disk}-${purpose}`; label.htmlFor = input.id;
+        if (purpose === 'artwork') { input.accept = 'image/*'; input.dataset.artworkInput = ''; input.required = true; }
+        else input.dataset.burningInput = '';
+        input.disabled = !individual;
+        const panel = document.createElement('div'); panel.className = 'disc-card-upload';
+        const listEl = document.createElement('ul'); listEl.className = 'file-list'; listEl.setAttribute('aria-live', 'polite');
+        panel.append(label, input, listEl); card.append(panel);
+        input.addEventListener('change', () => {
+          updateFileList(input);
+          if (input.files?.length) {
+            const error = $('.upload-error', panel);
+            if (error) error.textContent = '';
+            input.removeAttribute('aria-invalid');
+          }
+        });
+        if (purpose === 'burning') input.addEventListener('change', updateBurningSizeError);
+      };
+      if ($(`[data-artwork-option]:checked`, section)) addUpload('artwork', product === 'vinyl' ? 'artworkVinylSurface' : 'artworkStandardSurface', 'Zīmējums uz virsmas', false);
+      if ($('[data-burning-option]:checked', section)) addUpload('burning', product === 'vinyl' ? 'burningVinyl' : 'burningStandard', 'Faili iededzināšanai (izvēlies visus šim diskam)', true);
+      return card;
     };
 
     const updateSections = () => {
@@ -736,6 +764,49 @@
           burningPanel.hidden = !enabled || !burningSelected;
           $$('[data-burning-input]', burningPanel).forEach((input) => { input.disabled = !enabled || !burningSelected; });
         }
+
+        const product = section.dataset.orderSection;
+        const cards = $(`[data-disc-cards="${product}"]`, section);
+        if (cards) {
+          cards.hidden = !enabled;
+          const quantity = Math.min(100, Number(quantityInput.value) || 0);
+          const assignment = cards.querySelector(`input[name="assignment-${product}"]:checked`)?.value || 'same';
+          section.dataset.assignment = assignment;
+          const signature = `${assignment}:${$$('[data-finish-option], [data-burning-option]', section).map((input) => `${input.name}=${input.checked}`).join(',')}`;
+          if (cards.dataset.signature !== signature) {
+            cards.dataset.signature = signature;
+            cards.replaceChildren();
+            const mode = document.createElement('fieldset');
+            mode.className = 'field-group disc-assignment';
+            const legend = document.createElement('legend'); legend.textContent = 'Failu piesaiste diskiem'; mode.append(legend);
+            const choices = document.createElement('div'); choices.className = 'chips';
+            [['same', 'Visiem diskiem vienādi'], ['individual', 'Katram diskam atsevišķi']].forEach(([value, text]) => {
+              const label = document.createElement('label'); label.className = 'chip';
+              const radio = document.createElement('input'); radio.type = 'radio'; radio.name = `assignment-${product}`; radio.value = value; radio.checked = value === assignment; radio.dataset.discAssignment = '';
+              radio.addEventListener('change', updateSections);
+              label.append(radio, Object.assign(document.createElement('span'), { textContent: text })); choices.append(label);
+            });
+            mode.append(choices); cards.append(mode);
+            const list = document.createElement('div'); list.className = 'disc-card-list'; list.dataset.discCardList = '';
+            list.hidden = assignment !== 'individual';
+            cards.append(list);
+          }
+          const individual = assignment === 'individual';
+          const list = $('[data-disc-card-list]', cards);
+          $$('[data-disc-card]', list).filter((card) => Number(card.dataset.discCard) > quantity).forEach((card) => card.remove());
+          for (let disk = 1; disk <= quantity; disk += 1) {
+            if (!$(`[data-disc-card="${disk}"]`, list)) list.append(createDiscCard(product, section, disk, individual));
+          }
+          list.hidden = !individual;
+          $$('[data-product]', section).filter((input) => input.dataset.scope === 'all').forEach((input) => {
+            const artworkPanel = input.closest('[data-artwork-panel]');
+            const burningPanelForInput = input.closest('[data-burning-panel]');
+            if (artworkPanel) artworkPanel.hidden = !enabled || individual || !$$(`[data-artwork-option="${artworkPanel.dataset.artworkPanel}"]:checked`, section).length;
+            if (burningPanelForInput) burningPanelForInput.hidden = !enabled || individual || !burningSelected;
+            input.disabled = !enabled || individual || (artworkPanel ? artworkPanel.hidden : burningPanelForInput ? burningPanelForInput.hidden : !burningSelected);
+          });
+          $$('[data-disc-card] input[type="file"]', cards).forEach((input) => { input.disabled = !enabled || !individual; });
+        }
       });
       updatePrices();
       updateBurningSizeError();
@@ -744,7 +815,7 @@
     const validateArtwork = () => {
       let valid = true;
       $$('[data-artwork-input]', form).filter((input) => !input.disabled).forEach((input) => {
-        const panel = input.closest('.upload-panel');
+        const panel = input.closest('.upload-panel, .disc-card-upload');
         let error = $('.upload-error', panel);
         if (!error) {
           error = document.createElement('span');
@@ -764,20 +835,18 @@
       let valid = true;
       sections.forEach((section) => {
         if (!Number($('input[type="number"]', section).value) || !$('[data-burning-option]:checked', section)) return;
-        const inputs = $$('[data-burning-input]', section).filter((fileInput) => fileInput.files && fileInput.files.length);
-        const input = $('[data-burning-input]', section);
-        const panel = input.closest('.upload-panel');
-        let error = $('.upload-error', panel);
-        if (!error) {
-          error = document.createElement('span');
-          error.className = 'field-error upload-error';
-          error.setAttribute('role', 'alert');
-          panel.append(error);
-        }
-        const hasFiles = inputs.length > 0;
-        error.textContent = hasFiles ? '' : 'Lūdzu, pievienojiet vismaz vienu failu iededzināšanai.';
-        input.setAttribute('aria-invalid', String(!hasFiles));
-        if (!hasFiles) valid = false;
+        const inputs = section.dataset.assignment === 'individual'
+          ? $$('[data-disc-card] [data-burning-input]', section)
+          : $$('[data-burning-input]', section).filter((input) => input.dataset.scope === 'all');
+        inputs.forEach((input) => {
+          const panel = input.closest('.upload-panel, .disc-card-upload');
+          let error = $('.upload-error', panel);
+          if (!error) { error = document.createElement('span'); error.className = 'field-error upload-error'; error.setAttribute('role', 'alert'); panel.append(error); }
+          const hasFiles = !!input.files?.length;
+          error.textContent = hasFiles ? '' : 'Lūdzu, pievienojiet vismaz vienu failu iededzināšanai šim diskam.';
+          input.setAttribute('aria-invalid', String(!hasFiles));
+          if (!hasFiles) valid = false;
+        });
       });
       return valid;
     };
@@ -873,6 +942,38 @@
       input.click();
     }));
 
+    const serviceInfo = {
+      quantityVinyl: ['Vinila stila disks', 'Dekoratīvs, vinila plates izskatā veidots CD. Izvēlieties disku skaitu, tad atzīmējiet drukāšanu uz diska virsmas vai iededzināšanu. Failus var izvēlēties no datora failu loga; vienam diskam izvēlieties “Visiem diskiem vienādi”, bet atšķirīgam saturam katram diskam — “Katram diskam atsevišķi”.'],
+      quantityStandard: ['Parastais disks', 'Parasts CD disks datu vai mūzikas glabāšanai. Atzīmējiet vajadzīgos darbus, pievienojiet drukas attēlu un/vai failus iededzināšanai. Failus izvēlieties failu logā; vairāku disku atšķirīgam saturam izmantojiet individuālās kartītes.'],
+      quantityCases: ['Diska futlāris', 'Cietais diska futlāris. Izvēles apdarei pievienojiet priekšpuses un aizmugures zīmējumu.'],
+      optionVinylSurface: ['Druka uz vinila stila diska', 'Krāsains zīmējums tiek drukāts uz diska virsmas. Cena: 0,50 € par katru disku. Izvēlieties attēlu (piemēram, PNG, JPG vai WebP) no datora. Ja katram diskam ir cits zīmējums, atzīmējiet “Katram diskam atsevišķi” un pievienojiet attēlu katrā diska kartītē.'],
+      optionStandardSurface: ['Druka uz parastā diska', 'Krāsains zīmējums tiek drukāts uz diska virsmas. Cena: 0,50 € par katru disku. Izvēlieties attēlu no datora; individuālu zīmējumu katram diskam pievienojiet tā kartītē.'],
+      optionVinylBurn: ['Iededzināšana vinila stila diskā', 'Faili tiek ierakstīti diskā un ir pieejami nolasīšanai. Nospiediet failu izvēles pogu, atrodiet vajadzīgo mapi, iezīmējiet vienu vai vairākus failus (Ctrl ļauj izvēlēties vairākus) un spiediet “Atvērt”. Katram diskam paredzētos failus var norādīt atsevišķi. Visu pasūtījuma iededzināšanas failu kopējais lielums nedrīkst pārsniegt 700 MB.'],
+      optionStandardBurn: ['Iededzināšana parastajā diskā', 'Faili tiek ierakstīti diskā un ir pieejami nolasīšanai. Nospiediet failu izvēles pogu, atrodiet vajadzīgo mapi, iezīmējiet vienu vai vairākus failus (Ctrl ļauj izvēlēties vairākus) un spiediet “Atvērt”. Katram diskam paredzētos failus var norādīt atsevišķi. Visu pasūtījuma iededzināšanas failu kopējais lielums nedrīkst pārsniegt 700 MB.'],
+      optionCasesFinish: ['Futlāra apdare', 'Drukāsim zīmējumu uz futlāra vāciņa. Pievienojiet atsevišķus priekšpuses un aizmugures attēlus.'],
+    };
+    const infoDialog = $('#serviceInfoDialog');
+    const infoDismiss = $('#serviceInfoDismiss');
+    infoDialog.addEventListener('close', () => {
+      const key = infoDialog.dataset.infoKey;
+      if (infoDismiss.checked && key) { try { localStorage.setItem(`cdify-hide-service-info-${key}`, '1'); } catch {} }
+      infoDismiss.checked = false;
+    });
+    form.addEventListener('change', (event) => {
+      const input = event.target;
+      if (!input.matches('.order-section input')) return;
+      const info = serviceInfo[input.name];
+      const selected = input.type === 'number' ? Number(input.value) > 0 : input.checked;
+      if (!info || !selected) return;
+      const key = input.name;
+      try { if (localStorage.getItem(`cdify-hide-service-info-${key}`)) return; } catch {}
+      if (infoDialog.open) infoDialog.close();
+      infoDialog.dataset.infoKey = key;
+      $('#serviceInfoTitle').textContent = info[0];
+      $('#serviceInfoText').textContent = info[1];
+      infoDialog.showModal();
+    });
+
     form.addEventListener('reset', () => {
       setTimeout(() => {
         updatePanels();
@@ -880,7 +981,7 @@
         $$('.has-error', form).forEach((field) => field.classList.remove('has-error'));
         $$('.field-error', form).forEach((error) => { error.textContent = ''; });
         $$('[aria-invalid]', form).forEach((input) => input.removeAttribute('aria-invalid'));
-        artworkInputs.forEach(updateFileList);
+        $$('[data-artwork-input]', form).forEach(updateFileList);
         burningInputs().filter((input) => !input.closest('.additional-file-input')).forEach(updateFileList);
         updateBurningSizeError();
         formError.hidden = true;
@@ -904,6 +1005,10 @@
         .flatMap((input) => Array.from(input.files || []).map((file) => ({
           file,
           field: input.name,
+          product: input.dataset.product,
+          diskNumber: input.dataset.diskNumber ? Number(input.dataset.diskNumber) : undefined,
+          scope: input.dataset.scope,
+          purpose: input.dataset.purpose,
         })));
       if (files.some((item) => item.file.size < 1 || item.file.size > fileLimit)) {
         throw new Error('Fails nedrīkst būt tukšs vai lielāks par 700 MB.');
@@ -920,6 +1025,7 @@
           .map((section) => ({
             product: section.dataset.orderSection,
             quantity: selectedQuantity(section),
+            discAssignment: section.dataset.assignment || 'same',
             options: $$('input[type="checkbox"]:checked', section).map((input) => input.name),
           }))
           .filter((item) => item.quantity > 0);
@@ -931,36 +1037,61 @@
       }
 
       if (selectedType === 'order') {
-        const startedOrder = await postApi('start-order', { name: submission.name });
+        const startedOrder = await postApi('start-order', {
+          name: submission.name,
+          items: submission.items.map(({ product, quantity }) => ({ product, quantity })),
+        });
         submission.orderNumber = startedOrder.orderNumber;
       }
 
-      for (const [index, item] of files.entries()) {
-        submitLabel.textContent = `Augšupielādē failu ${index + 1}/${files.length}...`;
-        const contentType = item.file.type || 'application/octet-stream';
-        const signedUpload = await postApi('get-upload-url', {
-          orderNumber: submission.orderNumber,
-          fileName: item.file.name,
-          fileType: contentType,
-          fileSize: item.file.size,
-          field: item.field,
-        });
-        const uploadResponse = await fetch(signedUpload.uploadUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': contentType, ...signedUpload.uploadHeaders },
-          body: item.file,
-        });
-        if (!uploadResponse.ok) {
-          throw new Error(`Neizdevās augšupielādēt failu "${item.file.name}" (HTTP ${uploadResponse.status}).`);
+      let nextUploadIndex = 0;
+      let completedUploads = 0;
+      const uploadNextFile = async () => {
+        while (nextUploadIndex < files.length) {
+          const index = nextUploadIndex++;
+          const item = files[index];
+          submitLabel.textContent = `Augšupielādē failus ${completedUploads}/${files.length}...`;
+          const contentType = item.file.type || 'application/octet-stream';
+          const signedUpload = await postApi('get-upload-url', {
+            orderNumber: submission.orderNumber,
+            fileName: item.file.name,
+            fileType: contentType,
+            fileSize: item.file.size,
+            field: item.field,
+            ...(item.product ? { product: item.product } : {}),
+            ...(item.diskNumber ? { diskNumber: item.diskNumber } : {}),
+            ...(item.scope ? { scope: item.scope } : {}),
+            ...(item.purpose ? { purpose: item.purpose } : {}),
+          });
+          let uploadResponse;
+          try {
+            uploadResponse = await fetch(signedUpload.uploadUrl, {
+              method: 'PUT',
+              headers: { 'Content-Type': contentType },
+              body: item.file,
+            });
+          } catch {
+            throw new Error('Neizdevās savienoties ar Cloudflare R2. Pārbaudi, vai bucket CORS atļauj šīs vietnes adresi, PUT metodi un Content-Type galveni.');
+          }
+          if (!uploadResponse.ok) {
+            throw new Error(`Neizdevās augšupielādēt failu "${item.file.name}" (HTTP ${uploadResponse.status}).`);
+          }
+          submission.files.push({
+            key: signedUpload.fileKey,
+            name: item.file.name,
+            contentType,
+            size: item.file.size,
+            field: item.field,
+            ...(item.product ? { product: item.product } : {}),
+            ...(item.diskNumber ? { diskNumber: item.diskNumber } : {}),
+            ...(item.scope ? { scope: item.scope } : {}),
+            ...(item.purpose ? { purpose: item.purpose } : {}),
+          });
+          completedUploads += 1;
+          submitLabel.textContent = `Augšupielādē failus ${completedUploads}/${files.length}...`;
         }
-        submission.files.push({
-          key: signedUpload.fileKey,
-          name: item.file.name,
-          contentType,
-          size: item.file.size,
-          field: item.field,
-        });
-      }
+      };
+      await Promise.all(Array.from({ length: Math.min(3, files.length) }, uploadNextFile));
 
       submitLabel.textContent = 'Nosūta informāciju...';
       return postApi('submit-order', submission);

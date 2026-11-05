@@ -218,8 +218,8 @@
             <div class="card-bg glass"></div>
             <div class="card-body">
               <div class="icon-box"><svg class="icon"><use href="#i-box"/></svg></div>
-              <h3>Nenolasāmās puses apstrāde</h3>
-              <p>Ar LightScribe tehnoloģiju uz diska daļas, kas nesatur datus, iededzināt zīmējumus, kas neietekmē diska darbību. (Disks paliek lietojams)</p>
+              <h3>Druka uz diska virsmas</h3>
+              <p>Ar krāsu printeri uz diska virsmas uzdrukā izvēlēto zīmējumu. Šo opciju var izvēlēties gan vinila stila, gan parastajiem diskiem.</p>
             </div>
           </article>
 
@@ -441,11 +441,12 @@
           </fieldset>
 
           <div data-form-panel="order">
-            <p class="order-intro">Norādiet daudzumu katram produktam un pēc tam izvēlieties vajadzīgās opcijas. Apdares cena ir 0,50&nbsp;€ par gabalu, iededzināšana — 0,25&nbsp;€ par disku.</p>
+            <p class="order-intro">Norādiet daudzumu katram produktam un pēc tam izvēlieties vajadzīgās opcijas. Drukāšana uz diska virsmas un vāku apdare maksā 0,50&nbsp;€ par gabalu, iededzināšana — 0,25&nbsp;€ par disku.</p>
 
-            <section class="order-section" data-order-section="vinyl" data-unit-price="1.5">
+            <details class="order-section" data-order-section="vinyl" data-unit-price="1.5" open>
+              <summary class="order-section-summary">Vinila stila diski</summary>
               <div class="field quantity-field">
-                <input type="number" id="f-quantity-vinyl" name="quantityVinyl" min="0" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
+                <input type="number" id="f-quantity-vinyl" name="quantityVinyl" min="0" max="100" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
                 <label for="f-quantity-vinyl">Vinila stila disku skaits</label>
                 <span class="unit-price">1,50&nbsp;€ / gab.</span>
                 <span class="field-error" aria-live="polite"></span>
@@ -453,55 +454,29 @@
               <fieldset class="field-group section-options" data-options-for="vinyl" disabled>
                 <legend>Vinila stila disku opcijas</legend>
                 <div class="chips">
+                  <label class="chip"><input type="checkbox" name="optionVinylSurface" value="surface-print" data-finish-option data-artwork-option="vinyl-surface" /><span>Drukāt uz virsmas (+0,50&nbsp;€ / gab.)</span></label>
                   <label class="chip"><input type="checkbox" name="optionVinylBurn" value="burning" data-burning-option /><span>Diska iededzināšana (+0,25&nbsp;€ / gab.)</span></label>
+                </div>
+                <div class="upload-panel" data-artwork-panel="vinyl-surface" hidden>
+                  <label class="upload-label" for="f-artwork-vinyl">Zīmējums drukai uz diska</label>
+                  <input type="file" id="f-artwork-vinyl" name="artworkVinylSurface" accept="image/*" data-artwork-input data-product="vinyl" data-scope="all" data-purpose="artwork" />
+                  <ul class="file-list" data-file-list-for="artwork-vinyl-surface" aria-live="polite"></ul>
                 </div>
                 <div class="upload-panel" data-burning-panel="vinyl" hidden>
                   <label class="upload-label" for="f-burning-vinyl">Faili iededzināšanai</label>
-                  <input type="file" id="f-burning-vinyl" name="burningVinyl" multiple data-burning-input />
+                  <input type="file" id="f-burning-vinyl" name="burningVinyl" multiple data-burning-input data-product="vinyl" data-scope="all" data-purpose="burning" />
                   <button type="button" class="btn btn-ghost add-files-btn" data-add-burning-files="f-burning-vinyl">Pievienot vēl failus</button>
                   <span class="upload-help">Var pievienot neierobežotu failu skaitu; visu iededzināšanas failu kopējais lielums nedrīkst pārsniegt 700&nbsp;MB.</span>
                   <ul class="file-list" data-file-list-for="burning-vinyl" aria-live="polite"></ul>
                 </div>
               </fieldset>
-            </section>
+              <div class="disc-cards" data-disc-cards="vinyl" hidden></div>
+            </details>
 
-            <section class="order-section" data-order-section="lightscribe" data-unit-price="2">
+            <details class="order-section" data-order-section="standard" data-unit-price="1" open>
+              <summary class="order-section-summary">Parastie diski</summary>
               <div class="field quantity-field">
-                <input type="number" id="f-quantity-lightscribe" name="quantityLightscribe" min="0" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
-                <label for="f-quantity-lightscribe">LightScribe disku skaits</label>
-                <span class="unit-price">2,00&nbsp;€ / gab.</span>
-                <span class="field-error" aria-live="polite"></span>
-              </div>
-              <fieldset class="field-group section-options" data-options-for="lightscribe" disabled>
-                <legend>LightScribe disku opcijas</legend>
-                <div class="chips">
-                  <label class="chip"><input type="checkbox" name="optionLightscribeReadableFinish" value="readable-finish" data-finish-option data-artwork-option="lightscribe-readable" /><span>Lasāmās daļas apdare (+0,50&nbsp;€ / gab.)</span></label>
-                  <label class="chip"><input type="checkbox" name="optionLightscribeUnreadableFinish" value="unreadable-finish" data-finish-option data-artwork-option="lightscribe-unreadable" /><span>Nelasāmās daļas apdare (+0,50&nbsp;€ / gab.)</span></label>
-                  <label class="chip"><input type="checkbox" name="optionLightscribeBurn" value="burning" data-burning-option /><span>Diska iededzināšana (+0,25&nbsp;€ / gab.)</span></label>
-                </div>
-                <div class="upload-panel" data-artwork-panel="lightscribe-readable" hidden>
-                  <label class="upload-label" for="f-artwork-lightscribe-readable">Izvēlētais zīmējums — lasāmās daļas apdarei</label>
-                  <input type="file" id="f-artwork-lightscribe-readable" name="artworkLightscribeReadable" accept="image/*" data-artwork-input />
-                  <ul class="file-list" data-file-list-for="artwork-lightscribe-readable" aria-live="polite"></ul>
-                </div>
-                <div class="upload-panel" data-artwork-panel="lightscribe-unreadable" hidden>
-                  <label class="upload-label" for="f-artwork-lightscribe-unreadable">Izvēlētais zīmējums — nelasāmās daļas apdarei</label>
-                  <input type="file" id="f-artwork-lightscribe-unreadable" name="artworkLightscribeUnreadable" accept="image/*" data-artwork-input />
-                  <ul class="file-list" data-file-list-for="artwork-lightscribe-unreadable" aria-live="polite"></ul>
-                </div>
-                <div class="upload-panel" data-burning-panel="lightscribe" hidden>
-                  <label class="upload-label" for="f-burning-lightscribe">Faili iededzināšanai</label>
-                  <input type="file" id="f-burning-lightscribe" name="burningLightscribe" multiple data-burning-input />
-                  <button type="button" class="btn btn-ghost add-files-btn" data-add-burning-files="f-burning-lightscribe">Pievienot vēl failus</button>
-                  <span class="upload-help">Var pievienot neierobežotu failu skaitu; visu iededzināšanas failu kopējais lielums nedrīkst pārsniegt 700&nbsp;MB.</span>
-                  <ul class="file-list" data-file-list-for="burning-lightscribe" aria-live="polite"></ul>
-                </div>
-              </fieldset>
-            </section>
-
-            <section class="order-section" data-order-section="standard" data-unit-price="1">
-              <div class="field quantity-field">
-                <input type="number" id="f-quantity-standard" name="quantityStandard" min="0" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
+                <input type="number" id="f-quantity-standard" name="quantityStandard" min="0" max="100" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
                 <label for="f-quantity-standard">Parasto disku skaits</label>
                 <span class="unit-price">1,00&nbsp;€ / gab.</span>
                 <span class="field-error" aria-live="polite"></span>
@@ -509,27 +484,29 @@
               <fieldset class="field-group section-options" data-options-for="standard" disabled>
                 <legend>Parasto disku opcijas</legend>
                 <div class="chips">
-                  <label class="chip"><input type="checkbox" name="optionStandardReadableFinish" value="readable-finish" data-finish-option data-artwork-option="standard-readable" /><span>Lasāmās daļas apdare (+0,50&nbsp;€ / gab.)</span></label>
+                  <label class="chip"><input type="checkbox" name="optionStandardSurface" value="surface-print" data-finish-option data-artwork-option="standard-surface" /><span>Drukāt uz virsmas (+0,50&nbsp;€ / gab.)</span></label>
                   <label class="chip"><input type="checkbox" name="optionStandardBurn" value="burning" data-burning-option /><span>Diska iededzināšana (+0,25&nbsp;€ / gab.)</span></label>
                 </div>
-                <div class="upload-panel" data-artwork-panel="standard-readable" hidden>
-                  <label class="upload-label" for="f-artwork-standard-readable">Izvēlētais zīmējums — lasāmās daļas apdarei</label>
-                  <input type="file" id="f-artwork-standard-readable" name="artworkStandardReadable" accept="image/*" data-artwork-input />
-                  <ul class="file-list" data-file-list-for="artwork-standard-readable" aria-live="polite"></ul>
+                <div class="upload-panel" data-artwork-panel="standard-surface" hidden>
+                  <label class="upload-label" for="f-artwork-standard-surface">Zīmējums drukai uz diska</label>
+                  <input type="file" id="f-artwork-standard-surface" name="artworkStandardSurface" accept="image/*" data-artwork-input data-product="standard" data-scope="all" data-purpose="artwork" />
+                  <ul class="file-list" data-file-list-for="artwork-standard-surface" aria-live="polite"></ul>
                 </div>
                 <div class="upload-panel" data-burning-panel="standard" hidden>
                   <label class="upload-label" for="f-burning-standard">Faili iededzināšanai</label>
-                  <input type="file" id="f-burning-standard" name="burningStandard" multiple data-burning-input />
+                  <input type="file" id="f-burning-standard" name="burningStandard" multiple data-burning-input data-product="standard" data-scope="all" data-purpose="burning" />
                   <button type="button" class="btn btn-ghost add-files-btn" data-add-burning-files="f-burning-standard">Pievienot vēl failus</button>
                   <span class="upload-help">Var pievienot neierobežotu failu skaitu; visu iededzināšanas failu kopējais lielums nedrīkst pārsniegt 700&nbsp;MB.</span>
                   <ul class="file-list" data-file-list-for="burning-standard" aria-live="polite"></ul>
                 </div>
               </fieldset>
-            </section>
+              <div class="disc-cards" data-disc-cards="standard" hidden></div>
+            </details>
 
-            <section class="order-section" data-order-section="cases" data-unit-price="1">
+            <details class="order-section" data-order-section="cases" data-unit-price="1" open>
+              <summary class="order-section-summary">Disku futlāri</summary>
               <div class="field quantity-field">
-                <input type="number" id="f-quantity-cases" name="quantityCases" min="0" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
+                <input type="number" id="f-quantity-cases" name="quantityCases" min="0" max="100" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
                 <label for="f-quantity-cases">Disku futlāru skaits</label>
                 <span class="unit-price">1,00&nbsp;€ / gab.</span>
                 <span class="field-error" aria-live="polite"></span>
@@ -548,7 +525,7 @@
                   <ul class="file-list" data-file-list-for="artwork-case-back" aria-live="polite"></ul>
                 </div>
               </fieldset>
-            </section>
+            </details>
 
             <div class="order-total" aria-live="polite">
               <span>Provizoriskā kopsumma</span>
@@ -603,6 +580,14 @@
             <p>Informācija ir nosūtīta un saglabāta.</p>
           </div>
         </form>
+        <dialog class="service-dialog" id="serviceInfoDialog" aria-labelledby="serviceInfoTitle">
+          <form method="dialog">
+            <h3 id="serviceInfoTitle">Par pakalpojumu</h3>
+            <p id="serviceInfoText"></p>
+            <label class="service-dialog-dismiss"><input type="checkbox" id="serviceInfoDismiss" /> Vairāk nerādīt šo skaidrojumu</label>
+            <button type="submit" class="btn btn-primary"><span class="btn-label">Sapratu</span></button>
+          </form>
+        </dialog>
       </div>
     </section>
   </main>
@@ -620,6 +605,6 @@
 
   <!-- Three.js ir vajadzīgs interaktīvajam CD modulim public/script.js. -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js" defer></script>
-  <script src="script.js" defer></script>
+  <script src="script.js?v=order-summary-v2" defer></script>
 </body>
 </html>

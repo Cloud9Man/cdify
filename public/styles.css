@@ -964,6 +964,11 @@ main, .footer { position: relative; z-index: 1; }
 
 .order-intro { margin: -.2rem 0 1.4rem; color: var(--muted); font-size: .9rem; }
 .order-section { padding: 1.1rem 0 .3rem; border-top: 1px solid var(--border); }
+.order-section-summary { display: flex; align-items: center; gap: .6rem; padding: .15rem 0 .8rem; color: var(--text-strong); font: 700 1.1rem var(--font-head); cursor: pointer; list-style: none; }
+.order-section-summary::-webkit-details-marker { display: none; }
+.order-section-summary::after { content: "+"; margin-left: auto; color: var(--muted); font: 600 1.15rem var(--font-body); }
+.order-section[open] > .order-section-summary::after { content: "−"; }
+.order-section-summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 5px; }
 .quantity-field { padding-right: 0; }
 .quantity-field input { padding-right: 8rem; }
 .quantity-field label { right: 8rem; }
@@ -973,6 +978,21 @@ main, .footer { position: relative; z-index: 1; }
 .upload-panel { margin-top: .9rem; padding: 1rem; border: 1px solid var(--border); border-radius: 16px; background: rgba(var(--ink-rgb), .035); }
 .upload-label { display: block; margin: .15rem 0 .5rem; font-size: .9rem; font-weight: 600; }
 .upload-panel input[type="file"] { display: block; width: 100%; padding: .7rem; border: 1px dashed var(--border); border-radius: 11px; background: rgba(var(--ink-rgb), .035); font-size: .83rem; }
+.disc-cards { margin: .8rem 0 1rem; }
+.disc-cards[hidden] { display: none; }
+.disc-card-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: .65rem; margin-top: .7rem; }
+.disc-card { min-width: 0; padding: .8rem; border: 1px solid var(--border); border-radius: 13px; background: rgba(var(--ink-rgb), .035); }
+.disc-card h4 { margin: 0 0 .5rem; color: var(--text-strong); font-size: .9rem; }
+.disc-card-upload { display: grid; gap: .35rem; margin-top: .6rem; }
+.disc-card-upload input[type="file"] { width: 100%; padding: .55rem; border: 1px dashed var(--border); border-radius: 9px; background: rgba(var(--ink-rgb), .035); font-size: .78rem; }
+.disc-assignment { margin: .8rem 0 .25rem; }
+.service-dialog { width: min(92vw, 520px); max-height: 85vh; padding: 1.4rem; border: 1px solid var(--border); border-radius: 20px; background: var(--bg-soft); color: var(--text); box-shadow: 0 24px 80px #0008; }
+.service-dialog::backdrop { background: rgba(5, 6, 12, .72); backdrop-filter: blur(4px); }
+.service-dialog h3 { margin: 0 0 .6rem; color: var(--text-strong); font: 700 1.35rem var(--font-head); }
+.service-dialog p { line-height: 1.6; }
+.service-dialog-dismiss { display: flex; align-items: center; gap: .55rem; margin: 1rem 0; color: var(--muted); font-size: .88rem; }
+.service-dialog-dismiss input { width: 18px; height: 18px; accent-color: var(--primary); }
+.service-dialog .btn { justify-content: center; width: 100%; }
 .add-files-btn { margin-top: .55rem; padding: .55rem .95rem; font-size: .8rem; }
 .additional-file-input { display: grid; gap: .4rem; margin-top: .65rem; }
 .remove-files-btn { justify-self: start; padding: .25rem 0; border: 0; background: transparent; color: var(--err-text); font-size: .76rem; cursor: pointer; }

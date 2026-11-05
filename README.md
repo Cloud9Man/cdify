@@ -5,14 +5,15 @@ CDify vietne tiek publicēta Firebase Hosting un izmanto pasūtījuma formu, Fir
 ## Datu plūsma
 
 - Formas teksts un pasūtījuma metadati tiek sūtīti uz tās pašas Firebase Hosting izcelsmes `/api` adresi, pārbaudīti `api` Cloud Function un saglabāti Firestore kolekcijā `orders`.
-- Atlasītie faili tiek augšupielādēti tieši R2 bucketā `r2cdify`, izmantojot īslaicīgas parakstītas saites. Firestore glabā failu atslēgas un metadatus, nevis failu saturu.
+- Jaunā pasūtījuma Firestore dokumenta ID un R2 saknes mape ir viens un tas pats lasāmais nosaukums: `<kārtas-numurs>-<klienta-vārds>-<produktu-veidi-un-skaits>`, piemēram, `106-Janina-Vinila-2-Parastie-1`. Kārtas numurs garantē unikalitāti; UUID pasūtījuma nosaukumā vairs nav.
+- Atlasītie faili tiek augšupielādēti tieši R2 bucketā `r2cdify`, izmantojot īslaicīgas parakstītas saites ar path-style URL. Firestore glabā failu atslēgas un metadatus, nevis failu saturu. R2 objektu ceļi ir sakārtoti kā `orders/<pasūtījuma-numurs>/discs/<veids>/<all-discs-vai-disc-NN>/<artwork-vai-burning>/<faila-nosaukums>--<unikāls-ID>`.
 - `firestore.rules` liedz vietnei tiešu piekļuvi Firestore; Cloud Function datubāzē raksta ar Firebase Admin SDK.
 - Formā redzamā kopsumma ir aptuvena; funkcija to aprēķina no iesniegtajiem produktiem un opcijām.
 
 ## Konfigurēšana un publicēšana
 
 1. Nomaini visus Cloudflare API tokenus un R2 piekļuves atslēgas, kas tika kopīgotas. Izveido atsevišķu R2 S3 piekļuves atslēgu ar piekļuvi tikai `r2cdify` bucketam.
-2. Cloudflare bucketam iestati CORS: vietnes izcelsmes adreses, `PUT` metode un `Content-Type` galvene. Formas faili tiek augšupielādēti tieši R2, tāpēc bucket CORS konfigurācija ir obligāta. Pašlaik konfigurētajām vietnes adresēm to var iestatīt šādi:
+2. Cloudflare bucketam iestati CORS: vietnes izcelsmes adreses, `PUT` metode un pieprasījuma galvenes. CORS ir obligāts, jo pārlūks augšupielādē failus tieši R2. Augšupielādes pieprasījumā vairs netiek sūtītas pielāgotas `x-amz-meta-*` galvenes; tas novērš biežu preflight noraidījumu. Iestati:
 
    ```json
    [
@@ -23,18 +24,14 @@ CDify vietne tiek publicēta Firebase Hosting un izmanto pasūtījuma formu, Fir
          "https://home.jalatvia.lv"
        ],
        "AllowedMethods": ["PUT"],
-       "AllowedHeaders": [
-         "Content-Type",
-         "x-amz-checksum-crc32",
-         "x-amz-sdk-checksum-algorithm"
-       ],
+       "AllowedHeaders": ["*"],
        "ExposeHeaders": ["ETag"],
        "MaxAgeSeconds": 3600
      }
    ]
    ```
 
-   Pievieno arī citas produkcijas vai priekšskatījuma vietnes adreses, ja tās izmanto formu.
+   Pievieno arī citas produkcijas vai priekšskatījuma vietnes adreses, ja tās izmanto formu. Pēc CORS maiņas izmēģini formu no tās pašas vietnes adreses; vecam parakstītam URL var būt beidzies derīgums.
 3. Failā `functions/.env.cdify-smu` norādi publiskās konfigurācijas vērtības:
 
    ```dotenv

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>CD vāku redaktors — CDify</title>
-  <meta name="description" content="Izveido CD jewel case vāku un Epson XP-7100 diska dizainu. Projekti tiek saglabāti tikai tavā ierīcē." />
+  <meta name="description" content="Izveido CD jewel case vāku un diska dizainu. Sagatavo savu dizainu un lejuplādē to kā PNG vai printē uzreiz!" />
   <meta name="theme-color" content="#06070d" />
   <link rel="icon" href="./Images/TLogo.png" />
   <script>
@@ -45,47 +45,47 @@
           <option value="disc">Diska etiķete · Epson XP-7100 · 120 mm</option>
         </select>
 
-        <div class="control-group">
-          <div class="control-heading"><label class="control-label" for="imageFile">Attēli</label><span class="local-tag">Tikai ierīcē</span></div>
+        <details class="control-group editor-section" open>
+          <summary class="control-label">Attēli <span class="local-tag">Tikai ierīcē</span></summary>
           <input id="imageFile" type="file" accept="image/*" multiple />
           <input id="backgroundFile" type="file" accept="image/*" hidden />
           <button type="button" class="small-action" id="replaceBackground">Nomainīt fona attēlu</button>
           <p class="control-hint">Izvēloties vairākus, pirmais attēls kļūst par fonu, pārējie - par atsevišķiem slāņiem. Velc objektu, lai pārvietotu; velc tā stūri, lai mainītu izmēru.</p>
-        </div>
+        </details>
 
-        <div class="control-group base-image-tools">
-          <span class="control-label">Fona attēla pielāgošana</span>
+        <details class="control-group base-image-tools editor-section" open>
+          <summary class="control-label">Fona attēla pielāgošana</summary>
           <label class="object-field">Mērogs <output id="zoomOut">100%</output><input id="zoom" type="range" min="50" max="300" value="100" /></label>
           <label class="object-field">Pagrieziens <output id="rotationOut">0°</output><input id="rotation" type="range" min="-180" max="180" value="0" /></label>
           <label class="object-field">Gaišums <output id="brightnessOut">100%</output><input id="brightness" type="range" min="30" max="180" value="100" /></label>
           <label class="object-field">Kontrasts <output id="contrastOut">100%</output><input id="contrast" type="range" min="30" max="180" value="100" /></label>
           <label class="object-field">Piesātinājums <output id="saturationOut">100%</output><input id="saturation" type="range" min="0" max="200" value="100" /></label>
-        </div>
+        </details>
 
-        <div class="control-group">
-          <span class="control-label">Pievienot objektu</span>
+        <details class="control-group editor-section" open>
+          <summary class="control-label">Pievienot objektu</summary>
           <div class="add-object-actions">
             <button type="button" class="btn btn-ghost" id="addText">＋ Tekstlodziņš</button>
             <button type="button" class="btn btn-ghost" id="addRect">＋ Taisnstūris</button>
             <button type="button" class="btn btn-ghost" id="addCircle">＋ Aplis</button>
             <button type="button" class="btn btn-ghost" id="addLine">＋ Līnija</button>
           </div>
-        </div>
+        </details>
 
-        <div class="control-group guide-toggles">
-          <span class="control-label">Palīglīnijas</span>
+        <details class="control-group guide-toggles editor-section">
+          <summary class="control-label">Palīglīnijas</summary>
           <label><input id="toggleGuides" type="checkbox" checked /> Sagataves locījuma / griezuma līnijas</label>
           <label><input id="toggleGrid" type="checkbox" /> Režģis (5 mm)</label>
           <p class="control-hint">Palīglīnijas redzamas tikai priekšskatījumā, tās netiek saglabātas PNG vai drukā.</p>
-        </div>
+        </details>
 
-        <div class="control-group layer-list-group">
-          <div class="control-heading"><span class="control-label">Slāņi</span><span id="layerCount" class="local-tag">0 objekti</span></div>
+        <details class="control-group layer-list-group editor-section" open>
+          <summary class="control-label">Slāņi <span id="layerCount" class="local-tag">0 objekti</span></summary>
           <div id="layerList" class="layer-list"><p class="control-hint">Pievieno attēlu, tekstu vai formu.</p></div>
-        </div>
+        </details>
 
-        <div class="control-group selected-object" id="selectedObject" hidden>
-          <div class="control-heading"><span class="control-label">Atlasītais objekts</span><button type="button" id="deleteObject" class="small-action">Dzēst</button></div>
+        <details class="control-group selected-object editor-section" id="selectedObject" hidden open>
+          <summary class="control-label">Atlasītais objekts <span><button type="button" id="deleteObject" class="small-action">Dzēst</button></span></summary>
           <p id="selectedType" class="control-hint"></p>
           <label class="object-field" id="textField" hidden>Teksts<textarea id="objectText" rows="3" maxlength="500"></textarea></label>
           <label class="object-field" id="colorField" hidden>Krāsa<input id="objectColor" type="color" value="#ee6253" /></label>
@@ -95,10 +95,10 @@
           <label class="object-field">Necaurspīdīgums <output id="objectOpacityOut">100%</output><input id="objectOpacity" type="range" min="10" max="100" value="100" /></label>
           <label class="object-field" id="fontSizeField" hidden>Teksta lielums <output id="fontSizeOut">6%</output><input id="fontSize" type="range" min="2" max="20" value="6" /></label>
           <div class="layer-order"><button type="button" id="layerDown" class="small-action">Uz leju</button><button type="button" id="layerUp" class="small-action">Uz augšu</button></div>
-        </div>
+        </details>
 
-        <div class="control-group print-queue">
-          <div class="control-heading"><span class="control-label">Drukas rinda</span><span id="queueCount" class="local-tag">0 attēli</span></div>
+        <details class="control-group print-queue editor-section">
+          <summary class="control-label">Drukas rinda <span id="queueCount" class="local-tag">0 attēli</span></summary>
           <input id="queueFiles" type="file" accept="image/*" multiple />
           <button type="button" id="queueCurrent" class="small-action">Pievienot pašreizējo dizainu</button>
           <div id="queueList" class="queue-list"><p class="control-hint">Pievieno attēlus vai pašreizējo dizainu drukas rindai.</p></div>
@@ -106,7 +106,7 @@
           <div id="queueAnalysis" class="queue-analysis" role="status">A4 ainava · 5 mm malas · 3 mm atstarpe · 100 mm pārbaudes līnija apakšā.</div>
           <button type="button" class="btn btn-primary queue-print" id="printQueue"><span class="btn-label">Drukāt visu rindu</span></button>
           <p class="control-hint">Atsevišķi attēli aizpilda izvēlēto izmēru un var tikt apgriezti; saliktam dizainam pievieno priekšskatījumu. Attēli tiek pagriezti un sakārtoti, lai uz lapas ietilptu pēc iespējas vairāk.</p>
-        </div>
+        </details>
 
         <div class="editor-actions"><button class="btn btn-primary" id="download" type="button"><span class="btn-label">Lejupielādēt PNG</span></button><button class="btn btn-ghost" id="print" type="button">Drukāt uz A4</button><button class="btn btn-ghost" id="reset" type="button">Notīrīt dizainu</button></div>
         <p class="control-hint">Drukājot izvēlies A4 papīru un 100% mērogu. Lapa ietver 100 mm pārbaudes līniju un +0,5 mm izmēra kompensāciju.</p>

@@ -108,3 +108,14 @@
   .editor-actions { grid-template-columns: 1fr; }
   .editor-actions .btn { width: 100%; font-size: .9rem; }
 }
+
+/* Collapsible editor controls */
+.editor-section > summary { list-style: none; cursor: pointer; min-height: 28px; }
+.editor-section > summary::-webkit-details-marker { display: none; }
+.editor-section > summary::after { content: "＋"; color: var(--muted); font-size: 1rem; margin-left: auto; transition: transform .18s ease; }
+.editor-section[open] > summary::after { content: "−"; }
+.editor-section > summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; border-radius: 4px; }
+.editor-section[open] > :not(summary) { animation: section-reveal .16s ease-out; }
+.editor-section > summary > span { margin-left: auto; }
+@keyframes section-reveal { from { opacity: .6; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .editor-section > summary::after { transition: none; } .editor-section[open] > :not(summary) { animation: none; } }

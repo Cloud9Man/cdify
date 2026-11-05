@@ -32,37 +32,23 @@ const R2_PUBLIC_DOMAIN = defineString("R2_PUBLIC_DOMAIN", { default: "" });
 const R2_ACCESS_KEY_ID = defineSecret("R2_ACCESS_KEY_ID");
 const R2_SECRET_ACCESS_KEY = defineSecret("R2_SECRET_ACCESS_KEY");
 const MAX_FILE_SIZE = 700 * 1024 * 1024;
-const ORDER_NUMBER_PATTERN = /^\d+-[A-Za-z0-9-]{1,60}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-const FILE_KEY_PATTERN = /^uploads\/\d+-[A-Za-z0-9-]{1,60}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-[a-zA-Z0-9._-]{1,120}$/;
+const ORDER_NUMBER_PATTERN = /^\d+-[A-Za-z0-9-]{1,60}-(?:Vinila-\d+(?:-Parastie-\d+)?(?:-Futlari-\d+)?|Parastie-\d+(?:-Futlari-\d+)?|Futlari-\d+|Pasutijums)$/;
 
 const ORDER_PRODUCTS = {
-  vinyl: { unitPrice: 1.5, options: { optionVinylBurn: 0.25 } },
-  lightscribe: {
-    unitPrice: 2,
-    options: {
-      optionLightscribeReadableFinish: 0.5,
-      optionLightscribeUnreadableFinish: 0.5,
-      optionLightscribeBurn: 0.25,
-    },
-  },
+  vinyl: { unitPrice: 1.5, options: { optionVinylSurface: 0.5, optionVinylBurn: 0.25 } },
   standard: {
     unitPrice: 1,
-    options: {
-      optionStandardReadableFinish: 0.5,
-      optionStandardBurn: 0.25,
-    },
+    options: { optionStandardSurface: 0.5, optionStandardBurn: 0.25 },
   },
   cases: { unitPrice: 1, options: { optionCasesFinish: 0.5 } },
 };
 
 const ALLOWED_FILE_FIELDS = new Set([
-  "artworkLightscribeReadable",
-  "artworkLightscribeUnreadable",
-  "artworkStandardReadable",
+  "artworkVinylSurface",
+  "artworkStandardSurface",
   "artworkCaseFront",
   "artworkCaseBack",
   "burningVinyl",
-  "burningLightscribe",
   "burningStandard",
 ]);
 
@@ -75,6 +61,7 @@ function createS3Client() {
   return new S3Client({
     region: "auto",
     endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+    forcePathStyle: true,
     requestChecksumCalculation: "WHEN_REQUIRED",
     credentials: {
       accessKeyId: R2_ACCESS_KEY_ID.value(),
@@ -105,6 +92,21 @@ function toOrderNameSlug(name) {
   return slug || "Klients";
 }
 
+function toOrderSummary(items) {
+  if (!Array.isArray(items) || items.length < 1 || items.length > Object.keys(ORDER_PRODUCTS).length) return null;
+  const labels = { vinyl: "Vinila", standard: "Parastie", cases: "Futlari" };
+  const seen = new Set();
+  for (const item of items) {
+    if (!item || !Object.hasOwn(labels, item.product) || seen.has(item.product) ||
+      !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 100) return null;
+    seen.add(item.product);
+  }
+  return ["vinyl", "standard", "cases"]
+    .filter((product) => seen.has(product))
+    .map((product) => `${labels[product]}-${items.find((item) => item.product === product).quantity}`)
+    .join("-");
+}
+
 function validateFiles(files, orderNumber) {
   if (!Array.isArray(files)) return false;
   const keys = new Set();
@@ -113,8 +115,9 @@ function validateFiles(files, orderNumber) {
     if (
       !file ||
       typeof file.key !== "string" ||
-      !FILE_KEY_PATTERN.test(file.key) ||
-      !file.key.startsWith(`uploads/${orderNumber}-`) ||
+      !file.key.startsWith(`orders/${orderNumber}/`) ||
+      file.key.split("/")[1] !== orderNumber ||
+      !/^orders\/[\dA-Za-z-]+\/(?:discs\/(?:vinyl|standard)\/(?:all-discs|disc-\d{2,6})\/(?:artwork|burning)|general\/(?:artwork|burning))\/[a-zA-Z0-9._-]{1,120}--[0-9a-f-]{36}$/.test(file.key) ||
       keys.has(file.key) ||
       typeof file.name !== "string" ||
       file.name.length < 1 ||
@@ -125,7 +128,11 @@ function validateFiles(files, orderNumber) {
       !Number.isSafeInteger(file.size) ||
       file.size < 1 ||
       file.size > MAX_FILE_SIZE ||
-      !ALLOWED_FILE_FIELDS.has(file.field)
+      !ALLOWED_FILE_FIELDS.has(file.field) ||
+      (file.product !== undefined && !["vinyl", "standard"].includes(file.product)) ||
+      (file.diskNumber !== undefined && (!Number.isInteger(file.diskNumber) || file.diskNumber < 1 || file.diskNumber > 10000)) ||
+      (file.scope !== undefined && !["all", "disk"].includes(file.scope)) ||
+      (file.purpose !== undefined && !["artwork", "burning"].includes(file.purpose))
     ) {
       return false;
     }
@@ -138,12 +145,10 @@ function filesMatchOrder(items, files) {
   const expectedFields = new Set();
   const requiredFields = new Set();
   const optionFiles = {
-    optionLightscribeReadableFinish: ["artworkLightscribeReadable"],
-    optionLightscribeUnreadableFinish: ["artworkLightscribeUnreadable"],
-    optionStandardReadableFinish: ["artworkStandardReadable"],
+    optionVinylSurface: ["artworkVinylSurface"],
+    optionStandardSurface: ["artworkStandardSurface"],
     optionCasesFinish: ["artworkCaseFront", "artworkCaseBack"],
     optionVinylBurn: ["burningVinyl"],
-    optionLightscribeBurn: ["burningLightscribe"],
     optionStandardBurn: ["burningStandard"],
   };
 
@@ -152,6 +157,24 @@ function filesMatchOrder(items, files) {
       for (const field of optionFiles[option] || []) {
         expectedFields.add(field);
         requiredFields.add(field);
+      }
+    }
+    if (["vinyl", "standard"].includes(item.product)) {
+      const prefix = item.product === "vinyl" ? "Vinyl" : "Standard";
+      const diskOptions = [
+        ...(item.options.includes(`option${prefix}Surface`) ? [[`artwork${prefix}Surface`, "artwork"]] : []),
+        ...(item.options.includes(`option${prefix}Burn`) ? [[`burning${prefix}`, "burning"]] : []),
+      ];
+      for (const [field, purpose] of diskOptions) {
+        const matches = files.filter((file) => file.field === field && file.product === item.product && file.purpose === purpose);
+        if (item.discAssignment === "individual") {
+          for (let disk = 1; disk <= item.quantity; disk += 1) {
+            if (!matches.some((file) => file.scope === "disk" && file.diskNumber === disk)) return false;
+          }
+          if (matches.some((file) => file.scope !== "disk" || file.diskNumber > item.quantity)) return false;
+        } else if (!matches.some((file) => file.scope === "all" && file.diskNumber === undefined)) {
+          return false;
+        }
       }
     }
   }
@@ -179,12 +202,16 @@ function normalizeSubmission(body) {
     requestType,
     name: body.name.trim(),
     email: body.email.trim(),
-    files: body.files.map(({ key, name, contentType, size, field }) => ({
+    files: body.files.map(({ key, name, contentType, size, field, product, diskNumber, scope, purpose }) => ({
       key,
       name,
       contentType,
       size,
       field,
+      ...(product ? { product } : {}),
+      ...(diskNumber ? { diskNumber } : {}),
+      ...(scope ? { scope } : {}),
+      ...(purpose ? { purpose } : {}),
     })),
     status: "jauns",
   };
@@ -213,10 +240,11 @@ function normalizeSubmission(body) {
         products.has(item.product) ||
         !Number.isInteger(item.quantity) ||
         item.quantity < 1 ||
-        item.quantity > 100000 ||
+        item.quantity > 100 ||
         !Array.isArray(item.options) ||
         new Set(item.options).size !== item.options.length ||
-        item.options.some((option) => !Object.hasOwn(product.options, option))
+        item.options.some((option) => !Object.hasOwn(product.options, option)) ||
+        (["vinyl", "standard"].includes(item.product) && !["same", "individual"].includes(item.discAssignment))
       ) {
         return null;
       }
@@ -229,6 +257,7 @@ function normalizeSubmission(body) {
         product: item.product,
         quantity: item.quantity,
         options: item.options,
+        ...(item.discAssignment ? { discAssignment: item.discAssignment } : {}),
       });
     }
 
@@ -291,6 +320,9 @@ exports.api = onRequest({
           return res.status(400).json({ error: "Lūdzu, norādiet derīgu vārdu un uzvārdu." });
         }
 
+        // Older cached Hosting pages may still call start-order without items.
+        const orderSummary = body.items === undefined ? "Pasutijums" : toOrderSummary(body.items);
+        if (!orderSummary) return res.status(400).json({ error: "Pasūtījuma produktu skaits nav derīgs." });
         const nameSlug = toOrderNameSlug(body.name.trim());
         const sequenceRef = db.collection("_system").doc("order-sequence");
         const orderNumber = await db.runTransaction(async (transaction) => {
@@ -305,7 +337,7 @@ exports.api = onRequest({
             throw new Error("Order sequence has reached its maximum value.");
           }
 
-          const nextOrderNumber = `${nextSequence}-${nameSlug}-${randomUUID()}`;
+          const nextOrderNumber = `${nextSequence}-${nameSlug}-${orderSummary}`;
           transaction.set(sequenceRef, {
             lastSequence: nextSequence,
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -313,6 +345,7 @@ exports.api = onRequest({
           transaction.create(db.collection("_orderReservations").doc(nextOrderNumber), {
             orderNumber: nextOrderNumber,
             nameSlug,
+            orderSummary,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
           });
           return nextOrderNumber;
@@ -322,7 +355,7 @@ exports.api = onRequest({
       }
 
       if (req.method === "POST" && path === "/get-upload-url") {
-        const { orderNumber, fileName, fileType, fileSize, field } = body || {};
+        const { orderNumber, fileName, fileType, fileSize, field, product, diskNumber, scope, purpose } = body || {};
         if (
           !ORDER_NUMBER_PATTERN.test(orderNumber || "") ||
           typeof fileName !== "string" ||
@@ -334,39 +367,36 @@ exports.api = onRequest({
           !Number.isSafeInteger(fileSize) ||
           fileSize < 1 ||
           fileSize > MAX_FILE_SIZE ||
-          !ALLOWED_FILE_FIELDS.has(field)
+          !ALLOWED_FILE_FIELDS.has(field) ||
+          (product !== undefined && !["vinyl", "standard"].includes(product)) ||
+          (diskNumber !== undefined && (!Number.isInteger(diskNumber) || diskNumber < 1 || diskNumber > 10000)) ||
+          (scope !== undefined && !["all", "disk"].includes(scope)) ||
+          (purpose !== undefined && !["artwork", "burning"].includes(purpose)) ||
+          (product && purpose && !((purpose === "artwork" && field.startsWith("artwork")) || (purpose === "burning" && field.startsWith("burning"))))
         ) {
           return res.status(400).json({ error: "Faila informācija nav derīga." });
         }
 
         const safeFileName = fileName.trim().replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 120) || "file";
-        const fileKey = `uploads/${orderNumber}-${randomUUID()}-${safeFileName}`;
+        if ((scope === "disk") !== Number.isInteger(diskNumber)) {
+          return res.status(400).json({ error: "Norādītais diska numurs nav derīgs." });
+        }
+        const category = product
+          ? `discs/${product}/${scope === "disk" ? `disc-${String(diskNumber).padStart(2, "0")}` : "all-discs"}/${purpose || "artwork"}`
+          : `general/${field.startsWith("burning") ? "burning" : "artwork"}`;
+        const fileKey = `orders/${orderNumber}/${category}/${safeFileName}--${randomUUID()}`;
 
         const command = new PutObjectCommand({
           Bucket: bucketName,
           Key: fileKey,
           ContentType: fileType,
-          Metadata: {
-            "order-number": orderNumber,
-            "file-field": field,
-          },
         });
-        const uploadUrl = await getSignedUrl(createS3Client(), command, {
-          expiresIn: 3600,
-          unhoistableHeaders: new Set([
-            "x-amz-meta-order-number",
-            "x-amz-meta-file-field",
-          ]),
-        });
+        const uploadUrl = await getSignedUrl(createS3Client(), command, { expiresIn: 3600 });
         const publicDomain = R2_PUBLIC_DOMAIN.value().trim().replace(/\/+$/, "");
 
         return res.json({
           uploadUrl,
           fileKey,
-          uploadHeaders: {
-            "x-amz-meta-order-number": orderNumber,
-            "x-amz-meta-file-field": field,
-          },
           publicUrl: publicDomain ? `${publicDomain}/${fileKey}` : null,
         });
       }
@@ -388,8 +418,7 @@ exports.api = onRequest({
             }));
             if (
               uploaded.ContentLength !== file.size ||
-              uploaded.Metadata?.["order-number"] !== submission.orderNumber ||
-              uploaded.Metadata?.["file-field"] !== file.field
+              (uploaded.ContentType && uploaded.ContentType !== file.contentType)
             ) {
               return res.status(400).json({ error: "Augšupielādētā faila dati nesakrīt." });
             }
@@ -426,6 +455,8 @@ exports.api = onRequest({
             if (
               !reservationSnapshot.exists ||
               reservationSnapshot.get("nameSlug") !== toOrderNameSlug(submission.name) ||
+              (reservationSnapshot.get("orderSummary") !== "Pasutijums" &&
+                reservationSnapshot.get("orderSummary") !== toOrderSummary(submission.items)) ||
               existingOrderSnapshot.exists
             ) {
               return false;

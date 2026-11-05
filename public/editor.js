@@ -9,6 +9,18 @@
   const queueCtx = queueCanvas.getContext('2d');
   const shell = $('#previewShell');
   const state = { template: 'front', imageBlob: null, zoom: 1, rotation: 0, brightness: 1, contrast: 1, saturation: 1, text: '', textColor: '#ffffff', tx: 0, ty: 0, layers: [], selectedId: null, guidelines: true, grid: false, printQueue: [] };
+  const editorSections = [...document.querySelectorAll('.editor-section')];
+  const sectionStorageKey = 'cdify-editor-sections';
+  try {
+    const savedSections = JSON.parse(localStorage.getItem(sectionStorageKey) || '{}');
+    editorSections.forEach((section, index) => {
+      const key = section.id || section.dataset.section || 'section-' + index;
+      if (typeof savedSections[key] === 'boolean') section.open = savedSections[key];
+      section.addEventListener('toggle', () => {
+        try { savedSections[key] = section.open; localStorage.setItem(sectionStorageKey, JSON.stringify(savedSections)); } catch {}
+      });
+    });
+  } catch {}
   let sourceImage = null;
   const layerImages = new Map();
   const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
