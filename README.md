@@ -21,7 +21,7 @@ CDify vietne tiek publicēta Firebase Hosting un izmanto pasūtījuma formu, Fir
        "AllowedOrigins": [
          "https://cdify-smu.web.app",
          "https://cdify-smu.firebaseapp.com",
-         "https://home.jalatvia.lv"
+         "https://cdify.xyz"
        ],
        "AllowedMethods": ["PUT"],
        "AllowedHeaders": ["*"],
