@@ -38,7 +38,7 @@ const ORDER_PRODUCTS = {
   vinyl: { unitPrice: 1.5, options: { optionVinylSurface: 0.5, optionVinylBurn: 0.25 } },
   standard: {
     unitPrice: 1,
-    options: { optionStandardSurface: 0.5, optionStandardBurn: 0.25 },
+    options: { optionStandardSurface: 0.5, optionStandardBurn: 0.25, optionStandardImageBurn: 0.25 },
   },
   cases: { unitPrice: 1, options: { optionCasesFinish: 0.5 } },
 };
@@ -150,6 +150,7 @@ function filesMatchOrder(items, files) {
     optionCasesFinish: ["artworkCaseFront", "artworkCaseBack"],
     optionVinylBurn: ["burningVinyl"],
     optionStandardBurn: ["burningStandard"],
+    optionStandardImageBurn: ["burningStandard"],
   };
 
   for (const item of items) {
@@ -163,7 +164,9 @@ function filesMatchOrder(items, files) {
       const prefix = item.product === "vinyl" ? "Vinyl" : "Standard";
       const diskOptions = [
         ...(item.options.includes(`option${prefix}Surface`) ? [[`artwork${prefix}Surface`, "artwork"]] : []),
-        ...(item.options.includes(`option${prefix}Burn`) ? [[`burning${prefix}`, "burning"]] : []),
+        ...(item.options.some((option) => option === `option${prefix}Burn` || option === "optionStandardImageBurn")
+          ? [[`burning${prefix}`, "burning"]]
+          : []),
       ];
       for (const [field, purpose] of diskOptions) {
         const matches = files.filter((file) => file.field === field && file.product === item.product && file.purpose === purpose);

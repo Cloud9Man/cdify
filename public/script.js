@@ -953,6 +953,7 @@
       optionStandardPrintSurface: ['Druka uz parastā diska', 'Krāsains zīmējums tiek drukāts uz diska virsmas. Cena: 0,50 € par katru disku. Izvēlieties attēlu no datora.'],
       optionVinylBurn: ['Iededzināšana vinila stila diskā', 'Faili tiek ierakstīti diskā un ir pieejami nolasīšanai. Nospiediet failu izvēles pogu, atrodiet vajadzīgo mapi, iezīmējiet vienu vai vairākus failus (Ctrl ļauj izvēlēties vairākus) un spiediet “Atvērt”. Katram diskam paredzētos failus var norādīt atsevišķi. Visu pasūtījuma iededzināšanas failu kopējais lielums nedrīkst pārsniegt 700 MB.'],
       optionStandardBurn: ['Iededzināšana parastajā diskā', 'Faili tiek ierakstīti diskā un ir pieejami nolasīšanai. Nospiediet failu izvēles pogu, atrodiet vajadzīgo mapi, iezīmējiet vienu vai vairākus failus (Ctrl ļauj izvēlēties vairākus) un spiediet “Atvērt”. Katram diskam paredzētos failus var norādīt atsevišķi. Visu pasūtījuma iededzināšanas failu kopējais lielums nedrīkst pārsniegt 700 MB.'],
+      optionStandardImageBurn: ['Attēla iededzināšana parastajā diskā', 'Izvēlieties attēla failu, kuru iededzināt diskā. Faila augšupielādei izmantojiet šo disku iededzināšanas failu izvēli.'],
       optionCasesFinish: ['Futlāra apdare', 'Drukāsim zīmējumu uz futlāra vāciņa. Pievienojiet atsevišķus priekšpuses un aizmugures attēlus.'],
       optionSlimCaseFinish: ['Plānā futlāra apdare', 'Drukāsim zīmējumu uz futlāra vāciņa. Pievienojiet atsevišķus priekšpuses un aizmugures attēlus.'],
     };
