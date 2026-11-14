@@ -1,6 +1,7 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const { defineSecret, defineString } = require("firebase-functions/params");
 const admin = require("firebase-admin");
+const nodemailer = require("nodemailer");
 const { randomUUID } = require("node:crypto");
 const {
   HeadObjectCommand,
@@ -31,6 +32,9 @@ const R2_BUCKET_NAME = defineString("R2_BUCKET_NAME", { default: "r2cdify" });
 const R2_PUBLIC_DOMAIN = defineString("R2_PUBLIC_DOMAIN", { default: "" });
 const R2_ACCESS_KEY_ID = defineSecret("R2_ACCESS_KEY_ID");
 const R2_SECRET_ACCESS_KEY = defineSecret("R2_SECRET_ACCESS_KEY");
+const GMAIL_USER = defineSecret("GMAIL_USER");
+const GMAIL_APP_PASSWORD = defineSecret("GMAIL_APP_PASSWORD");
+const ORDER_NOTIFICATION_EMAIL = defineSecret("ORDER_NOTIFICATION_EMAIL");
 const MAX_FILE_SIZE = 700 * 1024 * 1024;
 const ORDER_NUMBER_PATTERN = /^\d+-[A-Za-z0-9-]{1,60}-(?:Vinila-\d+(?:-Parastie-\d+)?(?:-Parastais-dead-\d+)?(?:-Futlari-\d+)?|Parastie-\d+(?:-Parastais-dead-\d+)?(?:-Futlari-\d+)?|Parastais-dead-\d+(?:-Futlari-\d+)?|Futlari-\d+|Pasutijums)$/;
 
@@ -335,9 +339,56 @@ function parseRequestBody(body, rawBody) {
   return null;
 }
 
+async function sendOrderNotification(submission) {
+  const gmailUser = GMAIL_USER.value();
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: gmailUser,
+      pass: GMAIL_APP_PASSWORD.value().replace(/\s/g, ""),
+    },
+  });
+  const productLabels = {
+    vinyl: "Vinila",
+    standard: "Parastie",
+    "parastais-dead": "Parastais-dead",
+    cases: "Futlāri",
+  };
+  const items = submission.items.map((item) =>
+    `- ${productLabels[item.product]}: ${item.quantity}; opcijas: ${item.options.join(", ") || "nav"}`
+  );
+
+  await transporter.sendMail({
+    from: `"CDify pasūtījumi" <${gmailUser}>`,
+    to: ORDER_NOTIFICATION_EMAIL.value(),
+    replyTo: submission.email,
+    subject: `Jauns pasūtījums ${submission.orderNumber}`,
+    text: [
+      `Pasūtījuma numurs: ${submission.orderNumber}`,
+      `Klients: ${submission.name}`,
+      `E-pasts: ${submission.email}`,
+      "",
+      "Produkti:",
+      ...items,
+      "",
+      `Aptuvenā kopsumma: ${(submission.estimatedTotalCents / 100).toFixed(2)} EUR`,
+      "",
+      "Papildu informācija:",
+      submission.details,
+    ].join("\n"),
+  });
+}
+
 exports.api = onRequest({
   region: "europe-west1",
-  secrets: [R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY],
+  secrets: [
+    R2_ACCOUNT_ID,
+    R2_ACCESS_KEY_ID,
+    R2_SECRET_ACCESS_KEY,
+    GMAIL_USER,
+    GMAIL_APP_PASSWORD,
+    ORDER_NOTIFICATION_EMAIL,
+  ],
 }, async (req, res) => {
   return cors(req, res, async () => {
     try {
@@ -508,6 +559,17 @@ exports.api = onRequest({
           }
         } else {
           await docRef.create(orderData);
+        }
+
+        if (submission.requestType === "order") {
+          try {
+            await sendOrderNotification(submission);
+          } catch (error) {
+            console.error("Pasūtījums saglabāts, bet e-pasta paziņojumu neizdevās nosūtīt.", {
+              orderNumber: submission.orderNumber,
+              error: error.message,
+            });
+          }
         }
 
         return res.json({ success: true, orderId: docRef.id, orderNumber: submission.orderNumber });

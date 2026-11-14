@@ -6,6 +6,7 @@ CDify vietne tiek publicēta Firebase Hosting un izmanto pasūtījuma formu, Fir
 
 - Pasūtījuma opciju ID tiek glabāti produkta `items[].options` masīvā. Tikai apdrukai paredzētie diski tiek saglabāti kā `parastais-dead`; iededzināšanas faili tiek glabāti zem `burning/file-burn`, bet attēli zem `burning/image-burn`.
 - Formas teksts un pasūtījuma metadati tiek sūtīti uz tās pašas Firebase Hosting izcelsmes `/api` adresi, pārbaudīti `api` Cloud Function un saglabāti Firestore kolekcijā `orders`.
+- Pēc veiksmīgas pasūtījuma saglabāšanas `api` funkcija nosūta paziņojumu uz konfigurēto e-pasta adresi, izmantojot Gmail SMTP. Ja e-pasta nosūtīšana neizdodas, pasūtījums paliek saglabāts un kļūda tiek pierakstīta Functions žurnālos.
 - Jaunā pasūtījuma Firestore dokumenta ID un R2 saknes mape ir viens un tas pats lasāmais nosaukums: `<kārtas-numurs>-<klienta-vārds>-<produktu-veidi-un-skaits>`, piemēram, `106-Janina-Vinila-2-Parastie-1`. Kārtas numurs garantē unikalitāti; UUID pasūtījuma nosaukumā vairs nav.
 - Atlasītie faili tiek augšupielādēti tieši R2 bucketā `r2cdify`, izmantojot īslaicīgas parakstītas saites ar path-style URL. Firestore glabā failu atslēgas un metadatus, nevis failu saturu. R2 objektu ceļi ir sakārtoti kā `orders/<pasūtījuma-numurs>/discs/<veids>/<all-discs-vai-disc-NN>/<artwork-vai-burning-veids>/<faila-nosaukums>--<unikāls-ID>`.
 - `firestore.rules` liedz vietnei tiešu piekļuvi Firestore; Cloud Function datubāzē raksta ar Firebase Admin SDK.
@@ -42,11 +43,14 @@ CDify vietne tiek publicēta Firebase Hosting un izmanto pasūtījuma formu, Fir
    ```
 
    `R2_PUBLIC_DOMAIN` nav obligāts. Ja tas nav iestatīts, augšupielādētie objekti paliek privāti, un metadatos tiek saglabātas tikai R2 objektu atslēgas.
-4. Nomainītās piekļuves atslēgas iestati kā Firebase Functions noslēpumus. Izpildi komandas un ievadi vērtības drošajā uzvednē; neglabā piekļuves datus koda vai `.env` failos:
+4. Nomainītās R2 atslēgas un Gmail piekļuves datus iestati kā Firebase Functions noslēpumus. Gmail kontā vispirms ieslēdz divpakāpju verifikāciju un izveido lietotnes paroli. `GMAIL_USER` ir Gmail sūtītāja adrese, `GMAIL_APP_PASSWORD` ir šī lietotnes parole, bet `ORDER_NOTIFICATION_EMAIL` ir adrese, kas saņems jauno pasūtījumu paziņojumus. Izpildi komandas un ievadi vērtības drošajā uzvednē; neglabā piekļuves datus kodā vai `.env` failos:
 
    ```powershell
    npx firebase-tools functions:secrets:set R2_ACCESS_KEY_ID
    npx firebase-tools functions:secrets:set R2_SECRET_ACCESS_KEY
+   npx firebase-tools functions:secrets:set GMAIL_USER
+   npx firebase-tools functions:secrets:set GMAIL_APP_PASSWORD
+   npx firebase-tools functions:secrets:set ORDER_NOTIFICATION_EMAIL
    ```
 
 5. Instalē Functions atkarības, pēc tam publicē Firestore noteikumus, funkciju un vietni:
