@@ -408,12 +408,12 @@
             </li>
             <li>
               <span class="ci"><svg class="icon"><use href="#i-phone"/></svg></span>
-              <div><small>Tālrunis</small><a target="_blank" href="tel:+37127855305">+371 27 855 305 - Ernests</a> <br> <a target="_blank" href="tel:+37122452988">+371 22 452 988 - Jānis</a> <br> <a target="_blank" href="tel:+37129172307">+371 29 172 307 - Nils</a> <br> <a target="_blank" href="tel:+37122413969">+371 22 413 969 - Sandris</a></div>
+              <div><small>Tālrunis</small><a target="_blank" href="tel:+37127855305">+371 27 855 305</a> <br> <a target="_blank" href="tel:+37122452988">+371 22 452 988</a> <br> <a target="_blank" href="tel:+37129172307">+371 29 172 307</a> <br> <a target="_blank" href="tel:+37122413969">+371 22 413 969</a></div>
             </li>
           </ul>
 
           <div class="socials reveal" style="--d:.28s">
-            <a class="chip-link magnetic" target="_blank" href="#">Instagram</a>
+            <a class="chip-link magnetic" target="_blank" href="https://www.instagram.com/smu_cdify/">Instagram</a>
             <a class="chip-link magnetic" target="_blank" href="#">TikTok</a>
           </div>
         </div>
@@ -443,7 +443,7 @@
           <div data-form-panel="order">
             <p class="order-intro">Norādiet daudzumu katram produktam un pēc tam izvēlieties vajadzīgās opcijas. Drukāšana uz diska virsmas un vāku apdare maksā 0,50&nbsp;€ par gabalu, iededzināšana — 0,25&nbsp;€ par disku.</p>
 
-            <details class="order-section" data-order-section="vinyl" data-unit-price="1.5" open>
+            <details class="order-section" data-order-section="vinyl" data-unit-price="1.5">
               <summary class="order-section-summary">Vinila stila diski</summary>
               <div class="field quantity-field">
                 <input type="number" id="f-quantity-vinyl" name="quantityVinyl" min="0" max="100" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
@@ -473,7 +473,7 @@
               <div class="disc-cards" data-disc-cards="vinyl" hidden></div>
             </details>
 
-            <details class="order-section" data-order-section="standard" data-unit-price="1" open>
+            <details class="order-section" data-order-section="standard" data-unit-price="1">
               <summary class="order-section-summary">Parastie diski</summary>
               <div class="field quantity-field">
                 <input type="number" id="f-quantity-standard" name="quantityStandard" min="0" max="100" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
@@ -503,8 +503,27 @@
               <div class="disc-cards" data-disc-cards="standard" hidden></div>
             </details>
 
-            <details class="order-section" data-order-section="cases" data-unit-price="1" open>
-              <summary class="order-section-summary">Disku futlāri</summary>
+            <details class="order-section" data-order-section="standardPrint" data-unit-price="0.5">
+              <summary class="order-section-summary">Parastais disks · tikai apdruka</summary>
+              <div class="field quantity-field">
+                <input type="number" id="f-quantity-standardPrint" name="quantityStandardPrint" min="0" max="100" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
+                <label for="f-quantity-standardPrint">Disku skaits</label>
+                <span class="unit-price">0,50&nbsp;€ / gab.</span>
+                <span class="field-error" aria-live="polite"></span>
+              </div>
+              <fieldset class="field-group section-options" data-options-for="standardPrint" disabled>
+                <legend>Apdrukas opcija</legend>
+                <div class="chips"><label class="chip"><input type="checkbox" name="optionStandardPrintSurface" value="surface-print" data-finish-option data-artwork-option="standardPrint-surface" /><span>Drukāt uz diska (+0,50&nbsp;€ / gab.)</span></label></div>
+                <div class="upload-panel" data-artwork-panel="standardPrint-surface" hidden>
+                  <label class="upload-label" for="f-artwork-standardPrint">Zīmējums drukai uz diska</label>
+                  <input type="file" id="f-artwork-standardPrint" name="artworkStandardPrintSurface" accept="image/*" data-artwork-input data-product="standard" data-scope="all" data-purpose="artwork" />
+                  <ul class="file-list" data-file-list-for="artwork-standardPrint" aria-live="polite"></ul>
+                </div>
+              </fieldset>
+            </details>
+
+            <details class="order-section" data-order-section="cases" data-unit-price="1">
+              <summary class="order-section-summary">Jewel futlāris</summary>
               <div class="field quantity-field">
                 <input type="number" id="f-quantity-cases" name="quantityCases" min="0" max="100" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
                 <label for="f-quantity-cases">Disku futlāru skaits</label>
@@ -523,6 +542,28 @@
                   <label class="upload-label" for="f-artwork-case-back">Izvēlētais zīmējums — futlāra aizmugure</label>
                   <input type="file" id="f-artwork-case-back" name="artworkCaseBack" accept="image/*" required data-artwork-input />
                   <ul class="file-list" data-file-list-for="artwork-case-back" aria-live="polite"></ul>
+                </div>
+              </fieldset>
+            </details>
+
+            <details class="order-section" data-order-section="slimCases" data-unit-price="0.5">
+              <summary class="order-section-summary">Plānais futlāris</summary>
+              <div class="field quantity-field">
+                <input type="number" id="f-quantity-slimCases" name="quantitySlimCases" min="0" max="100" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
+                <label for="f-quantity-slimCases">Plāno futlāru skaits</label>
+                <span class="unit-price">0,50&nbsp;€ / gab.</span>
+                <span class="field-error" aria-live="polite"></span>
+              </div>
+              <fieldset class="field-group section-options" data-options-for="slimCases" disabled>
+                <legend>Plānā futlāra opcijas</legend>
+                <div class="chips"><label class="chip"><input type="checkbox" name="optionSlimCaseFinish" value="case-finish" data-finish-option data-case-artwork-option /><span>Apdare un zīmējums (+0,50&nbsp;€ / gab.)</span></label></div>
+                <div class="upload-panel case-artwork" data-case-artwork-panel hidden>
+                  <label class="upload-label" for="f-artwork-slimCase-front">Zīmējums — futlāra priekšpuse</label>
+                  <input type="file" id="f-artwork-slimCase-front" name="artworkSlimCaseFront" accept="image/*" required data-artwork-input />
+                  <ul class="file-list" data-file-list-for="artwork-slimCase-front" aria-live="polite"></ul>
+                  <label class="upload-label" for="f-artwork-slimCase-back">Zīmējums — futlāra aizmugure</label>
+                  <input type="file" id="f-artwork-slimCase-back" name="artworkSlimCaseBack" accept="image/*" required data-artwork-input />
+                  <ul class="file-list" data-file-list-for="artwork-slimCase-back" aria-live="polite"></ul>
                 </div>
               </fieldset>
             </details>

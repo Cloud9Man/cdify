@@ -945,12 +945,16 @@
     const serviceInfo = {
       quantityVinyl: ['Vinila stila disks', 'Dekoratīvs, vinila plates izskatā veidots CD. Izvēlieties disku skaitu, tad atzīmējiet drukāšanu uz diska virsmas vai iededzināšanu. Failus var izvēlēties no datora failu loga; vienam diskam izvēlieties “Visiem diskiem vienādi”, bet atšķirīgam saturam katram diskam — “Katram diskam atsevišķi”.'],
       quantityStandard: ['Parastais disks', 'Parasts CD disks datu vai mūzikas glabāšanai. Atzīmējiet vajadzīgos darbus, pievienojiet drukas attēlu un/vai failus iededzināšanai. Failus izvēlieties failu logā; vairāku disku atšķirīgam saturam izmantojiet individuālās kartītes.'],
-      quantityCases: ['Diska futlāris', 'Cietais diska futlāris. Izvēles apdarei pievienojiet priekšpuses un aizmugures zīmējumu.'],
+      quantityStandardPrint: ['Parastais disks · tikai apdruka', 'Šis ir parastais disks ar iespēju izvēlēties tikai apdruku. Bāzes cena ir uz pusi zemāka nekā parastajam diskam; apdruka tiek pieskaitīta atsevišķi.'],
+      quantityCases: ['Jewel futlāris', 'Cietais Jewel tipa diska futlāris. Izvēles apdarei pievienojiet priekšpuses un aizmugures zīmējumu.'],
+      quantitySlimCases: ['Plānais futlāris', 'Plānais diska futlāris maksā uz pusi mazāk nekā Jewel futlāris. Pieejama tikai apdare; pievienojiet priekšpuses un aizmugures zīmējumus.'],
       optionVinylSurface: ['Druka uz vinila stila diska', 'Krāsains zīmējums tiek drukāts uz diska virsmas. Cena: 0,50 € par katru disku. Izvēlieties attēlu (piemēram, PNG, JPG vai WebP) no datora. Ja katram diskam ir cits zīmējums, atzīmējiet “Katram diskam atsevišķi” un pievienojiet attēlu katrā diska kartītē.'],
       optionStandardSurface: ['Druka uz parastā diska', 'Krāsains zīmējums tiek drukāts uz diska virsmas. Cena: 0,50 € par katru disku. Izvēlieties attēlu no datora; individuālu zīmējumu katram diskam pievienojiet tā kartītē.'],
+      optionStandardPrintSurface: ['Druka uz parastā diska', 'Krāsains zīmējums tiek drukāts uz diska virsmas. Cena: 0,50 € par katru disku. Izvēlieties attēlu no datora.'],
       optionVinylBurn: ['Iededzināšana vinila stila diskā', 'Faili tiek ierakstīti diskā un ir pieejami nolasīšanai. Nospiediet failu izvēles pogu, atrodiet vajadzīgo mapi, iezīmējiet vienu vai vairākus failus (Ctrl ļauj izvēlēties vairākus) un spiediet “Atvērt”. Katram diskam paredzētos failus var norādīt atsevišķi. Visu pasūtījuma iededzināšanas failu kopējais lielums nedrīkst pārsniegt 700 MB.'],
       optionStandardBurn: ['Iededzināšana parastajā diskā', 'Faili tiek ierakstīti diskā un ir pieejami nolasīšanai. Nospiediet failu izvēles pogu, atrodiet vajadzīgo mapi, iezīmējiet vienu vai vairākus failus (Ctrl ļauj izvēlēties vairākus) un spiediet “Atvērt”. Katram diskam paredzētos failus var norādīt atsevišķi. Visu pasūtījuma iededzināšanas failu kopējais lielums nedrīkst pārsniegt 700 MB.'],
       optionCasesFinish: ['Futlāra apdare', 'Drukāsim zīmējumu uz futlāra vāciņa. Pievienojiet atsevišķus priekšpuses un aizmugures attēlus.'],
+      optionSlimCaseFinish: ['Plānā futlāra apdare', 'Drukāsim zīmējumu uz futlāra vāciņa. Pievienojiet atsevišķus priekšpuses un aizmugures attēlus.'],
     };
     const infoDialog = $('#serviceInfoDialog');
     const infoDismiss = $('#serviceInfoDismiss');

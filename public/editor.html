@@ -45,7 +45,7 @@
           <option value="disc">Diska etiķete · Epson XP-7100 · 120 mm</option>
         </select>
 
-        <details class="control-group editor-section" open>
+        <details class="control-group editor-section">
           <summary class="control-label">Attēli <span class="local-tag">Tikai ierīcē</span></summary>
           <input id="imageFile" type="file" accept="image/*" multiple />
           <input id="backgroundFile" type="file" accept="image/*" hidden />
@@ -53,7 +53,7 @@
           <p class="control-hint">Izvēloties vairākus, pirmais attēls kļūst par fonu, pārējie - par atsevišķiem slāņiem. Velc objektu, lai pārvietotu; velc tā stūri, lai mainītu izmēru.</p>
         </details>
 
-        <details class="control-group base-image-tools editor-section" open>
+        <details class="control-group base-image-tools editor-section">
           <summary class="control-label">Fona attēla pielāgošana</summary>
           <label class="object-field">Mērogs <output id="zoomOut">100%</output><input id="zoom" type="range" min="50" max="300" value="100" /></label>
           <label class="object-field">Pagrieziens <output id="rotationOut">0°</output><input id="rotation" type="range" min="-180" max="180" value="0" /></label>
@@ -62,7 +62,7 @@
           <label class="object-field">Piesātinājums <output id="saturationOut">100%</output><input id="saturation" type="range" min="0" max="200" value="100" /></label>
         </details>
 
-        <details class="control-group editor-section" open>
+        <details class="control-group editor-section">
           <summary class="control-label">Pievienot objektu</summary>
           <div class="add-object-actions">
             <button type="button" class="btn btn-ghost" id="addText">＋ Tekstlodziņš</button>
@@ -79,12 +79,12 @@
           <p class="control-hint">Palīglīnijas redzamas tikai priekšskatījumā, tās netiek saglabātas PNG vai drukā.</p>
         </details>
 
-        <details class="control-group layer-list-group editor-section" open>
+        <details class="control-group layer-list-group editor-section">
           <summary class="control-label">Slāņi <span id="layerCount" class="local-tag">0 objekti</span></summary>
           <div id="layerList" class="layer-list"><p class="control-hint">Pievieno attēlu, tekstu vai formu.</p></div>
         </details>
 
-        <details class="control-group selected-object editor-section" id="selectedObject" hidden open>
+        <details class="control-group selected-object editor-section" id="selectedObject" hidden>
           <summary class="control-label">Atlasītais objekts <span><button type="button" id="deleteObject" class="small-action">Dzēst</button></span></summary>
           <p id="selectedType" class="control-hint"></p>
           <label class="object-field" id="textField" hidden>Teksts<textarea id="objectText" rows="3" maxlength="500"></textarea></label>
