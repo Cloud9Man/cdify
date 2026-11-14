@@ -32,7 +32,7 @@ const R2_PUBLIC_DOMAIN = defineString("R2_PUBLIC_DOMAIN", { default: "" });
 const R2_ACCESS_KEY_ID = defineSecret("R2_ACCESS_KEY_ID");
 const R2_SECRET_ACCESS_KEY = defineSecret("R2_SECRET_ACCESS_KEY");
 const MAX_FILE_SIZE = 700 * 1024 * 1024;
-const ORDER_NUMBER_PATTERN = /^\d+-[A-Za-z0-9-]{1,60}-(?:Vinila-\d+(?:-Parastie-\d+)?(?:-Futlari-\d+)?|Parastie-\d+(?:-Futlari-\d+)?|Futlari-\d+|Pasutijums)$/;
+const ORDER_NUMBER_PATTERN = /^\d+-[A-Za-z0-9-]{1,60}-(?:Vinila-\d+(?:-Parastie-\d+)?(?:-Parastais-dead-\d+)?(?:-Futlari-\d+)?|Parastie-\d+(?:-Parastais-dead-\d+)?(?:-Futlari-\d+)?|Parastais-dead-\d+(?:-Futlari-\d+)?|Futlari-\d+|Pasutijums)$/;
 
 const ORDER_PRODUCTS = {
   vinyl: { unitPrice: 1.5, options: { optionVinylSurface: 0.5, optionVinylBurn: 0.25 } },
@@ -40,16 +40,19 @@ const ORDER_PRODUCTS = {
     unitPrice: 1,
     options: { optionStandardSurface: 0.5, optionStandardBurn: 0.25, optionStandardImageBurn: 0.25 },
   },
+  "parastais-dead": { unitPrice: 0.5, options: { optionStandardPrintSurface: 0.5 } },
   cases: { unitPrice: 1, options: { optionCasesFinish: 0.5 } },
 };
 
 const ALLOWED_FILE_FIELDS = new Set([
   "artworkVinylSurface",
   "artworkStandardSurface",
+  "artworkStandardPrintSurface",
   "artworkCaseFront",
   "artworkCaseBack",
   "burningVinyl",
   "burningStandard",
+  "burningStandardImage",
 ]);
 
 function createS3Client() {
@@ -94,14 +97,14 @@ function toOrderNameSlug(name) {
 
 function toOrderSummary(items) {
   if (!Array.isArray(items) || items.length < 1 || items.length > Object.keys(ORDER_PRODUCTS).length) return null;
-  const labels = { vinyl: "Vinila", standard: "Parastie", cases: "Futlari" };
+  const labels = { vinyl: "Vinila", standard: "Parastie", "parastais-dead": "Parastais-dead", cases: "Futlari" };
   const seen = new Set();
   for (const item of items) {
     if (!item || !Object.hasOwn(labels, item.product) || seen.has(item.product) ||
       !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 100) return null;
     seen.add(item.product);
   }
-  return ["vinyl", "standard", "cases"]
+  return ["vinyl", "standard", "parastais-dead", "cases"]
     .filter((product) => seen.has(product))
     .map((product) => `${labels[product]}-${items.find((item) => item.product === product).quantity}`)
     .join("-");
@@ -117,7 +120,7 @@ function validateFiles(files, orderNumber) {
       typeof file.key !== "string" ||
       !file.key.startsWith(`orders/${orderNumber}/`) ||
       file.key.split("/")[1] !== orderNumber ||
-      !/^orders\/[\dA-Za-z-]+\/(?:discs\/(?:vinyl|standard)\/(?:all-discs|disc-\d{2,6})\/(?:artwork|burning)|general\/(?:artwork|burning))\/[a-zA-Z0-9._-]{1,120}--[0-9a-f-]{36}$/.test(file.key) ||
+      !/^orders\/[\dA-Za-z-]+\/(?:discs\/(?:vinyl|standard|parastais-dead)\/(?:all-discs|disc-\d{2,6})\/(?:artwork|burning(?:\/(?:image-burn|file-burn))?)|general\/(?:artwork|burning))\/[a-zA-Z0-9._-]{1,120}--[0-9a-f-]{36}$/.test(file.key) ||
       keys.has(file.key) ||
       typeof file.name !== "string" ||
       file.name.length < 1 ||
@@ -129,10 +132,13 @@ function validateFiles(files, orderNumber) {
       file.size < 1 ||
       file.size > MAX_FILE_SIZE ||
       !ALLOWED_FILE_FIELDS.has(file.field) ||
-      (file.product !== undefined && !["vinyl", "standard"].includes(file.product)) ||
+      (file.product !== undefined && !["vinyl", "standard", "parastais-dead"].includes(file.product)) ||
       (file.diskNumber !== undefined && (!Number.isInteger(file.diskNumber) || file.diskNumber < 1 || file.diskNumber > 10000)) ||
       (file.scope !== undefined && !["all", "disk"].includes(file.scope)) ||
-      (file.purpose !== undefined && !["artwork", "burning"].includes(file.purpose))
+      (file.purpose !== undefined && !["artwork", "burning"].includes(file.purpose)) ||
+      (file.burnType !== undefined && (!["image-burn", "file-burn"].includes(file.burnType) || file.purpose !== "burning")) ||
+      (file.burnType === "image-burn" && (!file.contentType.startsWith("image/") || !file.key.includes("/burning/image-burn/"))) ||
+      (file.burnType === "file-burn" && !file.key.includes("/burning/file-burn/"))
     ) {
       return false;
     }
@@ -143,33 +149,36 @@ function validateFiles(files, orderNumber) {
 
 function filesMatchOrder(items, files) {
   const expectedFields = new Set();
-  const requiredFields = new Set();
   const optionFiles = {
-    optionVinylSurface: ["artworkVinylSurface"],
-    optionStandardSurface: ["artworkStandardSurface"],
-    optionCasesFinish: ["artworkCaseFront", "artworkCaseBack"],
-    optionVinylBurn: ["burningVinyl"],
-    optionStandardBurn: ["burningStandard"],
-    optionStandardImageBurn: ["burningStandard"],
+    optionVinylSurface: [{ field: "artworkVinylSurface", product: "vinyl", purpose: "artwork" }],
+    optionStandardSurface: [{ field: "artworkStandardSurface", product: "standard", purpose: "artwork" }],
+    optionStandardPrintSurface: [{ field: "artworkStandardPrintSurface", product: "parastais-dead", purpose: "artwork" }],
+    optionCasesFinish: [{ field: "artworkCaseFront" }, { field: "artworkCaseBack" }],
+    optionVinylBurn: [{ field: "burningVinyl", legacyField: "burningVinyl", product: "vinyl", purpose: "burning", burnType: "file-burn" }],
+    optionStandardBurn: [{ field: "burningStandard", legacyField: "burningStandard", product: "standard", purpose: "burning", burnType: "file-burn" }],
+    optionStandardImageBurn: [
+      { field: "burningStandardImage", legacyField: "burningStandard", product: "standard", purpose: "burning", burnType: "image-burn" },
+    ],
   };
+  const expectedFiles = [];
 
   for (const item of items) {
     for (const option of item.options) {
-      for (const field of optionFiles[option] || []) {
-        expectedFields.add(field);
-        requiredFields.add(field);
+      for (const file of optionFiles[option] || []) {
+        expectedFiles.push(file);
+        expectedFields.add(file.field);
+        if (file.legacyField) expectedFields.add(file.legacyField);
       }
     }
     if (["vinyl", "standard"].includes(item.product)) {
-      const prefix = item.product === "vinyl" ? "Vinyl" : "Standard";
       const diskOptions = [
-        ...(item.options.includes(`option${prefix}Surface`) ? [[`artwork${prefix}Surface`, "artwork"]] : []),
-        ...(item.options.some((option) => option === `option${prefix}Burn` || option === "optionStandardImageBurn")
-          ? [[`burning${prefix}`, "burning"]]
-          : []),
+        ...expectedFiles.filter((file) => file.product === item.product),
       ];
-      for (const [field, purpose] of diskOptions) {
-        const matches = files.filter((file) => file.field === field && file.product === item.product && file.purpose === purpose);
+      for (const expected of diskOptions) {
+        const matches = files.filter((file) => (file.field === expected.field || file.field === expected.legacyField) &&
+          file.product === expected.product &&
+          file.purpose === expected.purpose && (file.burnType === expected.burnType ||
+            (expected.legacyField === file.field && file.burnType === undefined)));
         if (item.discAssignment === "individual") {
           for (let disk = 1; disk <= item.quantity; disk += 1) {
             if (!matches.some((file) => file.scope === "disk" && file.diskNumber === disk)) return false;
@@ -179,11 +188,28 @@ function filesMatchOrder(items, files) {
           return false;
         }
       }
+    } else if (item.product === "parastais-dead") {
+      for (const expected of expectedFiles.filter((file) => file.product === item.product)) {
+        const matches = files.filter((file) => file.field === expected.field && file.product === expected.product &&
+          file.purpose === expected.purpose);
+        if (!matches.some((file) => file.scope === "all" && file.diskNumber === undefined) ||
+          matches.some((file) => file.scope !== "all" || file.diskNumber !== undefined)) return false;
+      }
     }
   }
 
-  return [...requiredFields].every((field) => files.some((file) => file.field === field)) &&
-    files.every((file) => expectedFields.has(file.field));
+  return expectedFiles.every((expected) => files.some((file) =>
+    (file.field === expected.field || file.field === expected.legacyField) &&
+    (expected.product === undefined || file.product === expected.product) &&
+    (expected.purpose === undefined || file.purpose === expected.purpose) &&
+    (expected.burnType === undefined || file.burnType === expected.burnType ||
+      (expected.legacyField === file.field && file.burnType === undefined)))) &&
+    files.every((file) => expectedFields.has(file.field) && expectedFiles.some((expected) =>
+      (file.field === expected.field || file.field === expected.legacyField) &&
+      (expected.product === undefined || file.product === expected.product) &&
+      (expected.purpose === undefined || file.purpose === expected.purpose) &&
+      (expected.burnType === undefined || file.burnType === expected.burnType ||
+        (expected.legacyField === file.field && file.burnType === undefined))));
 }
 
 function normalizeSubmission(body) {
@@ -205,7 +231,7 @@ function normalizeSubmission(body) {
     requestType,
     name: body.name.trim(),
     email: body.email.trim(),
-    files: body.files.map(({ key, name, contentType, size, field, product, diskNumber, scope, purpose }) => ({
+    files: body.files.map(({ key, name, contentType, size, field, product, diskNumber, scope, purpose, burnType }) => ({
       key,
       name,
       contentType,
@@ -215,6 +241,7 @@ function normalizeSubmission(body) {
       ...(diskNumber ? { diskNumber } : {}),
       ...(scope ? { scope } : {}),
       ...(purpose ? { purpose } : {}),
+      ...(burnType ? { burnType } : {}),
     })),
     status: "jauns",
   };
@@ -358,7 +385,7 @@ exports.api = onRequest({
       }
 
       if (req.method === "POST" && path === "/get-upload-url") {
-        const { orderNumber, fileName, fileType, fileSize, field, product, diskNumber, scope, purpose } = body || {};
+        const { orderNumber, fileName, fileType, fileSize, field, product, diskNumber, scope, purpose, burnType } = body || {};
         if (
           !ORDER_NUMBER_PATTERN.test(orderNumber || "") ||
           typeof fileName !== "string" ||
@@ -371,10 +398,17 @@ exports.api = onRequest({
           fileSize < 1 ||
           fileSize > MAX_FILE_SIZE ||
           !ALLOWED_FILE_FIELDS.has(field) ||
-          (product !== undefined && !["vinyl", "standard"].includes(product)) ||
+          (product !== undefined && !["vinyl", "standard", "parastais-dead"].includes(product)) ||
           (diskNumber !== undefined && (!Number.isInteger(diskNumber) || diskNumber < 1 || diskNumber > 10000)) ||
           (scope !== undefined && !["all", "disk"].includes(scope)) ||
           (purpose !== undefined && !["artwork", "burning"].includes(purpose)) ||
+          (burnType !== undefined && (!["image-burn", "file-burn"].includes(burnType) || purpose !== "burning")) ||
+          (burnType === "image-burn" && !fileType.startsWith("image/")) ||
+          (burnType === "image-burn" && (field !== "burningStandardImage" || product !== "standard")) ||
+          (burnType === "file-burn" && !(
+            (field === "burningVinyl" && product === "vinyl") ||
+            (field === "burningStandard" && product === "standard")
+          )) ||
           (product && purpose && !((purpose === "artwork" && field.startsWith("artwork")) || (purpose === "burning" && field.startsWith("burning"))))
         ) {
           return res.status(400).json({ error: "Faila informācija nav derīga." });
@@ -385,7 +419,7 @@ exports.api = onRequest({
           return res.status(400).json({ error: "Norādītais diska numurs nav derīgs." });
         }
         const category = product
-          ? `discs/${product}/${scope === "disk" ? `disc-${String(diskNumber).padStart(2, "0")}` : "all-discs"}/${purpose || "artwork"}`
+          ? `discs/${product}/${scope === "disk" ? `disc-${String(diskNumber).padStart(2, "0")}` : "all-discs"}/${purpose === "burning" ? `burning${burnType ? `/${burnType}` : ""}` : purpose || "artwork"}`
           : `general/${field.startsWith("burning") ? "burning" : "artwork"}`;
         const fileKey = `orders/${orderNumber}/${category}/${safeFileName}--${randomUUID()}`;
 

@@ -4,10 +4,10 @@ CDify vietne tiek publicēta Firebase Hosting un izmanto pasūtījuma formu, Fir
 
 ## Datu plūsma
 
-- Pasūtījuma opciju ID tiek glabāti produkta `items[].options` masīvā; parastā diska attēla iededzināšana izmanto esošo `burningStandard` failu metadatus un maksā tikpat, cik diska iededzināšana.
+- Pasūtījuma opciju ID tiek glabāti produkta `items[].options` masīvā. Tikai apdrukai paredzētie diski tiek saglabāti kā `parastais-dead`; iededzināšanas faili tiek glabāti zem `burning/file-burn`, bet attēli zem `burning/image-burn`.
 - Formas teksts un pasūtījuma metadati tiek sūtīti uz tās pašas Firebase Hosting izcelsmes `/api` adresi, pārbaudīti `api` Cloud Function un saglabāti Firestore kolekcijā `orders`.
 - Jaunā pasūtījuma Firestore dokumenta ID un R2 saknes mape ir viens un tas pats lasāmais nosaukums: `<kārtas-numurs>-<klienta-vārds>-<produktu-veidi-un-skaits>`, piemēram, `106-Janina-Vinila-2-Parastie-1`. Kārtas numurs garantē unikalitāti; UUID pasūtījuma nosaukumā vairs nav.
-- Atlasītie faili tiek augšupielādēti tieši R2 bucketā `r2cdify`, izmantojot īslaicīgas parakstītas saites ar path-style URL. Firestore glabā failu atslēgas un metadatus, nevis failu saturu. R2 objektu ceļi ir sakārtoti kā `orders/<pasūtījuma-numurs>/discs/<veids>/<all-discs-vai-disc-NN>/<artwork-vai-burning>/<faila-nosaukums>--<unikāls-ID>`.
+- Atlasītie faili tiek augšupielādēti tieši R2 bucketā `r2cdify`, izmantojot īslaicīgas parakstītas saites ar path-style URL. Firestore glabā failu atslēgas un metadatus, nevis failu saturu. R2 objektu ceļi ir sakārtoti kā `orders/<pasūtījuma-numurs>/discs/<veids>/<all-discs-vai-disc-NN>/<artwork-vai-burning-veids>/<faila-nosaukums>--<unikāls-ID>`.
 - `firestore.rules` liedz vietnei tiešu piekļuvi Firestore; Cloud Function datubāzē raksta ar Firebase Admin SDK.
 - Formā redzamā kopsumma ir aptuvena; funkcija to aprēķina no iesniegtajiem produktiem un opcijām.
 

@@ -455,16 +455,16 @@
                 <legend>Vinila stila disku opcijas</legend>
                 <div class="chips">
                   <label class="chip"><input type="checkbox" name="optionVinylSurface" value="surface-print" data-finish-option data-artwork-option="vinyl-surface" /><span>Drukāt uz virsmas (+0,50&nbsp;€ / gab.)</span></label>
-                  <label class="chip"><input type="checkbox" name="optionVinylBurn" value="burning" data-burning-option /><span>Diska iededzināšana (+0,25&nbsp;€ / gab.)</span></label>
+                  <label class="chip"><input type="checkbox" name="optionVinylBurn" value="burning" data-burning-option data-burn-type="file-burn" /><span>Diska iededzināšana (+0,25&nbsp;€ / gab.)</span></label>
                 </div>
                 <div class="upload-panel" data-artwork-panel="vinyl-surface" hidden>
                   <label class="upload-label" for="f-artwork-vinyl">Zīmējums drukai uz diska</label>
                   <input type="file" id="f-artwork-vinyl" name="artworkVinylSurface" accept="image/*" data-artwork-input data-product="vinyl" data-scope="all" data-purpose="artwork" />
                   <ul class="file-list" data-file-list-for="artwork-vinyl-surface" aria-live="polite"></ul>
                 </div>
-                <div class="upload-panel" data-burning-panel="vinyl" hidden>
+                <div class="upload-panel" data-burning-panel="optionVinylBurn" hidden>
                   <label class="upload-label" for="f-burning-vinyl">Faili iededzināšanai</label>
-                  <input type="file" id="f-burning-vinyl" name="burningVinyl" multiple data-burning-input data-product="vinyl" data-scope="all" data-purpose="burning" />
+                  <input type="file" id="f-burning-vinyl" name="burningVinyl" multiple data-burning-input data-product="vinyl" data-scope="all" data-purpose="burning" data-burn-type="file-burn" />
                   <button type="button" class="btn btn-ghost add-files-btn" data-add-burning-files="f-burning-vinyl">Pievienot vēl failus</button>
                   <span class="upload-help">Var pievienot neierobežotu failu skaitu; visu iededzināšanas failu kopējais lielums nedrīkst pārsniegt 700&nbsp;MB.</span>
                   <ul class="file-list" data-file-list-for="burning-vinyl" aria-live="polite"></ul>
@@ -485,26 +485,31 @@
                 <legend>Parasto disku opcijas</legend>
                 <div class="chips">
                   <label class="chip"><input type="checkbox" name="optionStandardSurface" value="surface-print" data-finish-option data-artwork-option="standard-surface" /><span>Drukāt uz virsmas (+0,50&nbsp;€ / gab.)</span></label>
-                  <label class="chip"><input type="checkbox" name="optionStandardBurn" value="burning" data-burning-option /><span>Diska iededzināšana (+0,25&nbsp;€ / gab.)</span></label>
-                  <label class="chip"><input type="checkbox" name="optionStandardImageBurn" value="image-burning" data-burning-option /><span>Attēla iededzināšana (+0,25&nbsp;€ / gab.)</span></label>
+                  <label class="chip"><input type="checkbox" name="optionStandardBurn" value="burning" data-burning-option data-burn-type="file-burn" /><span>Diska iededzināšana (+0,25&nbsp;€ / gab.)</span></label>
+                  <label class="chip"><input type="checkbox" name="optionStandardImageBurn" value="image-burning" data-burning-option data-burn-type="image-burn" /><span>Attēla iededzināšana (+0,25&nbsp;€ / gab.)</span></label>
                 </div>
                 <div class="upload-panel" data-artwork-panel="standard-surface" hidden>
                   <label class="upload-label" for="f-artwork-standard-surface">Zīmējums drukai uz diska</label>
                   <input type="file" id="f-artwork-standard-surface" name="artworkStandardSurface" accept="image/*" data-artwork-input data-product="standard" data-scope="all" data-purpose="artwork" />
                   <ul class="file-list" data-file-list-for="artwork-standard-surface" aria-live="polite"></ul>
                 </div>
-                <div class="upload-panel" data-burning-panel="standard" hidden>
+                <div class="upload-panel" data-burning-panel="optionStandardBurn" hidden>
                   <label class="upload-label" for="f-burning-standard">Faili iededzināšanai</label>
-                  <input type="file" id="f-burning-standard" name="burningStandard" multiple data-burning-input data-product="standard" data-scope="all" data-purpose="burning" />
+                  <input type="file" id="f-burning-standard" name="burningStandard" multiple data-burning-input data-product="standard" data-scope="all" data-purpose="burning" data-burn-type="file-burn" />
                   <button type="button" class="btn btn-ghost add-files-btn" data-add-burning-files="f-burning-standard">Pievienot vēl failus</button>
                   <span class="upload-help">Var pievienot neierobežotu failu skaitu; visu iededzināšanas failu kopējais lielums nedrīkst pārsniegt 700&nbsp;MB.</span>
                   <ul class="file-list" data-file-list-for="burning-standard" aria-live="polite"></ul>
+                </div>
+                <div class="upload-panel" data-burning-panel="optionStandardImageBurn" hidden>
+                  <label class="upload-label" for="f-burning-standard-image">Attēls iededzināšanai</label>
+                  <input type="file" id="f-burning-standard-image" name="burningStandardImage" accept="image/*" data-burning-input data-product="standard" data-scope="all" data-purpose="burning" data-burn-type="image-burn" />
+                  <ul class="file-list" data-file-list-for="burning-standard-image" aria-live="polite"></ul>
                 </div>
               </fieldset>
               <div class="disc-cards" data-disc-cards="standard" hidden></div>
             </details>
 
-            <details class="order-section" data-order-section="standardPrint" data-unit-price="0.5">
+            <details class="order-section" data-order-section="standardPrint" data-product-id="parastais-dead" data-unit-price="0.5">
               <summary class="order-section-summary">Parastais disks · tikai apdruka</summary>
               <div class="field quantity-field">
                 <input type="number" id="f-quantity-standardPrint" name="quantityStandardPrint" min="0" max="100" step="1" value="0" placeholder=" " data-validate data-rule="nonnegativeQuantity" />
@@ -517,7 +522,7 @@
                 <div class="chips"><label class="chip"><input type="checkbox" name="optionStandardPrintSurface" value="surface-print" data-finish-option data-artwork-option="standardPrint-surface" /><span>Drukāt uz diska (+0,50&nbsp;€ / gab.)</span></label></div>
                 <div class="upload-panel" data-artwork-panel="standardPrint-surface" hidden>
                   <label class="upload-label" for="f-artwork-standardPrint">Zīmējums drukai uz diska</label>
-                  <input type="file" id="f-artwork-standardPrint" name="artworkStandardPrintSurface" accept="image/*" data-artwork-input data-product="standard" data-scope="all" data-purpose="artwork" />
+                  <input type="file" id="f-artwork-standardPrint" name="artworkStandardPrintSurface" accept="image/*" data-artwork-input data-product="parastais-dead" data-scope="all" data-purpose="artwork" />
                   <ul class="file-list" data-file-list-for="artwork-standardPrint" aria-live="polite"></ul>
                 </div>
               </fieldset>
