@@ -560,6 +560,340 @@
   }
 
   /* ---------- 8. PROJEKTI UN FORMA ---------- */
+  const CATALOG_PRODUCTS = [
+    {
+      id: 'maxell',
+      name: 'Maxell printable',
+      type: 'CD-R printable',
+      description: 'Tukšs Maxell CD-R disks ar vietu jūsu izvēlētajam noformējumam. Izvēlies attēla iededzināšanu, diska apdruku vai datu iededzināšanu.',
+      image: { src: './Images/catalog/cdr-straight.png', alt: 'Tukšs CD-R disks ar caurspīdīgu fonu' },
+      orderSection: 'standard',
+      quantityName: 'quantityStandard',
+      categories: ['disc'],
+      subsections: [
+        {
+          id: 'image-burning',
+          name: 'Attēla iededzināšana',
+          description: 'Attēls tiek iededzināts tieši diska virsmā.',
+          orderOption: 'optionStandardImageBurn',
+          images: [
+            { src: './Images/catalog/imageburn-straight.png', alt: 'Attēla iededzināšana diskā, skats no priekšpuses', caption: 'Skats no priekšpuses' },
+            { src: './Images/catalog/imageburn-tilt.png', alt: 'Attēla iededzināšana diskā, skats no slīpuma', caption: 'Skats no slīpuma' },
+          ],
+        },
+        {
+          id: 'disc-print',
+          name: 'Diska apdruka',
+          description: 'Izvēlies attēlu, ko uzdrukāt uz diska apdrukājamās virsmas.',
+          orderOption: 'optionStandardSurface',
+          images: [{ src: './Images/catalog/cdr-straight.png', alt: 'Tukšs CD-R disks apdrukai', caption: 'Apdrukājamā CD-R virsma' }],
+        },
+        {
+          id: 'disc-burning',
+          name: 'Diska iededzināšana',
+          description: 'Ieraksti diskā mūziku, dokumentus vai citus failus.',
+          orderOption: 'optionStandardBurn',
+          images: [{ src: './Images/catalog/cdr-straight.png', alt: 'Tukšs CD-R disks iededzināšanai', caption: 'CD-R disks' }],
+        },
+      ],
+    },
+    {
+      id: 'vinyl',
+      name: 'Vinyl printable',
+      type: 'Vinila stila CD',
+      description: 'CD ar vinila plates noskaņu, ko vari papildināt ar diska apdruku vai iededzinātiem failiem.',
+      image: { src: './Images/catalog/cdr-straight.png', alt: 'CD-R disks ar caurspīdīgu fonu' },
+      orderSection: 'vinyl',
+      quantityName: 'quantityVinyl',
+      categories: ['disc'],
+      subsections: [
+        {
+          id: 'disc-burning',
+          name: 'Diska iededzināšana',
+          description: 'Ieraksti diskā mūziku, dokumentus vai citus failus.',
+          orderOption: 'optionVinylBurn',
+          images: [{ src: './Images/catalog/cdr-straight.png', alt: 'Tukšs CD disks iededzināšanai', caption: 'CD disks' }],
+        },
+        {
+          id: 'disc-print',
+          name: 'Diska apdruka',
+          description: 'Izvēlies attēlu, ko uzdrukāt uz vinila stila diska.',
+          orderOption: 'optionVinylSurface',
+          images: [{ src: './Images/catalog/cdr-straight.png', alt: 'Tukšs CD disks apdrukai', caption: 'Diska virsma apdrukai' }],
+        },
+      ],
+    },
+    {
+      id: 'jewel',
+      name: 'Jewel case',
+      type: 'Cietais futlāris',
+      description: 'Klasiskais 10,4 mm cietās plastmasas futlāris ar apdrukas iespējām.',
+      image: { src: './Images/catalog/jewel-open.png', alt: 'Atvērts Jewel case futlāris' },
+      orderSection: 'cases',
+      quantityName: 'quantityCases',
+      categories: ['case'],
+      subsections: [
+        {
+          id: 'finish',
+          name: 'Apdare',
+          description: 'Pievieno futlāra priekšpuses un aizmugures noformējumu.',
+          orderOption: 'optionCasesFinish',
+          images: [
+            { src: './Images/catalog/jewel-open.png', alt: 'Atvērts Jewel case futlāris', caption: 'Atvērts futlāris' },
+            { src: './Images/catalog/jewel-close.png', alt: 'Aizvērts Jewel case futlāris', caption: 'Aizvērts futlāris' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'slim',
+      name: 'Slim case',
+      type: 'Plānais futlāris',
+      description: 'Viegls un kompakts plānais futlāris ar apdrukas iespējām.',
+      image: { src: './Images/catalog/slim-open.png', alt: 'Atvērts slim case futlāris' },
+      orderSection: 'slimCases',
+      quantityName: 'quantitySlimCases',
+      categories: ['case'],
+      subsections: [
+        {
+          id: 'finish',
+          name: 'Apdare',
+          description: 'Pievieno futlāra priekšpuses un aizmugures noformējumu.',
+          orderOption: 'optionSlimCaseFinish',
+          images: [
+            { src: './Images/catalog/slim-open.png', alt: 'Atvērts slim case futlāris', caption: 'Atvērts futlāris' },
+            { src: './Images/catalog/slim-closed.png', alt: 'Aizvērts slim case futlāris', caption: 'Aizvērts futlāris' },
+          ],
+        },
+      ],
+    },
+  ];
+
+  function initCatalog() {
+    const dialog = $('#productCatalog');
+    const content = $('#catalogContent');
+    const openButton = $('#openProductCatalog');
+    const gallery = $('#projGrid');
+    if (!dialog || !content || !openButton || !gallery) return;
+
+    const imageElement = (image, className) => {
+      const img = document.createElement('img');
+      img.src = image.src;
+      img.alt = image.alt;
+      img.loading = 'lazy';
+      img.className = className;
+      return img;
+    };
+
+    const createButton = (text, className, action) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = className;
+      button.textContent = text;
+      button.addEventListener('click', action);
+      return button;
+    };
+
+    const findProduct = (id) => CATALOG_PRODUCTS.find((product) => product.id === id);
+    let activeProductId = null;
+
+    const openCatalog = (productId, subsectionId) => {
+      activeProductId = productId || null;
+      if (!dialog.open) dialog.showModal();
+      if (productId && subsectionId) renderGallery(productId, subsectionId);
+      else if (productId) renderProduct(productId);
+      else renderProducts();
+    };
+
+    const renderProducts = () => {
+      content.replaceChildren();
+      content.scrollTop = 0;
+      const intro = document.createElement('p');
+      intro.className = 'catalog-intro';
+      intro.textContent = 'Apskati produktu, izvēlies apakšsadaļu un iepazīsti attēlu galeriju.';
+      const grid = document.createElement('div');
+      grid.className = 'catalog-product-grid';
+      CATALOG_PRODUCTS.forEach((product) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'catalog-product-card';
+        card.setAttribute('aria-label', `${product.name} — atvērt produktu`);
+        const visual = document.createElement('span');
+        visual.className = 'catalog-product-visual';
+        visual.append(imageElement(product.image, 'catalog-product-image'));
+        const meta = document.createElement('span');
+        meta.className = 'catalog-product-meta';
+        const type = document.createElement('span');
+        type.className = 'catalog-product-type';
+        type.textContent = product.type;
+        const title = document.createElement('strong');
+        title.textContent = product.name;
+        const link = document.createElement('span');
+        link.className = 'catalog-product-link';
+        link.textContent = 'Skatīt produktu →';
+        meta.append(type, title, link);
+        card.append(visual, meta);
+        card.addEventListener('click', () => renderProduct(product.id));
+        grid.append(card);
+      });
+      content.append(intro, grid);
+    };
+
+    const renderProduct = (productId) => {
+      const product = findProduct(productId);
+      if (!product) {
+        renderProducts();
+        return;
+      }
+      activeProductId = product.id;
+      content.replaceChildren();
+      content.scrollTop = 0;
+      content.append(createButton('← Visi produkti', 'catalog-back', renderProducts));
+      const layout = document.createElement('div');
+      layout.className = 'catalog-product-detail';
+      const visual = document.createElement('div');
+      visual.className = 'catalog-detail-visual';
+      visual.append(imageElement(product.image, 'catalog-detail-image'));
+      const info = document.createElement('div');
+      info.className = 'catalog-detail-info';
+      const type = document.createElement('span');
+      type.className = 'catalog-product-type';
+      type.textContent = product.type;
+      const title = document.createElement('h3');
+      title.className = 'catalog-page-title';
+      title.tabIndex = -1;
+      title.textContent = product.name;
+      const description = document.createElement('p');
+      description.textContent = product.description;
+      const sectionTitle = document.createElement('h4');
+      sectionTitle.textContent = 'Izvēlies apakšsadaļu';
+      const sections = document.createElement('div');
+      sections.className = 'catalog-subsection-list';
+      product.subsections.forEach((subsection) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'catalog-subsection';
+        const name = document.createElement('strong');
+        name.textContent = subsection.name;
+        const summary = document.createElement('span');
+        summary.textContent = subsection.description;
+        const arrow = document.createElement('span');
+        arrow.className = 'catalog-subsection-arrow';
+        arrow.textContent = '→';
+        button.append(name, summary, arrow);
+        button.addEventListener('click', () => renderGallery(product.id, subsection.id));
+        sections.append(button);
+      });
+      info.append(type, title, description, sectionTitle, sections);
+      layout.append(visual, info);
+      content.append(layout);
+      title.focus({ preventScroll: true });
+    };
+
+    const renderGallery = (productId, subsectionId) => {
+      const product = findProduct(productId);
+      const subsection = product?.subsections.find((item) => item.id === subsectionId);
+      if (!product || !subsection) {
+        renderProducts();
+        return;
+      }
+      activeProductId = product.id;
+      content.replaceChildren();
+      content.scrollTop = 0;
+      content.append(createButton(`← ${product.name}`, 'catalog-back', () => renderProduct(product.id)));
+      const heading = document.createElement('div');
+      heading.className = 'catalog-gallery-heading';
+      const title = document.createElement('h3');
+      title.className = 'catalog-page-title';
+      title.tabIndex = -1;
+      title.textContent = subsection.name;
+      const description = document.createElement('p');
+      description.textContent = `${product.name} · ${subsection.description}`;
+      heading.append(title, description);
+      const images = document.createElement('div');
+      images.className = 'catalog-gallery-grid';
+      subsection.images.forEach((image) => {
+        const figure = document.createElement('figure');
+        figure.className = 'catalog-gallery-item';
+        const visual = document.createElement('div');
+        visual.className = 'catalog-gallery-visual';
+        visual.append(imageElement(image, 'catalog-gallery-image'));
+        const caption = document.createElement('figcaption');
+        caption.textContent = image.caption || image.alt;
+        figure.append(visual, caption);
+        images.append(figure);
+      });
+      const choose = createButton('Pievienot šo opciju pasūtījumam', 'btn btn-primary catalog-order-button', () => {
+        const section = $(`[data-order-section="${product.orderSection}"]`);
+        const quantity = section && $(`[name="${product.quantityName}"]`, section);
+        const option = section && $(`[name="${subsection.orderOption}"]`, section);
+        if (!section || !quantity || !option) return;
+        activeProductId = null;
+        dialog.close();
+        section.open = true;
+        if (Number(quantity.value) < 1) {
+          quantity.value = '1';
+          quantity.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        if (!option.checked) {
+          option.checked = true;
+          option.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        requestAnimationFrame(() => section.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+      });
+      content.append(heading, images, choose);
+      title.focus({ preventScroll: true });
+    };
+
+    const showcase = [];
+    const seenImages = new Set();
+    CATALOG_PRODUCTS.forEach((product) => {
+      product.subsections.forEach((subsection) => {
+        subsection.images.forEach((image) => {
+          if (seenImages.has(image.src)) return;
+          seenImages.add(image.src);
+          showcase.push({ product, subsection, image });
+        });
+      });
+    });
+
+    showcase.forEach(({ product, subsection, image }) => {
+      const card = document.createElement('article');
+      card.className = 'proj glass reveal';
+      card.dataset.cat = product.categories.join(' ');
+      const visual = document.createElement('div');
+      visual.className = 'proj-visual';
+      visual.append(imageElement(image, 'proj-image'));
+      const body = document.createElement('div');
+      body.className = 'proj-body';
+      const tags = document.createElement('div');
+      tags.className = 'tags';
+      const productTag = document.createElement('span');
+      productTag.textContent = product.name;
+      const subsectionTag = document.createElement('span');
+      subsectionTag.textContent = subsection.name;
+      tags.append(productTag, subsectionTag);
+      const title = document.createElement('h3');
+      title.textContent = image.caption || subsection.name;
+      const description = document.createElement('p');
+      description.textContent = `${product.name} · ${subsection.name}`;
+      const view = createButton('Skatīt katalogā →', 'proj-link', () => openCatalog(product.id, subsection.id));
+      body.append(tags, title, description, view);
+      card.append(visual, body);
+      gallery.append(card);
+    });
+
+    openButton.addEventListener('click', () => openCatalog());
+    $$('[data-catalog-close]', dialog).forEach((button) => button.addEventListener('click', () => dialog.close()));
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('close', () => {
+      if (activeProductId) openButton.focus({ preventScroll: true });
+      activeProductId = null;
+    });
+  }
+
   function initFilter() {
     const btns = $$('.filter-btn');
     const cards = $$('.proj');
@@ -1649,7 +1983,7 @@
     });
 
     [initTheme, initNav, initScrollEffects, initRetroBackground, initMarquee, initSpotlight, initTilt, initMagnetic,
-      initCursor, initParallax, initCube, initTimeline, initFilter, initForm, initScene,
+      initCursor, initParallax, initCube, initTimeline, initCatalog, initFilter, initForm, initScene,
       initReveal, initCounters, initRotator].forEach(safe);
 
     requestAnimationFrame(loop);
