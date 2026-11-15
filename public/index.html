@@ -21,7 +21,7 @@
       if (meta) meta.setAttribute('content', theme === 'light' ? '#f9f5f4' : '#06070d');
     })();
   </script>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=product-catalog-v1" />
   <noscript><style>.reveal{opacity:1;translate:none;filter:none}</style></noscript>
 </head>
 
@@ -240,8 +240,8 @@
       <div class="container">
         <header class="section-head">
           <span class="eyebrow reveal">Galerija</span>
-          <h2 class="section-title reveal" style="--d:.08s">Darbi, ar kuriem <span class="gradient-text">lepojamies</span></h2>
-          <p class="section-lead reveal" style="--d:.16s">Piemēri no tā, ko var paveikt kopā ar mums</p>
+          <h2 class="section-title reveal" style="--d:.08s">Apskati produktus <span class="gradient-text">tuvāk</span></h2>
+          <p class="section-lead reveal" style="--d:.16s">Materiāli un piemēri no produktu kataloga</p>
         </header>
 
         <div class="filters glass reveal" role="group" aria-label="Projektu filtrs">
@@ -250,67 +250,7 @@
           <button class="filter-btn" type="button" data-filter="case" aria-pressed="false">Futlāri</button>
         </div>
 
-        <div class="grid proj-grid" id="projGrid" data-stagger>
-          <article class="proj glass tilt spot reveal" data-cat="disc" data-cursor="Skatīt" data-tilt="6">
-            <div class="proj-visual v1"><div class="mock"><i></i><i></i><i></i></div></div>
-            <div class="proj-body">
-              <div class="tags"><span>Diski</span><span>Mūzika</span></div>
-              <h3>Disks 1</h3>
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-              <a class="proj-link" href="#">Skatīt projektu <svg class="icon"><use href="#i-arrow"/></svg></a>
-            </div>
-          </article>
-
-          <article class="proj glass tilt spot reveal" data-cat="case" data-cursor="Skatīt" data-tilt="6">
-            <div class="proj-visual v2"><div class="mock"><i></i><i></i><i></i></div></div>
-            <div class="proj-body">
-              <div class="tags"><span>Futlāri</span><span>Apdare</span></div>
-              <h3>Futlāris 1</h3>
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-              <a class="proj-link" href="#">Skatīt projektu <svg class="icon"><use href="#i-arrow"/></svg></a>
-            </div>
-          </article>
-
-          <article class="proj glass tilt spot reveal" data-cat="disc" data-cursor="Skatīt" data-tilt="6">
-            <div class="proj-visual v3"><div class="mock mock--phone"><i></i><i></i><i></i></div></div>
-            <div class="proj-body">
-              <div class="tags"><span>Diski</span><span>Bildes</span></div>
-              <h3>Disks 2</h3>
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-              <a class="proj-link" href="#">Skatīt projektu <svg class="icon"><use href="#i-arrow"/></svg></a>
-            </div>
-          </article>
-
-          <article class="proj glass tilt spot reveal" data-cat="disc" data-cursor="Skatīt" data-tilt="6">
-            <div class="proj-visual v4"><div class="mock"><i></i><i></i><i></i></div></div>
-            <div class="proj-body">
-              <div class="tags"><span>Diski</span><span>Dokumenti</span></div>
-              <h3>Disks 3</h3>
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-              <a class="proj-link" href="#">Skatīt projektu <svg class="icon"><use href="#i-arrow"/></svg></a>
-            </div>
-          </article>
-
-          <article class="proj glass tilt spot reveal" data-cat="disc" data-cursor="Skatīt" data-tilt="6">
-            <div class="proj-visual v5"><div class="mock"><i></i><i></i><i></i></div></div>
-            <div class="proj-body">
-              <div class="tags"><span>Diski</span><span>Dāvana</span></div>
-              <h3>Disks 4</h3>
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-              <a class="proj-link" href="#">Skatīt projektu <svg class="icon"><use href="#i-arrow"/></svg></a>
-            </div>
-          </article>
-
-          <article class="proj glass tilt spot reveal" data-cat="case" data-cursor="Skatīt" data-tilt="6">
-            <div class="proj-visual v6"><div class="mock mock--phone"><i></i><i></i><i></i></div></div>
-            <div class="proj-body">
-              <div class="tags"><span>Futlāri</span><span>Dizains</span></div>
-              <h3>Futlāris 2</h3>
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. </p>
-              <a class="proj-link" href="#">Skatīt projektu <svg class="icon"><use href="#i-arrow"/></svg></a>
-            </div>
-          </article>
-        </div>
+        <div class="grid proj-grid" id="projGrid" data-stagger aria-live="polite"></div>
       </div>
     </section>
 
@@ -442,6 +382,10 @@
 
           <div data-form-panel="order">
             <p class="order-intro">Norādiet daudzumu katram produktam un pēc tam izvēlieties vajadzīgās opcijas. Drukāšana uz diska virsmas un vāku apdare maksā 0,50&nbsp;€ par gabalu, iededzināšana — 0,25&nbsp;€ par disku.</p>
+            <button type="button" class="btn btn-ghost catalog-open" id="openProductCatalog">
+              <span class="btn-label">Atvērt produktu katalogu</span>
+              <svg class="icon"><use href="#i-arrow"/></svg>
+            </button>
 
             <details class="order-section" data-order-section="vinyl" data-unit-price="1.5">
               <summary class="order-section-summary">Vinila stila diski</summary>
@@ -627,6 +571,18 @@
             <p>Informācija ir nosūtīta un saglabāta.</p>
           </div>
         </form>
+        <dialog class="catalog-dialog" id="productCatalog" aria-labelledby="catalogTitle">
+          <div class="catalog-shell">
+            <header class="catalog-header">
+              <div>
+                <span class="eyebrow">CDify produktu katalogs</span>
+                <h2 id="catalogTitle">Izvēlies produktu</h2>
+              </div>
+              <button type="button" class="catalog-close" data-catalog-close aria-label="Aizvērt katalogu">×</button>
+            </header>
+            <div class="catalog-content" id="catalogContent" aria-live="polite"></div>
+          </div>
+        </dialog>
         <dialog class="service-dialog" id="serviceInfoDialog" aria-labelledby="serviceInfoTitle">
           <form method="dialog">
             <h3 id="serviceInfoTitle">Par pakalpojumu</h3>
@@ -652,6 +608,6 @@
 
   <!-- Three.js ir vajadzīgs interaktīvajam CD modulim public/script.js. -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js" defer></script>
-  <script src="script.js?v=order-summary-v2" defer></script>
+  <script src="script.js?v=product-catalog-v1" defer></script>
 </body>
 </html>
