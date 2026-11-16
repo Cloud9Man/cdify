@@ -571,7 +571,24 @@
     } else return;
     event.preventDefault(); render(); if (layer) syncLayerPanel(); localSave();
   });
-  $('#editorBurger').addEventListener('click', (e) => { const open = document.body.classList.toggle('menu-open'); e.currentTarget.setAttribute('aria-expanded', String(open)); e.currentTarget.setAttribute('aria-label', open ? 'Aizvērt izvēlni' : 'Atvērt izvēlni'); });
+  const editorBurger = $('#editorBurger');
+  const editorMenu = $('#editorNavMenu');
+  const setEditorMenu = (open) => {
+    document.body.classList.toggle('menu-open', open);
+    editorBurger.setAttribute('aria-expanded', String(open));
+    editorBurger.setAttribute('aria-label', open ? 'Aizvērt izvēlni' : 'Atvērt izvēlni');
+  };
+  editorBurger.addEventListener('click', () => setEditorMenu(!document.body.classList.contains('menu-open')));
+  editorMenu.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setEditorMenu(false)));
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && document.body.classList.contains('menu-open')) {
+      setEditorMenu(false);
+      editorBurger.focus();
+    }
+  });
+  window.addEventListener('resize', () => {
+    if (innerWidth > 1100) setEditorMenu(false);
+  });
   const resize = new ResizeObserver(() => { guides.style.width = `${canvas.clientWidth}px`; guides.style.height = `${canvas.clientHeight}px`; }); resize.observe(shell);
   render(); syncPrintQueue(); calculateQueue(); loadProject();
 })();

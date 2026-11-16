@@ -31,10 +31,21 @@
   // Viena kopīga animācijas cilpa visiem efektiem
   const frameFns = [];
   const onFrame = (fn) => frameFns.push(fn);
+  let frameRequest = 0;
   const loop = (t) => {
+    frameRequest = 0;
+    if (document.hidden) return;
     for (const fn of frameFns) fn(t);
-    requestAnimationFrame(loop);
+    frameRequest = requestAnimationFrame(loop);
   };
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      cancelAnimationFrame(frameRequest);
+      frameRequest = 0;
+    } else if (!frameRequest) {
+      frameRequest = requestAnimationFrame(loop);
+    }
+  });
 
   /* ---------- 1b. KRĀSU TĒMA: sistēmas (noklusējums) / gaišā / tumšā ---------- */
   // <html data-theme="light|dark"> — faktiskā tēma; <html data-theme-pref="system|light|dark"> — lietotāja izvēle.
@@ -845,25 +856,31 @@
       title.focus({ preventScroll: true });
     };
 
-    const showcase = [];
-    const seenImages = new Set();
-    CATALOG_PRODUCTS.forEach((product) => {
+    const showcase = CATALOG_PRODUCTS.map((product) => {
+      const images = [];
+      const seenImages = new Set();
       product.subsections.forEach((subsection) => {
         subsection.images.forEach((image) => {
           if (seenImages.has(image.src)) return;
           seenImages.add(image.src);
-          showcase.push({ product, subsection, image });
+          images.push({ image, subsection });
         });
       });
+      if (product.image && !seenImages.has(product.image.src)) {
+        images.unshift({ image: product.image, subsection: product.subsections[0] });
+      }
+      return { product, images };
     });
 
-    showcase.forEach(({ product, subsection, image }) => {
+    showcase.forEach(({ product, images }) => {
+      if (!images.length) return;
       const card = document.createElement('article');
       card.className = 'proj glass reveal';
       card.dataset.cat = product.categories.join(' ');
       const visual = document.createElement('div');
       visual.className = 'proj-visual';
-      visual.append(imageElement(image, 'proj-image'));
+      const image = imageElement(images[0].image, 'proj-image');
+      visual.append(image);
       const body = document.createElement('div');
       body.className = 'proj-body';
       const tags = document.createElement('div');
@@ -871,14 +888,59 @@
       const productTag = document.createElement('span');
       productTag.textContent = product.name;
       const subsectionTag = document.createElement('span');
-      subsectionTag.textContent = subsection.name;
+      subsectionTag.textContent = images[0].subsection.name;
       tags.append(productTag, subsectionTag);
       const title = document.createElement('h3');
-      title.textContent = image.caption || subsection.name;
+      title.textContent = images[0].image.caption || images[0].image.alt;
       const description = document.createElement('p');
-      description.textContent = `${product.name} · ${subsection.name}`;
-      const view = createButton('Skatīt katalogā →', 'proj-link', () => openCatalog(product.id, subsection.id));
-      body.append(tags, title, description, view);
+      description.textContent = product.description;
+      let activeIndex = 0;
+      let slideSelect;
+      let slideCount;
+      let slideMenu;
+      const updateSlide = (index) => {
+        activeIndex = (index + images.length) % images.length;
+        const slide = images[activeIndex];
+        image.src = slide.image.src;
+        image.alt = slide.image.alt;
+        subsectionTag.textContent = slide.subsection.name;
+        title.textContent = slide.image.caption || slide.image.alt;
+        if (slideSelect) slideSelect.value = String(activeIndex);
+        if (slideCount) slideCount.textContent = `${activeIndex + 1} / ${images.length}`;
+      };
+
+      if (images.length > 1) {
+        const previous = createButton('‹', 'proj-slide-button proj-slide-previous', () => updateSlide(activeIndex - 1));
+        previous.setAttribute('aria-label', `Iepriekšējais ${product.name} attēls`);
+        const next = createButton('›', 'proj-slide-button proj-slide-next', () => updateSlide(activeIndex + 1));
+        next.setAttribute('aria-label', `Nākamais ${product.name} attēls`);
+        slideCount = document.createElement('span');
+        slideCount.className = 'proj-slide-count';
+        slideCount.setAttribute('aria-live', 'polite');
+        visual.append(previous, next, slideCount);
+
+        slideMenu = document.createElement('label');
+        slideMenu.className = 'proj-slide-menu';
+        const slideMenuLabel = document.createElement('span');
+        slideMenuLabel.textContent = 'Attēla skats';
+        slideSelect = document.createElement('select');
+        slideSelect.setAttribute('aria-label', `${product.name} attēla skats`);
+        slideSelect.className = 'proj-slide-select';
+        images.forEach(({ image: slideImage }, index) => {
+          const option = document.createElement('option');
+          option.value = String(index);
+          option.textContent = slideImage.caption || slideImage.alt;
+          slideSelect.append(option);
+        });
+        slideSelect.addEventListener('change', () => updateSlide(Number(slideSelect.value)));
+        slideMenu.append(slideMenuLabel, slideSelect);
+        updateSlide(0);
+      }
+
+      const view = createButton('Skatīt katalogā →', 'proj-link', () => openCatalog(product.id));
+      body.append(tags, title, description);
+      if (slideMenu) body.append(slideMenu);
+      body.append(view);
       card.append(visual, body);
       gallery.append(card);
     });
@@ -1731,7 +1793,7 @@
       canvas.remove();
       return;
     }
-    const isSmall = () => innerWidth < 900;
+    const isSmall = () => innerWidth <= 1100;
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isSmall() ? 1.5 : 2));
 
@@ -1915,6 +1977,7 @@
     window.addEventListener('pointercancel', endDrag);
     window.addEventListener('blur', () => endDrag());
 
+    document.body.classList.remove('no-webgl');
     onFrame((ms) => {
       const t = ms * 0.001 * speed;
       const dt = Math.min(0.05, Math.max(0.001, (ms - lastMs) / 1000));
@@ -1973,9 +2036,19 @@
   // Katru moduli palaižam atsevišķi, lai viena kļūda nenogāztu visu lapu
   const safe = (fn) => { try { fn(); } catch (err) { console.error('[NOVA]', fn.name, err); } };
 
+  function loadScene() {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js';
+    script.async = true;
+    script.addEventListener('load', () => safe(initScene), { once: true });
+    script.addEventListener('error', () => console.error('[CDify] Neizdevās ielādēt 3D bibliotēku Three.js.'), { once: true });
+    document.head.append(script);
+  }
+
   function init() {
     const year = $('#year');
     if (year) year.textContent = new Date().getFullYear();
+    document.body.classList.add('no-webgl');
 
     // Vietturu saites (href="#") nevajag ritināt uz augšu
     document.addEventListener('click', (e) => {
@@ -1983,10 +2056,12 @@
     });
 
     [initTheme, initNav, initScrollEffects, initRetroBackground, initMarquee, initSpotlight, initTilt, initMagnetic,
-      initCursor, initParallax, initCube, initTimeline, initCatalog, initFilter, initForm, initScene,
+      initCursor, initParallax, initCube, initTimeline, initCatalog, initFilter, initForm,
       initReveal, initCounters, initRotator].forEach(safe);
 
-    requestAnimationFrame(loop);
+    frameRequest = requestAnimationFrame(loop);
+    if (document.readyState === 'complete') loadScene();
+    else window.addEventListener('load', loadScene, { once: true });
   }
 
   init();
