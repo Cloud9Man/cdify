@@ -918,7 +918,7 @@ main, .footer { position: relative; z-index: 1; }
 .catalog-header .eyebrow { margin-bottom: .35rem; font-size: .72rem; }
 .catalog-header h2 { margin: 0; color: var(--text-strong); font: 700 clamp(1.25rem, 3vw, 1.8rem)/1.2 var(--font-head); }
 .catalog-close { display: grid; width: 42px; height: 42px; flex: none; place-items: center; border: 1px solid var(--border); border-radius: 50%; background: var(--glass); color: var(--text-strong); font: 400 1.8rem/1 var(--font-body); cursor: pointer; transition: background .2s, transform .2s; }
-.catalog-close:hover { background: rgba(var(--ink-rgb), .12); transform: rotate(90deg); }
+.catalog-close:hover { background: rgba(var(--ink-rgb), .12); }
 .catalog-content { overflow-y: auto; overscroll-behavior: contain; padding: clamp(1.1rem, 3vw, 2rem); }
 .catalog-intro { margin: 0 0 1.4rem; color: var(--muted); }
 .catalog-product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 1rem; }
