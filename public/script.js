@@ -576,7 +576,7 @@
       id: 'maxell',
       name: 'Maxell printable',
       type: 'CD-R printable',
-      description: 'Tukšs Maxell CD-R disks ar vietu jūsu izvēlētajam noformējumam. Izvēlies attēla iededzināšanu, diska apdruku vai datu iededzināšanu.',
+      description: 'Neapdrukāts CD-r disks, kuram ir iededzināts attēls uz lasāmās daļas',
       image: { src: './Images/catalog/cdr-straight.png', alt: 'Tukšs CD-R disks ar caurspīdīgu fonu' },
       orderSection: 'standard',
       quantityName: 'quantityStandard',
@@ -1537,7 +1537,7 @@
       try {
         const result = await submitForm(selectedType);
         const successMessage = selectedType === 'order'
-          ? `Pasūtījums ir nosūtīts. Numurs: ${result.orderNumber}. Faili saglabāti Cloudflare R2, bet informācija — Firebase.`
+          ? `Pasūtījums ir nosūtīts. Numurs: ${result.orderNumber}. Mēs sazināsimies ar jums e-pastā ${submission.email}.`
           : 'Ziņa ir nosūtīta un saglabāta Firebase.';
         form.reset();
         form.classList.add('is-sent');
