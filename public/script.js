@@ -1534,10 +1534,11 @@
       submitButton.disabled = true;
       formError.hidden = true;
       formError.textContent = '';
+      const email = $('[name="email"]', form).value.trim();
       try {
         const result = await submitForm(selectedType);
         const successMessage = selectedType === 'order'
-          ? `Pasūtījums ir nosūtīts. Numurs: ${result.orderNumber}. Mēs sazināsimies ar jums e-pastā ${submission.email}.`
+          ? `Pasūtījums ir nosūtīts. Numurs: ${result.orderNumber}. Mēs sazināsimies ar jums e-pastā ${email}.`
           : 'Ziņa ir nosūtīta un saglabāta Firebase.';
         form.reset();
         form.classList.add('is-sent');
