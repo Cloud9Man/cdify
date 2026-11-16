@@ -36,7 +36,7 @@ const GMAIL_USER = defineSecret("GMAIL_USER");
 const GMAIL_APP_PASSWORD = defineSecret("GMAIL_APP_PASSWORD");
 const ORDER_NOTIFICATION_EMAIL = defineSecret("ORDER_NOTIFICATION_EMAIL");
 const MAX_FILE_SIZE = 700 * 1024 * 1024;
-const ORDER_NUMBER_PATTERN = /^\d+-[A-Za-z0-9-]{1,60}-(?:Vinila-\d+(?:-Parastie-\d+)?(?:-Parastais-dead-\d+)?(?:-Futlari-\d+)?|Parastie-\d+(?:-Parastais-dead-\d+)?(?:-Futlari-\d+)?|Parastais-dead-\d+(?:-Futlari-\d+)?|Futlari-\d+|Pasutijums)$/;
+const ORDER_NUMBER_PATTERN = /^\d+-[A-Za-z0-9-]{1,60}-(?:Vinila-\d+(?:-Parastie-\d+)?(?:-Parastais-dead-\d+)?(?:-Futlari-\d+)?(?:-PlanieFutlari-\d+)?|Parastie-\d+(?:-Parastais-dead-\d+)?(?:-Futlari-\d+)?(?:-PlanieFutlari-\d+)?|Parastais-dead-\d+(?:-Futlari-\d+)?(?:-PlanieFutlari-\d+)?|Futlari-\d+(?:-PlanieFutlari-\d+)?|PlanieFutlari-\d+|Pasutijums)$/;
 
 const ORDER_PRODUCTS = {
   vinyl: { unitPrice: 1.5, options: { optionVinylSurface: 0.5, optionVinylBurn: 0.25 } },
@@ -46,6 +46,7 @@ const ORDER_PRODUCTS = {
   },
   "parastais-dead": { unitPrice: 0.5, options: { optionStandardPrintSurface: 0.5 } },
   cases: { unitPrice: 1, options: { optionCasesFinish: 0.5 } },
+  slimCases: { unitPrice: 0.5, options: { optionSlimCaseFinish: 0.5 } },
 };
 
 const ALLOWED_FILE_FIELDS = new Set([
@@ -54,6 +55,8 @@ const ALLOWED_FILE_FIELDS = new Set([
   "artworkStandardPrintSurface",
   "artworkCaseFront",
   "artworkCaseBack",
+  "artworkSlimCaseFront",
+  "artworkSlimCaseBack",
   "burningVinyl",
   "burningStandard",
   "burningStandardImage",
@@ -101,14 +104,20 @@ function toOrderNameSlug(name) {
 
 function toOrderSummary(items) {
   if (!Array.isArray(items) || items.length < 1 || items.length > Object.keys(ORDER_PRODUCTS).length) return null;
-  const labels = { vinyl: "Vinila", standard: "Parastie", "parastais-dead": "Parastais-dead", cases: "Futlari" };
+  const labels = {
+    vinyl: "Vinila",
+    standard: "Parastie",
+    "parastais-dead": "Parastais-dead",
+    cases: "Futlari",
+    slimCases: "PlanieFutlari",
+  };
   const seen = new Set();
   for (const item of items) {
     if (!item || !Object.hasOwn(labels, item.product) || seen.has(item.product) ||
       !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 100) return null;
     seen.add(item.product);
   }
-  return ["vinyl", "standard", "parastais-dead", "cases"]
+  return ["vinyl", "standard", "parastais-dead", "cases", "slimCases"]
     .filter((product) => seen.has(product))
     .map((product) => `${labels[product]}-${items.find((item) => item.product === product).quantity}`)
     .join("-");
@@ -158,6 +167,7 @@ function filesMatchOrder(items, files) {
     optionStandardSurface: [{ field: "artworkStandardSurface", product: "standard", purpose: "artwork" }],
     optionStandardPrintSurface: [{ field: "artworkStandardPrintSurface", product: "parastais-dead", purpose: "artwork" }],
     optionCasesFinish: [{ field: "artworkCaseFront" }, { field: "artworkCaseBack" }],
+    optionSlimCaseFinish: [{ field: "artworkSlimCaseFront" }, { field: "artworkSlimCaseBack" }],
     optionVinylBurn: [{ field: "burningVinyl", legacyField: "burningVinyl", product: "vinyl", purpose: "burning", burnType: "file-burn" }],
     optionStandardBurn: [{ field: "burningStandard", legacyField: "burningStandard", product: "standard", purpose: "burning", burnType: "file-burn" }],
     optionStandardImageBurn: [
@@ -349,13 +359,26 @@ async function sendOrderNotification(submission) {
     },
   });
   const productLabels = {
-    vinyl: "Vinila",
-    standard: "Parastie",
-    "parastais-dead": "Parastais-dead",
-    cases: "Futlāri",
+    vinyl: "Vinila stila disks (dekoratīvs CD)",
+    standard: "Parastais disks (CD-R)",
+    "parastais-dead": "Parastais disks tikai apdrukai (nav ierakstāms)",
+    cases: "Jewel futlāris (10,4 mm, cietā plastmasa)",
+    slimCases: "Plānais futlāris (mīkstā plastmasa)",
+  };
+  const optionLabels = {
+    optionVinylSurface: "apdruka uz virsmas",
+    optionVinylBurn: "failu iededzināšana",
+    optionStandardSurface: "apdruka uz virsmas",
+    optionStandardBurn: "failu iededzināšana",
+    optionStandardImageBurn: "attēla iededzināšana",
+    optionStandardPrintSurface: "apdruka uz virsmas",
+    optionCasesFinish: "apdrukāti ieliktņi (priekšpuse un aizmugure)",
+    optionSlimCaseFinish: "apdruka uz plānā futlāra (priekšpuse un aizmugure)",
   };
   const items = submission.items.map((item) =>
-    `- ${productLabels[item.product]}: ${item.quantity}; opcijas: ${item.options.join(", ") || "nav"}`
+    `- ${productLabels[item.product]}: ${item.quantity}; opcijas: ${
+      item.options.map((option) => `${option} (${optionLabels[option]})`).join(", ") || "nav"
+    }`
   );
 
   await transporter.sendMail({

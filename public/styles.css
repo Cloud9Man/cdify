@@ -1032,7 +1032,7 @@ main, .footer { position: relative; z-index: 1; }
 .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .footer-brands { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .footer-cdify { display: inline-flex; align-items: center; gap: .6rem; font: 700 1.25rem var(--font-head); letter-spacing: -.02em; }
-.footer-cdify img { width: 38px; height: 38px; object-fit: contain; }
+.footer-cdify img { width: 68px; height: 68px; object-fit: contain; filter: var(--footer-logo-filter); }
 .footer-jalatvia img { width: auto; height: 68px; max-width: min(220px, 42vw); object-fit: contain; filter: var(--footer-logo-filter); }
 .footer-jalatvia-member img { width: min(180px, 42vw); height: auto; max-height: 68px; }
 .footer p { font-size: .88rem; color: var(--muted); }
