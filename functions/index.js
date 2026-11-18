@@ -286,6 +286,7 @@ function normalizeSubmission(body) {
         item.quantity < 1 ||
         item.quantity > 100 ||
         !Array.isArray(item.options) ||
+        item.options.length < 1 ||
         new Set(item.options).size !== item.options.length ||
         item.options.some((option) => !Object.hasOwn(product.options, option)) ||
         (["vinyl", "standard"].includes(item.product) && !["same", "individual"].includes(item.discAssignment))
