@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>CD vāku redaktors — CDify</title>
   <meta name="description" content="Izveido CD jewel case vāku un diska dizainu. Sagatavo savu dizainu un lejuplādē to kā PNG vai printē uzreiz!" />
-  <meta name="theme-color" content="#06070d" />
+  <meta name="theme-color" content="#090714" />
   <link rel="icon" href="./Images/cdify-mark.png" />
   <script>
     (() => { let p = 'system'; try { const v = localStorage.getItem('theme'); if (v === 'light' || v === 'dark') p = v; } catch {} const t = p === 'system' ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : p; document.documentElement.dataset.theme = t; document.documentElement.dataset.themePref = p; })();
@@ -18,7 +18,24 @@
   <header class="nav-wrap" id="navbar">
     <nav class="nav" aria-label="Galvenā navigācija">
       <a href="index.html#hero" class="logo" aria-label="CDify — uz sākumu"><span class="logo-mark"><img src="./Images/cdify-mark.png" alt=""></span><span class="logo-text">CDify<span></span></span></a>
-      <div class="nav-menu editor-nav-menu" id="editorNavMenu"><div class="nav-links"><ul class="nav-list"><li><a href="index.html#hero" class="nav-link">Sākums</a></li><li><a href="index.html#services" class="nav-link">Pakalpojumi</a></li><li><a href="editor.html" class="nav-link active" aria-current="page">Vāku redaktors</a></li></ul></div><a href="index.html#contact" class="btn btn-primary nav-cta"><span class="btn-label">Sazināties</span></a></div>
+      <div class="nav-menu editor-nav-menu" id="editorNavMenu">
+        <div class="nav-links">
+          <ul class="nav-list">
+            <li style="--i:0"><a href="index.html#hero" class="nav-link">Sākums</a></li>
+            <li style="--i:1"><a href="index.html#services" class="nav-link">Pakalpojumi</a></li>
+            <li style="--i:2"><a href="index.html#projects" class="nav-link">Galerija</a></li>
+            <li style="--i:3"><a href="index.html#about" class="nav-link">Par mums</a></li>
+            <li style="--i:4"><a href="index.html#process" class="nav-link">Process</a></li>
+            <li style="--i:5"><a href="editor.html" class="nav-link active" aria-current="page">Vāku redaktors</a></li>
+            <li style="--i:6"><a href="faq.html" class="nav-link">FAQ</a></li>
+          </ul>
+          <span class="nav-indicator" id="editorNavIndicator" aria-hidden="true"></span>
+        </div>
+        <a href="index.html#contact" class="btn btn-primary nav-cta magnetic">
+          <span class="btn-label">Sazināties</span>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
       <div class="nav-tools"><button class="theme-toggle" id="themeToggle" type="button" aria-label="Krāsu tēma: pēc ierīces iestatījuma" title="Krāsu tēma: pēc ierīces iestatījuma">
         <svg class="icon i-system" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
         <svg class="icon i-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
@@ -137,8 +154,7 @@
       <div class="container footer-inner">
         <div class="footer-brands">
           <a href="index.html#hero" class="footer-cdify" aria-label="CDify — uz sākumu">
-            <img src="./Images/cdify-mark.png" alt="" width="38" height="38" />
-            <span>CDify</span>
+            <img src="./Images/cdify-full-logo.svg" alt="CDify" width="68" height="68" />
           </a>
           <a href="https://home.jalatvia.lv/" target="_blank" rel="noopener noreferrer" class="footer-jalatvia footer-jalatvia-member" aria-label="JA Latvia — JA Worldwide dalībnieks">
             <img src="./Images/jaLVW-footer.png" alt="JA Latvia — JA Worldwide dalībnieks" width="800" height="247" />
@@ -148,7 +164,7 @@
           </a>
         </div>
         <p><span id="year">2026</span> SMU "CDify".</p>
-        <a href="#" id="editorBackToTop" class="to-top" aria-label="Uz lapas augšu"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        <a href="editor.html" id="editorBackToTop" class="to-top magnetic" aria-label="Uz augšu"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
       </div>
     </footer>
   <script src="editor.js?v=product-showcase-v3" defer></script>

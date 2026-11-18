@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="lv" data-theme="dark" data-theme-pref="system">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Biežāk uzdotie jautājumi — CDify</title>
+  <meta name="description" content="Atbildes uz biežāk uzdotajiem jautājumiem par CDify pakalpojumiem, pasūtīšanu, diskiem un vāku redaktoru." />
+  <meta name="theme-color" content="#090714" />
+  <link rel="icon" href="./Images/cdify-mark.png" />
+  <script>
+    (() => { let p = 'system'; try { const v = localStorage.getItem('theme'); if (v === 'light' || v === 'dark') p = v; } catch {} const t = p === 'system' ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : p; document.documentElement.dataset.theme = t; document.documentElement.dataset.themePref = p; })();
+  </script>
+  <link rel="stylesheet" href="styles.css?v=product-showcase-v3" />
+  <link rel="stylesheet" href="editor.css?v=product-showcase-v3" />
+  <link rel="stylesheet" href="faq.css?v=product-showcase-v1" />
+</head>
+<body class="editor-page faq-page">
+  <div class="bg-layer" aria-hidden="true"></div>
+  <div class="noise" aria-hidden="true"></div>
+
+  <header class="nav-wrap" id="navbar">
+    <nav class="nav" aria-label="Galvenā navigācija">
+      <a href="index.html#hero" class="logo" aria-label="CDify — uz sākumu">
+        <span class="logo-mark"><img src="./Images/cdify-mark.png" alt=""></span>
+        <span class="logo-text">CDify<span></span></span>
+      </a>
+      <div class="nav-menu editor-nav-menu" id="faqNavMenu">
+        <div class="nav-links">
+          <ul class="nav-list">
+            <li style="--i:0"><a href="index.html#hero" class="nav-link">Sākums</a></li>
+            <li style="--i:1"><a href="index.html#services" class="nav-link">Pakalpojumi</a></li>
+            <li style="--i:2"><a href="index.html#projects" class="nav-link">Galerija</a></li>
+            <li style="--i:3"><a href="index.html#about" class="nav-link">Par mums</a></li>
+            <li style="--i:4"><a href="index.html#process" class="nav-link">Process</a></li>
+            <li style="--i:5"><a href="editor.html" class="nav-link">Vāku redaktors</a></li>
+            <li style="--i:6"><a href="faq.html" class="nav-link active" aria-current="page">FAQ</a></li>
+          </ul>
+          <span class="nav-indicator" id="faqNavIndicator" aria-hidden="true"></span>
+        </div>
+        <a href="index.html#contact" class="btn btn-primary nav-cta magnetic">
+          <span class="btn-label">Sazināties</span>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+      <div class="nav-tools">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Krāsu tēma: pēc ierīces iestatījuma" title="Krāsu tēma: pēc ierīces iestatījuma">
+          <svg class="icon i-system" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          <svg class="icon i-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          <svg class="icon i-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+        </button>
+        <button class="burger" id="faqBurger" type="button" aria-label="Atvērt izvēlni" aria-expanded="false" aria-controls="faqNavMenu"><span></span><span></span></button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container faq-main">
+    <header class="faq-hero">
+      <span class="eyebrow">Atbildes un norādījumi</span>
+      <h1 class="section-title">Biežāk uzdotie <span class="gradient-text">jautājumi</span></h1>
+      <p class="section-lead">Šeit atrodiet svarīgāko par CDify pasūtījumiem, iededzināšanu, diskiem, dizainu un vāku redaktoru.</p>
+      <div class="faq-search-wrap">
+        <input id="faqSearch" class="faq-search" type="search" placeholder="Meklēt jautājumā vai atbildē…" aria-label="Meklēt FAQ" />
+      </div>
+    </header>
+
+    <section class="faq-section" aria-labelledby="faq-orders">
+      <h2 class="faq-section-title" id="faq-orders">Pasūtīšana un piegāde</h2>
+      <div class="faq-grid">
+        <article class="faq-card">
+          <h3>Kā noformēt pasūtījumu?</h3>
+          <p>Izvēlieties vajadzīgo pakalpojumu un produktu galvenajā lapā, aizpildiet pasūtījuma formu un pievienojiet nepieciešamos failus. Pēc iesniegšanas mēs sazināsimies, lai apstiprinātu dizainu, diskus un kopējo summu.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Vai pasūtījumam jābūt apstiprinātam pirms maksāšanas?</h3>
+          <p>Jā. Vispirms mēs pārrunājam pieejamību, failus, drukas variantu un gala cenu. Darbu sākam tikai pēc to apstiprināšanas un vienošanās par apmaksas kārtību.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Cik ilgs ir izgatavošanas laiks?</h3>
+          <p>Izgatavošanas laiks parasti ir atkarīgs no pasūtījuma apjoma, dizaina sarežģītības un pašreizējās darba slodzes. Precīzu termiņu mēs norādām individuāli pēc pasūtījuma pārskatīšanas.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Vai iespējama pasūtījuma izsniegšana citur?</h3>
+          <p>Sākotnēji pasūtījumus varam nodot tikai sarunātā vietā. Ja nepieciešama cita piegādes iespēja, iespējamību un izmaksas sazināšanās laikā apspriedīsim atsevišķi.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="faq-section" aria-labelledby="faq-files">
+      <h2 class="faq-section-title" id="faq-files">Faili un iededzināšana</h2>
+      <div class="faq-grid">
+        <article class="faq-card">
+          <h3>Kādus failus var iededzināt uz CD diska?</h3>
+          <p>Var iededzināt mūziku, dokumentus, fotoattēlus, videomateriālus un citus digitālus failus, ja to kopējais apjoms nepārsniedz diska ietilpību. Standarta CD ietilpība parasti ir aptuveni 700 MB.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Kādos failu formātos jānosūta mūzika?</h3>
+          <p>Labākais variants ir MP3, WAV vai FLAC. Ja plānojat diska atskaņošanu standarta CD playerī, visdrošāk ir WAV vai jau pārveidots audio CD formāts. Konkrētajam aparatam ieteicams uzdot jautājumu pirms pasūtījuma.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Vai CD var tikt iededzināts kā audio un datu kombinācija?</h3>
+          <p>Jā, dažu disku struktūrā iespējams izveidot atsevišķas audio un datu sadaļas. Tomēr tas var ierobežot saderību ar vienkāršākiem CD atskaņotājiem, tāpēc variants jāizvēlas pēc ierīces, kurā disks tiks izmantots.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Kādas jābūt attēlu atbilstības prasībām?</h3>
+          <p>Ieteicams augstas izšķirtspējas PNG, TIFF vai JPG faili. Kvalitātes saglabāšanai priekšroku dod PNG vai TIFF; JPG ir piemērots fotogrāfijām. Ļoti mazi vai izstiepti attēli drukā var izskatīties neass.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Vai dokumentus var iededzināt vienā mapē ar virsuzrakstu?</h3>
+          <p>Jā. Pirms iededzināšanas varat norādīt vēlamo mapju struktūru un failu nosaukumus. Sagataves būsim labāk pārvaldāmas, ja faili nav dublēti un nosaukumi ir skaidri.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Vai var iededzināt oriģinālus failus no telefona?</h3>
+          <p>Jā, ja tos var pārsūtīt uz datoru vai augšupielādēt pasūtījuma formā. Neiestatiet materiālus tikai kā ekrānuzņēmumus, ja nepieciešama fotogrāfiju vai dokumentu maksimālā kvalitāte.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="faq-section" aria-labelledby="faq-editor">
+      <h2 class="faq-section-title" id="faq-editor">CD vāku redaktors</h2>
+      <div class="faq-grid">
+        <article class="faq-card">
+          <h3>Kas ir CD vāku redaktors?</h3>
+          <p>Tā ir iebūvēta rīks, ar kuru dizaina priekšējais vāks, buklets, aizmugures ieliktnis vai diska etiķete var tikt sagatavota tieši pārlūkā. Redaktors darbojas bez papildu programmu instalēšanas.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Vai mani attēli tiek augšupielādēti serverī?</h3>
+          <p>Nē. Redaktora attēli un projekts tiek apstrādāti lokāli pārlūkā. Projekts var automātiski saglabāties ierīces krātuvē, bet tas tiek glabāts tikai šajā pārlūkā.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Kā izmantot redaktoru no tālruņa?</h3>
+          <p>Atveriet redaktoru mobilajā pārlūkā, izvēlieties sagatavi, pievienojiet attēlu vai tekstu un velciet to uz nepieciešamo pozīciju. Mazākiem ekrāniem vadības paneļa elementu sekcijas atveras zem priekšskatījuma.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Kāds attēla formāts ir piemērots?</h3>
+          <p>Atbalstīti tiek JPG, PNG, WebP un citi pārlūkā atpazīstami attēlu formāti. Drukai ieteicams PNG vai augstas kvalitātes JPG ar pietiekamu izšķirtspēju.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Kā pievienot tekstu vai formu?</h3>
+          <p>Atveriet sadaļu “Pievienot objektu”, izvēlieties tekstlodziņu, taisnstūri, apli vai līniju. Pēc tam atveriet “Atlasītais objekts”, lai mainītu izmēru, krāsu, pagriezienu, necaurspīdīgumu un tekstu.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Vai var izdrukāt sagatavoto dizainu?</h3>
+          <p>Jā. Izvēlieties pogu “Lejupielādēt PNG”, lai saglabātu dizaina attēlu, vai pogu “Drukāt uz A4”, lai atvērtu drukas dialogu. Pirms drukāšanas izvēlieties 100% mērogu un A4 papīru.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Kāpēc redzamās palīglīnijas netiek lejupielādētas?</h3>
+          <p>Palīglīnijas ir paredzētas tikai dizaina apvienošanai ekrānā. PNG, drukājamais dizains un rediģējamais attēls tās neiekļauj.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Vai var saglabāt projektu citu dienu?</h3>
+          <p>Jā. Projekts tiek saglabāts tās pašas ierīces pārlūkā. Ja izmantojat citu ierīci, citas pārlūka profilu vai privāto režīmu, lokālais projekts var nebūt pieejams. Beigu attēlu ieteicams arī lejupielādēt.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Vai redaktors sākotnēji saglabā pareizos drukas izmērus?</h3>
+          <p>Jā. Redaktors izveido sagataves milimetru mērogā ar 300 DPI, piemēram, priekšējais vāks ir 120 × 120 mm. Pirms drukāšanas ieteicams pārbaudīt izdruku uz parasta papīra, jo atsevišķiem jewel case ražotājiem var būt nelielas atšķirības.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="faq-section" aria-labelledby="faq-products">
+      <h2 class="faq-section-title" id="faq-products">Produkti un kvalitāte</h2>
+      <div class="faq-grid">
+        <article class="faq-card">
+          <h3>Kādiem produktiem šie diski ir piemēroti?</h3>
+          <p>Mūsu diski parasti ir piemēroti dāvanām, portfeļiem, mūzikas kolekcijām, fotoalbūmiem, prezentācijām, dokumentu arhivēšanai un dekoratīvām atmiņām.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Vai var pasūtīt tikai tukšu jeb neierakstītu disku?</h3>
+          <p>Jā. Tukša diska, dekoratīvā apdruka vai vāka pasūtījumu var vienoties individuāli. Norādiet vēlamo produktu un daudzumu pasūtījuma formā.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Vai var drukāt diska virsmu ar jebkuru attēlu?</h3>
+          <p>Attēls jānodrošina pareizā kvalitātē un ar nepieciešamajām tiesībām to izmantot. Pirms drukas mēs pārbaudām, vai attēls aptver diska drukas zonu un vai tas nav pārāk izstiepts.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Vai dekorētais disks saglabā lasāmību?</h3>
+          <p>Tas ir atkarīgs no dekorēšanas veida. Pārlāsāmai nolasāmajai pusei nedrīkst uzklāt slāņus, kas traucē lasīšanai. Ja nepieciešams tikai dekoratīvs disks, uz nolasāmās puses var izveidot zīmējumus vai rakstus.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Kādus vāka materiālus izmantojam?</h3>
+          <p>Vāki tiek drukāti uz papīra un salikti cietā jewel case futlārī. Izdruku pārbauda ne tikai tā attēlu kvalitātes, bet arī pēc izmēra un futlāra ietilpības.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Vai var pasūtīt vairākus atšķirīgus disku dizainus vienā pasūtījumā?</h3>
+          <p>Jā. Katrā pasūtījumā var norādīt vajadzīgos dizainu variantus. Jo vairāku atsevišķu variantu ir, jo precīzāka jāsniedz informācija par apjomu katram dizainam.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="faq-section" aria-labelledby="faq-support">
+      <h2 class="faq-section-title" id="faq-support">Tehniskais atbalsts un autortiesības</h2>
+      <div class="faq-grid">
+        <article class="faq-card">
+          <h3>Vai mēs uzturējam pasūtījuma datus slepenībā?</h3>
+          <p>Jā. Pasūtījuma faili tiek izmantoti tikai izpildes vajadzībām un saziņai ar klientu. Pievienojot failus pasūtījuma formā, lūdzu izmantot atbilstošas piekļuves ierobežojumus un nesūtīt nevajadzīgu personisku informāciju.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Ko darīt, ja fails ir pārāk liels?</h3>
+          <p>Sazinieties ar mums, pirms pasūtījuma iesniegšanas, ja faila apjoms pārsniedz pieejamās augšupielādes iespējas. Kopā varam vienoties par drošu failu pārsūtīšanas veidu vai failu pārrakstīšanu mazākās daļās.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Vai drīkstu izmantot kāda cita autoru, fotogrāfijas vai mūziku?</h3>
+          <p>Lietošanai jābūt likumīgai. Lūdzu piegādāt tikai saturu, uz kuru jums ir tiesības, vai norādiet autoru, licences veidu un pielietojuma mērķi. CDify neatspēko vietējās vai starptautiskās autortiesību prasības.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Ko darīt, ja CD netiek nolasīts datorā vai atskaņotājā?</h3>
+          <p>Pārbaudiet, vai ierīce atbalsta attiecīgo diska tipu, failu formātu un CD lasīšanas īpašības. Ja problēma saglabājas, norādiet ierīces modeli, kļūdas tekstu un, ja iespējams, fotogrāfiju no ieliktņa. Tas palīdzēs noteikt cēloni.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Kādā laikā pārbaudīt atbildi uz pieprasījumu?</h3>
+          <p>Ja ir pagājis ilgāks laiks bez atbildes, pārbaudiet galveno e-pasta mapi, mēstuļu mapi un pasūtījuma iesniegšanas informāciju. Ja nepieciešama steidzama atbilde, sazinieties vēlreiz un norādiet savu vārdu un pasūtījuma numuru.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Kur sazināties ar CDify?</h3>
+          <p>Varat rakstīt uz e-pastu <a href="mailto:janisoaky@proton.me">janisoaky@proton.me</a>, Discord profilu “cdify” vai izmantot kontaktu sadaļu galvenajā lapā. Norādiet pasūtījuma veidu, termiņu un iespējamos failus.</p>
+        </article>
+      </div>
+    </section>
+
+    <p class="faq-empty" id="faqEmpty">Ar šo meklējuma frāzi atbilde netika atrasta. Mēģiniet citu atslēgvārdu.</p>
+
+    <section class="faq-contact" aria-labelledby="faq-contact-title">
+      <div>
+        <h2 id="faq-contact-title">Neatradāt atbildi?</h2>
+        <p>Nosūtiet mums savu jautājumu, pasūtījuma ideju vai failu nosūtīšanas izvēli.</p>
+      </div>
+      <a href="mailto:janisoaky@proton.me" class="btn btn-primary">
+        <span class="btn-label">Sazināties ar mums</span>
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brands">
+        <a href="index.html#hero" class="footer-cdify" aria-label="CDify — uz sākumu">
+          <img src="./Images/cdify-full-logo.svg" alt="CDify" width="68" height="68" />
+        </a>
+        <a href="https://home.jalatvia.lv/" target="_blank" rel="noopener noreferrer" class="footer-jalatvia footer-jalatvia-member" aria-label="JA Latvia — JA Worldwide dalībnieks">
+          <img src="./Images/jaLVW-footer.png" alt="JA Latvia — JA Worldwide dalībnieks" width="800" height="247" />
+        </a>
+        <a href="https://home.jalatvia.lv/" target="_blank" rel="noopener noreferrer" class="footer-jalatvia footer-jalatvia-white" aria-label="JA Latvia — baltais logo">
+          <img src="./Images/ja-latvia-white.png" alt="JA Latvia — Skolēnu mācību uzņēmums" width="200" height="75" />
+        </a>
+      </div>
+      <p><span id="year">2026</span> SMU "CDify".</p>
+      <a href="faq.html" id="faqBackToTop" class="to-top magnetic" aria-label="Uz lapas augšu">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </footer>
+
+  <script src="faq.js?v=product-showcase-v1" defer></script>
+</body>
+</html>

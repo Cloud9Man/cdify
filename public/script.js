@@ -51,7 +51,7 @@
   // <html data-theme="light|dark"> — faktiskā tēma; <html data-theme-pref="system|light|dark"> — lietotāja izvēle.
   // Sākotnējo tēmu pirms atveidošanas uzliek neliels skripts <head>; šeit ir slēdzis un sistēmas izmaiņu sekošana.
   const THEME_KEY = 'theme';
-  const THEME_META = { dark: '#06070d', light: '#f9f5f4' };
+  const THEME_META = { dark: '#090714', light: '#fff8f3' };
   const THEME_LABELS = {
     system: 'Krāsu tēma: pēc ierīces iestatījuma',
     light: 'Krāsu tēma: gaišā',
@@ -247,20 +247,20 @@
   // Tumšā palete ir oriģinālā; gaišā — tās pašas nokrāsas, bet pasteļtoņos
   const RETRO_RINGS = {
     dark: [
-      [1, '#261342'],
-      [0.86, '#45154e'],
-      [0.7, '#64194b'],
-      [0.54, '#8a1d43'],
-      [0.38, '#b43832'],
-      [0.22, '#744568'],
+      [1, '#17102e'],
+      [0.86, '#3a1f45'],
+      [0.7, '#63233f'],
+      [0.54, '#96313a'],
+      [0.38, '#c94a32'],
+      [0.22, '#ff7338'],
     ],
     light: [
-      [1, '#e6d9f5'],
-      [0.86, '#efd2ee'],
-      [0.7, '#f6c9dc'],
-      [0.54, '#fabfc8'],
-      [0.38, '#fcae9f'],
-      [0.22, '#e9bcd0'],
+      [1, '#f4d9cc'],
+      [0.86, '#f6c9b8'],
+      [0.7, '#fac6ad'],
+      [0.54, '#fbb49a'],
+      [0.38, '#ffc17f'],
+      [0.22, '#ffdca8'],
     ],
   };
 
@@ -1890,8 +1890,8 @@
 
     // Gaismas (malai); trešā seko pelei
     scene.add(new THREE.AmbientLight(0x8a90ff, 0.7));
-    const l1 = new THREE.PointLight(0x22d3ee, 2.2, 30); l1.position.set(-5, 3, 5);
-    const l2 = new THREE.PointLight(0xff5ca8, 1.8, 30); l2.position.set(5, -3, 4);
+    const l1 = new THREE.PointLight(0xff7338, 2.4, 30); l1.position.set(-5, 3, 5);
+    const l2 = new THREE.PointLight(0xff7a9e, 1.8, 30); l2.position.set(5, -3, 4);
     const l3 = new THREE.PointLight(0x7c5cff, 2.6, 20); l3.position.set(0, 0, 4);
     scene.add(l1, l2, l3);
 
