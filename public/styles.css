@@ -395,6 +395,7 @@ main, .footer { position: relative; z-index: 1; }
   border-radius: 999px;
   font-size: .92rem;
   font-weight: 500;
+  white-space: nowrap;
   color: var(--muted);
   transition: color .3s;
 }
