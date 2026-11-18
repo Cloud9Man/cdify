@@ -222,6 +222,7 @@ main, .footer { position: relative; z-index: 1; }
 }
 .btn-primary:hover { box-shadow: 0 16px 44px -8px var(--secondary), inset 0 1px 0 rgba(255, 255, 255, .3); }
 .btn-primary:hover::after { transform: translateX(120%); }
+.btn:disabled { cursor: not-allowed; opacity: .5; }
 
 .btn-ghost {
   background: rgba(var(--ink-rgb), .05);
@@ -983,13 +984,16 @@ main, .footer { position: relative; z-index: 1; }
 .disc-card-upload { display: grid; gap: .35rem; margin-top: .6rem; }
 .disc-card-upload input[type="file"] { width: 100%; padding: .55rem; border: 1px dashed var(--border); border-radius: 9px; background: rgba(var(--ink-rgb), .035); font-size: .78rem; }
 .disc-assignment { margin: .8rem 0 .25rem; }
-.service-dialog { width: min(92vw, 520px); max-height: 85vh; padding: 1.4rem; border: 1px solid var(--border); border-radius: 20px; background: var(--bg-soft); color: var(--text); box-shadow: 0 24px 80px #0008; }
-.service-dialog::backdrop { background: rgba(5, 6, 12, .72); backdrop-filter: blur(4px); }
-.service-dialog h3 { margin: 0 0 .6rem; color: var(--text-strong); font: 700 1.35rem var(--font-head); }
-.service-dialog p { line-height: 1.6; }
-.service-dialog-dismiss { display: flex; align-items: center; gap: .55rem; margin: 1rem 0; color: var(--muted); font-size: .88rem; }
+.service-dialog { position: fixed; inset: auto 1.25rem 1.25rem auto; width: min(92vw, 390px); max-height: min(75vh, 500px); margin: 0; padding: 1rem 1.1rem; border: 1px solid var(--border); border-radius: 16px; background: var(--bg-soft); color: var(--text); box-shadow: 0 12px 40px #0005; }
+.service-dialog::backdrop { background: transparent; }
+.service-dialog h3 { margin: 0 0 .5rem; color: var(--text-strong); font: 700 1.1rem var(--font-head); }
+.service-dialog p { font-size: .88rem; line-height: 1.5; }
+.service-dialog-dismiss { display: flex; align-items: center; gap: .55rem; margin: .75rem 0; color: var(--muted); font-size: .78rem; }
 .service-dialog-dismiss input { width: 18px; height: 18px; accent-color: var(--primary); }
-.service-dialog .btn { justify-content: center; width: 100%; }
+.service-dialog .btn { justify-self: end; padding: .55rem 1rem; font-size: .85rem; }
+@media (max-width: 600px) {
+  .service-dialog { right: .75rem; bottom: .75rem; width: calc(100vw - 1.5rem); }
+}
 .add-files-btn { margin-top: .55rem; padding: .55rem .95rem; font-size: .8rem; }
 .additional-file-input { display: grid; gap: .4rem; margin-top: .65rem; }
 .remove-files-btn { justify-self: start; padding: .25rem 0; border: 0; background: transparent; color: var(--err-text); font-size: .76rem; cursor: pointer; }
@@ -1003,6 +1007,7 @@ main, .footer { position: relative; z-index: 1; }
 .order-total { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: .5rem 0 1.4rem; padding: 1rem 1.1rem; border: 1px solid rgba(240, 73, 55, .35); border-radius: 15px; background: rgba(240, 73, 55, .08); }
 .order-total span { color: var(--muted); }
 .order-total strong { font: 700 1.25rem var(--font-head); color: var(--text-strong); white-space: nowrap; }
+.order-option-hint { margin: -1rem 0 1.2rem; color: var(--muted); font-size: .78rem; line-height: 1.45; }
 .form-success {
   position: absolute;
   inset: 0;

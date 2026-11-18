@@ -1000,9 +1000,11 @@
 
     const panels = $$('[data-form-panel]', form);
     const sections = $$('[data-order-section]', form);
+    const orderOptionError = $('#orderOptionError', form);
     const artworkInputs = $$('[data-artwork-input]', form);
     const fileLimit = 700 * 1024 * 1024;
     const euro = new Intl.NumberFormat('lv-LV', { style: 'currency', currency: 'EUR' });
+    let isSubmitting = false;
 
     const updatePanels = () => {
       const selectedType = form.querySelector('input[name="requestType"]:checked').value;
@@ -1030,6 +1032,8 @@
     };
 
     const selectedQuantity = (section) => Number($(`[name="quantity${section.dataset.orderSection[0].toUpperCase()}${section.dataset.orderSection.slice(1)}"]`, section).value);
+    const hasMissingOptions = () => sections.some((section) =>
+      selectedQuantity(section) > 0 && !$('[data-finish-option]:checked, [data-burning-option]:checked', section));
 
     const updatePrices = () => {
       let total = 0;
@@ -1210,6 +1214,10 @@
           $$('[data-disc-card] input[type="file"]', cards).forEach((input) => { input.disabled = !enabled || !individual; });
         }
       });
+      const selectedType = form.querySelector('input[name="requestType"]:checked').value;
+      const missingOptions = hasMissingOptions();
+      orderOptionError.hidden = selectedType !== 'order' || !missingOptions;
+      submitButton.disabled = isSubmitting || (selectedType === 'order' && missingOptions);
       updatePrices();
       updateBurningSizeError();
     };
@@ -1266,7 +1274,7 @@
       const artworkValid = validateArtwork();
       const burningFilesValid = validateBurningUploads();
       const fileSizeValid = updateBurningSizeError();
-      return validQuantities.every(Boolean) && hasItems && artworkValid && burningFilesValid && fileSizeValid;
+      return validQuantities.every(Boolean) && hasItems && !hasMissingOptions() && artworkValid && burningFilesValid && fileSizeValid;
     };
 
     const activeInputs = () => $$('[data-validate]', form).filter((input) => !input.disabled);
@@ -1385,7 +1393,7 @@
       infoDialog.dataset.infoKey = key;
       $('#serviceInfoTitle').textContent = info[0];
       $('#serviceInfoText').textContent = info[1];
-      infoDialog.showModal();
+      infoDialog.show();
     });
 
     form.addEventListener('reset', () => {
@@ -1531,6 +1539,7 @@
         return;
       }
 
+      isSubmitting = true;
       submitButton.disabled = true;
       formError.hidden = true;
       formError.textContent = '';
@@ -1549,7 +1558,8 @@
         formError.textContent = error.message || 'Neizdevās nosūtīt formu. Lūdzu, mēģiniet vēlreiz.';
         formError.hidden = false;
       } finally {
-        submitButton.disabled = false;
+        isSubmitting = false;
+        updateSections();
         if (!form.classList.contains('is-sent')) {
           submitLabel.textContent = selectedType === 'order'
             ? 'Pabeigt pasūtījuma noformēšanu'
