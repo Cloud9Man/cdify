@@ -8,7 +8,7 @@
   <link rel="icon" href="./Images/cdify-mark.png">
   <meta name="description" content="CDify ir SMU, kura mērķis ir nodrošināt esošo un nevajadzīgo priekšmetu utilizēšana, saskaņā ar mūsdienu cilvēku vajadzībām." />
   <meta name="color-scheme" content="dark light"/>
-  <meta name="theme-color" content="#06070d" />
+  <meta name="theme-color" content="#090714" />
   
   <script>
     (function () {
@@ -18,7 +18,7 @@
       root.setAttribute('data-theme', theme);
       root.setAttribute('data-theme-pref', pref);
       var meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute('content', theme === 'light' ? '#f9f5f4' : '#06070d');
+      if (meta) meta.setAttribute('content', theme === 'light' ? '#fff8f3' : '#090714');
     })();
   </script>
   <link rel="stylesheet" href="styles.css?v=product-showcase-v3" />
@@ -72,6 +72,7 @@
             <li style="--i:3"><a href="#about" class="nav-link">Par mums</a></li>
             <li style="--i:4"><a href="#process" class="nav-link">Process</a></li>
             <li style="--i:5"><a href="editor.html" class="nav-link">Vāku redaktors</a></li>
+            <li style="--i:6"><a href="faq.html" class="nav-link">FAQ</a></li>
           </ul>
           <span class="nav-indicator" id="navIndicator" aria-hidden="true"></span>
         </div>
@@ -122,6 +123,10 @@
             </a>
             <a href="editor.html" class="btn btn-ghost magnetic">
               <span class="btn-label">Veidot CD vāku</span>
+              <svg class="icon"><use href="#i-arrow"/></svg>
+            </a>
+            <a href="faq.html" class="btn btn-ghost magnetic">
+              <span class="btn-label">FAQ</span>
               <svg class="icon"><use href="#i-arrow"/></svg>
             </a>
           </div>

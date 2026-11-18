@@ -525,7 +525,7 @@
     const root = document.documentElement;
     root.dataset.theme = resolved; root.dataset.themePref = themePreference;
     themeButton.setAttribute('aria-label', themeLabels[themePreference]); themeButton.title = themeLabels[themePreference];
-    const meta = $('meta[name="theme-color"]'); if (meta) meta.content = resolved === 'light' ? '#f9f5f4' : '#06070d';
+    const meta = $('meta[name="theme-color"]'); if (meta) meta.content = resolved === 'light' ? '#fff8f3' : '#090714';
   }
   function nextThemePreference(current) {
     const opposite = systemTheme() === 'light' ? 'dark' : 'light';
@@ -573,6 +573,32 @@
   });
   const editorBurger = $('#editorBurger');
   const editorMenu = $('#editorNavMenu');
+  const editorNavIndicator = $('#editorNavIndicator');
+  const editorNavLinks = editorMenu.querySelectorAll('.nav-link');
+  const placeEditorNavIndicator = () => {
+    if (!editorNavIndicator) return;
+    const activeLink = editorMenu.querySelector('.nav-link.active');
+    if (!activeLink) { editorNavIndicator.style.opacity = '0'; return; }
+    const box = editorMenu.querySelector('.nav-links').getBoundingClientRect();
+    const rect = activeLink.getBoundingClientRect();
+    editorNavIndicator.style.width = `${rect.width}px`;
+    editorNavIndicator.style.transform = `translateX(${rect.left - box.left - editorMenu.querySelector('.nav-links').clientLeft}px)`;
+    editorNavIndicator.style.opacity = '1';
+  };
+  editorNavLinks.forEach((link) => {
+    link.addEventListener('pointerenter', () => {
+      if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+      const box = editorMenu.querySelector('.nav-links').getBoundingClientRect();
+      const rect = link.getBoundingClientRect();
+      editorNavIndicator.style.width = `${rect.width}px`;
+      editorNavIndicator.style.transform = `translateX(${rect.left - box.left - editorMenu.querySelector('.nav-links').clientLeft}px)`;
+      editorNavIndicator.style.opacity = '1';
+    });
+  });
+  editorMenu.querySelector('.nav-links').addEventListener('pointerleave', placeEditorNavIndicator);
+  window.addEventListener('load', placeEditorNavIndicator);
+  window.addEventListener('resize', placeEditorNavIndicator);
+  placeEditorNavIndicator();
   const setEditorMenu = (open) => {
     document.body.classList.toggle('menu-open', open);
     editorBurger.setAttribute('aria-expanded', String(open));
