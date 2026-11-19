@@ -574,24 +574,22 @@
   const CATALOG_PRODUCTS = [
     {
       id: 'maxell',
-      name: 'Attēls iededzināts diskā',
-      type: 'CD-R ar iededzinātu attēlu',
-      description: 'CD-R disks ar iededzinātu attēlu — no maketa līdz gatavam diskam.',
-      image: { src: './Images/catalog/disc-burned-angle-1.jpeg', alt: 'CD-R disks ar iededzinātu attēlu, slīps tuvplāns' },
+      name: 'Maxell printable',
+      type: 'CD-R printable',
+      description: 'Neapdrukāts CD-r disks, kuram ir iededzināts attēls uz lasāmās daļas',
+      image: { src: './Images/catalog/cdr-straight.png', alt: 'Tukšs CD-R disks ar caurspīdīgu fonu' },
       orderSection: 'standard',
       quantityName: 'quantityStandard',
-      showcaseSubsectionId: 'image-burning',
       categories: ['disc'],
       subsections: [
         {
           id: 'image-burning',
           name: 'Attēla iededzināšana',
-          description: 'Attēls tiek iededzināts diskā; apskati gatavo disku un tā izveides maketu.',
+          description: 'Attēls tiek iededzināts tieši diska virsmā.',
           orderOption: 'optionStandardImageBurn',
           images: [
-            { src: './Images/catalog/disc-burned-angle-1.jpeg', alt: 'CD-R disks ar iededzinātu attēlu, slīps tuvplāns', caption: 'Iededzinātais attēls — slīps skats' },
-            { src: './Images/catalog/disc-burned-angle-2.jpeg', alt: 'CD-R diska iededzinātā virsma citā leņķī', caption: 'Iededzinātais attēls — cits leņķis' },
-            { src: './Images/catalog/disc-burned-design.png', alt: 'CD dizaina makets iededzināšanai', caption: 'Iededzināšanas makets' },
+            { src: './Images/catalog/imageburn-straight.png', alt: 'Attēla iededzināšana diskā, skats no priekšpuses', caption: 'Skats no priekšpuses' },
+            { src: './Images/catalog/imageburn-tilt.png', alt: 'Attēla iededzināšana diskā, skats no slīpuma', caption: 'Skats no slīpuma' },
           ],
         },
         {
@@ -638,13 +636,12 @@
     },
     {
       id: 'jewel',
-      name: 'Jewel case ar apdari',
-      type: 'Cietais futlāris · vāka noformējums',
-      description: 'Cietais 10,4 mm CD futlāris ar sagatavotu vāka dizainu — no maketa līdz drukas loksnei.',
-      image: { src: './Images/catalog/jewel-finish-front.jpeg', alt: 'Cietais CD futlāris no priekšpuses' },
+      name: 'Jewel case',
+      type: 'Cietais futlāris',
+      description: 'Klasiskais 10,4 mm cietās plastmasas futlāris ar apdrukas iespējām.',
+      image: { src: './Images/catalog/jewel-open.png', alt: 'Atvērts Jewel case futlāris' },
       orderSection: 'cases',
       quantityName: 'quantityCases',
-      showcaseSubsectionId: 'finish',
       categories: ['case'],
       subsections: [
         {
@@ -653,10 +650,8 @@
           description: 'Pievieno futlāra priekšpuses un aizmugures noformējumu.',
           orderOption: 'optionCasesFinish',
           images: [
-            { src: './Images/catalog/jewel-finish-front.jpeg', alt: 'Cietais CD futlāris no priekšpuses', caption: 'Futlāra priekšpuse' },
-            { src: './Images/catalog/jewel-finish-open.jpeg', alt: 'Atvērts cietais CD futlāris', caption: 'Atvērts futlāris' },
-            { src: './Images/catalog/jewel-cover-layout.png', alt: 'CD vāka drukas loksnes izkārtojuma makets', caption: 'Apdrukas loksnes makets' },
-            { src: './Images/catalog/jewel-cover-editor.png', alt: 'CD futlāra vāka dizains redaktorā', caption: 'Vāka dizains redaktorā' },
+            { src: './Images/catalog/jewel-open.png', alt: 'Atvērts Jewel case futlāris', caption: 'Atvērts futlāris' },
+            { src: './Images/catalog/jewel-close.png', alt: 'Aizvērts Jewel case futlāris', caption: 'Aizvērts futlāris' },
           ],
         },
       ],
@@ -681,6 +676,30 @@
             { src: './Images/catalog/slim-closed.png', alt: 'Aizvērts slim case futlāris', caption: 'Aizvērts futlāris' },
           ],
         },
+      ],
+    },
+  ];
+
+  const CATALOG_SHOWCASE = [
+    {
+      productId: 'maxell',
+      name: 'Attēls iededzināts diskā',
+      description: 'CD-R disks ar iededzinātu attēlu — no maketa līdz gatavam diskam.',
+      images: [
+        { src: './Images/catalog/disc-burned-angle-1.jpeg', alt: 'CD-R disks ar iededzinātu attēlu, slīps tuvplāns', caption: 'Iededzinātais attēls — slīps skats', subsectionName: 'Attēla iededzināšana' },
+        { src: './Images/catalog/disc-burned-angle-2.jpeg', alt: 'CD-R diska iededzinātā virsma citā leņķī', caption: 'Iededzinātais attēls — cits leņķis', subsectionName: 'Attēla iededzināšana' },
+        { src: './Images/catalog/disc-burned-design.png', alt: 'CD dizaina makets iededzināšanai', caption: 'Iededzināšanas makets', subsectionName: 'Attēla iededzināšana' },
+      ],
+    },
+    {
+      productId: 'jewel',
+      name: 'Jewel case ar apdari',
+      description: 'Cietais 10,4 mm CD futlāris ar sagatavotu vāka dizainu — no maketa līdz drukas loksnei.',
+      images: [
+        { src: './Images/catalog/jewel-finish-front.jpeg', alt: 'Cietais CD futlāris no priekšpuses', caption: 'Futlāra priekšpuse', subsectionName: 'Apdare' },
+        { src: './Images/catalog/jewel-finish-open.jpeg', alt: 'Atvērts cietais CD futlāris', caption: 'Atvērts futlāris', subsectionName: 'Apdare' },
+        { src: './Images/catalog/jewel-cover-layout.png', alt: 'CD vāka drukas loksnes izkārtojuma makets', caption: 'Apdrukas loksnes makets', subsectionName: 'Apdare' },
+        { src: './Images/catalog/jewel-cover-editor.png', alt: 'CD futlāra vāka dizains redaktorā', caption: 'Vāka dizains redaktorā', subsectionName: 'Apdare' },
       ],
     },
   ];
@@ -861,37 +880,29 @@
       title.focus({ preventScroll: true });
     };
 
-    const showcase = CATALOG_PRODUCTS.filter((product) => ['maxell', 'jewel'].includes(product.id)).map((product) => {
-      const subsection = product.subsections.find((item) => item.id === product.showcaseSubsectionId) || product.subsections[0];
-      const images = subsection ? subsection.images.map((image) => ({ image, subsection })) : [];
-      if (product.image && !images.some(({ image }) => image.src === product.image.src)) {
-        images.unshift({ image: product.image, subsection });
-      }
-      return { product, images };
-    });
-
-    showcase.forEach(({ product, images }) => {
-      if (!images.length) return;
+    CATALOG_SHOWCASE.forEach(({ productId, name, description: productDescription, images }) => {
+      const product = findProduct(productId);
+      if (!product || !images.length) return;
       const card = document.createElement('article');
       card.className = 'proj glass reveal';
       card.dataset.cat = product.categories.join(' ');
       const visual = document.createElement('div');
       visual.className = 'proj-visual';
-      const image = imageElement(images[0].image, 'proj-image');
+      const image = imageElement(images[0], 'proj-image');
       visual.append(image);
       const body = document.createElement('div');
       body.className = 'proj-body';
       const tags = document.createElement('div');
       tags.className = 'tags';
       const productTag = document.createElement('span');
-      productTag.textContent = product.name;
+      productTag.textContent = name;
       const subsectionTag = document.createElement('span');
-      subsectionTag.textContent = images[0].subsection.name;
+      subsectionTag.textContent = images[0].subsectionName;
       tags.append(productTag, subsectionTag);
       const title = document.createElement('h3');
-      title.textContent = images[0].image.caption || images[0].image.alt;
+      title.textContent = images[0].caption || images[0].alt;
       const description = document.createElement('p');
-      description.textContent = product.description;
+      description.textContent = productDescription;
       let activeIndex = 0;
       let slideSelect;
       let slideCount;
@@ -899,19 +910,19 @@
       const updateSlide = (index) => {
         activeIndex = (index + images.length) % images.length;
         const slide = images[activeIndex];
-        image.src = slide.image.src;
-        image.alt = slide.image.alt;
-        subsectionTag.textContent = slide.subsection.name;
-        title.textContent = slide.image.caption || slide.image.alt;
+        image.src = slide.src;
+        image.alt = slide.alt;
+        subsectionTag.textContent = slide.subsectionName;
+        title.textContent = slide.caption || slide.alt;
         if (slideSelect) slideSelect.value = String(activeIndex);
         if (slideCount) slideCount.textContent = `${activeIndex + 1} / ${images.length}`;
       };
 
       if (images.length > 1) {
         const previous = createButton('‹', 'proj-slide-button proj-slide-previous', () => updateSlide(activeIndex - 1));
-        previous.setAttribute('aria-label', `Iepriekšējais ${product.name} attēls`);
+        previous.setAttribute('aria-label', `Iepriekšējais ${name} attēls`);
         const next = createButton('›', 'proj-slide-button proj-slide-next', () => updateSlide(activeIndex + 1));
-        next.setAttribute('aria-label', `Nākamais ${product.name} attēls`);
+        next.setAttribute('aria-label', `Nākamais ${name} attēls`);
         slideCount = document.createElement('span');
         slideCount.className = 'proj-slide-count';
         slideCount.setAttribute('aria-live', 'polite');
@@ -922,9 +933,9 @@
         const slideMenuLabel = document.createElement('span');
         slideMenuLabel.textContent = 'Attēla skats';
         slideSelect = document.createElement('select');
-        slideSelect.setAttribute('aria-label', `${product.name} attēla skats`);
+        slideSelect.setAttribute('aria-label', `${name} attēla skats`);
         slideSelect.className = 'proj-slide-select';
-        images.forEach(({ image: slideImage }, index) => {
+        images.forEach((slideImage, index) => {
           const option = document.createElement('option');
           option.value = String(index);
           option.textContent = slideImage.caption || slideImage.alt;
@@ -1798,7 +1809,6 @@
     try {
       renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
     } catch (err) {
-      console.warn('[CDify] WebGL disks unavailable; using the CSS fallback.', err);
       document.body.classList.add('no-webgl');
       canvas.remove();
       return;
