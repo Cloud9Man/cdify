@@ -698,7 +698,7 @@ main, .footer { position: relative; z-index: 1; }
 
 .grid { display: grid; gap: 1.4rem; }
 .services-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); perspective: 1400px; }
-.proj-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); perspective: 1400px; }
+.proj-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); perspective: 1400px; }
 
 /* Tilt */
 .tilt {
@@ -767,7 +767,7 @@ main, .footer { position: relative; z-index: 1; }
 .proj { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--radius); }
 .proj.is-out { opacity: 0; scale: .92; pointer-events: none; }
 
-.proj-visual { position: relative; display: grid; grid-template-rows: minmax(0, 1fr); height: 220px; overflow: hidden; place-items: center; background: radial-gradient(circle at 50% 45%, rgba(var(--ink-rgb), .08), transparent 70%); }
+.proj-visual { position: relative; display: grid; grid-template-rows: minmax(0, 1fr); height: clamp(260px, 30vw, 360px); overflow: hidden; place-items: center; background: radial-gradient(circle at 50% 45%, rgba(var(--ink-rgb), .08), transparent 70%); }
 .proj-image { width: 100%; height: 100%; min-width: 0; min-height: 0; padding: 1.1rem; object-fit: contain; transition: transform .6s var(--ease); }
 .proj:hover .proj-image { transform: scale(1.05); }
 .proj-slide-button { position: absolute; top: 50%; z-index: 1; display: grid; width: 40px; height: 40px; place-items: center; border: 1px solid var(--border); border-radius: 50%; background: var(--menu-bg); color: var(--text-strong); font: 400 1.6rem/1 var(--font-body); cursor: pointer; transform: translateY(-50%); }
