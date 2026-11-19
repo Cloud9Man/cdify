@@ -574,22 +574,24 @@
   const CATALOG_PRODUCTS = [
     {
       id: 'maxell',
-      name: 'Maxell printable',
-      type: 'CD-R printable',
-      description: 'Neapdrukāts CD-r disks, kuram ir iededzināts attēls uz lasāmās daļas',
-      image: { src: './Images/catalog/cdr-straight.png', alt: 'Tukšs CD-R disks ar caurspīdīgu fonu' },
+      name: 'Attēls iededzināts diskā',
+      type: 'CD-R ar iededzinātu attēlu',
+      description: 'CD-R disks ar iededzinātu attēlu — no maketa līdz gatavam diskam.',
+      image: { src: './Images/catalog/disc-burned-angle-1.jpeg', alt: 'CD-R disks ar iededzinātu attēlu, slīps tuvplāns' },
       orderSection: 'standard',
       quantityName: 'quantityStandard',
+      showcaseSubsectionId: 'image-burning',
       categories: ['disc'],
       subsections: [
         {
           id: 'image-burning',
           name: 'Attēla iededzināšana',
-          description: 'Attēls tiek iededzināts tieši diska virsmā.',
+          description: 'Attēls tiek iededzināts diskā; apskati gatavo disku un tā izveides maketu.',
           orderOption: 'optionStandardImageBurn',
           images: [
-            { src: './Images/catalog/imageburn-straight.png', alt: 'Attēla iededzināšana diskā, skats no priekšpuses', caption: 'Skats no priekšpuses' },
-            { src: './Images/catalog/imageburn-tilt.png', alt: 'Attēla iededzināšana diskā, skats no slīpuma', caption: 'Skats no slīpuma' },
+            { src: './Images/catalog/disc-burned-angle-1.jpeg', alt: 'CD-R disks ar iededzinātu attēlu, slīps tuvplāns', caption: 'Iededzinātais attēls — slīps skats' },
+            { src: './Images/catalog/disc-burned-angle-2.jpeg', alt: 'CD-R diska iededzinātā virsma citā leņķī', caption: 'Iededzinātais attēls — cits leņķis' },
+            { src: './Images/catalog/disc-burned-design.png', alt: 'CD dizaina makets iededzināšanai', caption: 'Iededzināšanas makets' },
           ],
         },
         {
@@ -636,12 +638,13 @@
     },
     {
       id: 'jewel',
-      name: 'Jewel case',
-      type: 'Cietais futlāris',
-      description: 'Klasiskais 10,4 mm cietās plastmasas futlāris ar apdrukas iespējām.',
-      image: { src: './Images/catalog/jewel-open.png', alt: 'Atvērts Jewel case futlāris' },
+      name: 'Jewel case ar apdari',
+      type: 'Cietais futlāris · vāka noformējums',
+      description: 'Cietais 10,4 mm CD futlāris ar sagatavotu vāka dizainu — no maketa līdz drukas loksnei.',
+      image: { src: './Images/catalog/jewel-finish-front.jpeg', alt: 'Cietais CD futlāris no priekšpuses' },
       orderSection: 'cases',
       quantityName: 'quantityCases',
+      showcaseSubsectionId: 'finish',
       categories: ['case'],
       subsections: [
         {
@@ -650,8 +653,10 @@
           description: 'Pievieno futlāra priekšpuses un aizmugures noformējumu.',
           orderOption: 'optionCasesFinish',
           images: [
-            { src: './Images/catalog/jewel-open.png', alt: 'Atvērts Jewel case futlāris', caption: 'Atvērts futlāris' },
-            { src: './Images/catalog/jewel-close.png', alt: 'Aizvērts Jewel case futlāris', caption: 'Aizvērts futlāris' },
+            { src: './Images/catalog/jewel-finish-front.jpeg', alt: 'Cietais CD futlāris no priekšpuses', caption: 'Futlāra priekšpuse' },
+            { src: './Images/catalog/jewel-finish-open.jpeg', alt: 'Atvērts cietais CD futlāris', caption: 'Atvērts futlāris' },
+            { src: './Images/catalog/jewel-cover-layout.png', alt: 'CD vāka drukas loksnes izkārtojuma makets', caption: 'Apdrukas loksnes makets' },
+            { src: './Images/catalog/jewel-cover-editor.png', alt: 'CD futlāra vāka dizains redaktorā', caption: 'Vāka dizains redaktorā' },
           ],
         },
       ],
@@ -856,18 +861,11 @@
       title.focus({ preventScroll: true });
     };
 
-    const showcase = CATALOG_PRODUCTS.map((product) => {
-      const images = [];
-      const seenImages = new Set();
-      product.subsections.forEach((subsection) => {
-        subsection.images.forEach((image) => {
-          if (seenImages.has(image.src)) return;
-          seenImages.add(image.src);
-          images.push({ image, subsection });
-        });
-      });
-      if (product.image && !seenImages.has(product.image.src)) {
-        images.unshift({ image: product.image, subsection: product.subsections[0] });
+    const showcase = CATALOG_PRODUCTS.filter((product) => ['maxell', 'jewel'].includes(product.id)).map((product) => {
+      const subsection = product.subsections.find((item) => item.id === product.showcaseSubsectionId) || product.subsections[0];
+      const images = subsection ? subsection.images.map((image) => ({ image, subsection })) : [];
+      if (product.image && !images.some(({ image }) => image.src === product.image.src)) {
+        images.unshift({ image: product.image, subsection });
       }
       return { product, images };
     });
