@@ -527,17 +527,19 @@ main, .footer { position: relative; z-index: 1; }
 .float { position: absolute; will-change: transform; }
 .float-card { border-radius: 18px; animation: bob 7s ease-in-out infinite; }
 
-.float-code { top: 10%; left: 0; z-index: 2; }
+.float-code { top: 10%; left: 0; z-index: 2; width: min(440px, 100%); }
 .float-perf { bottom: 14%; right: 2%; }
 .float-live { top: 72%; left: 0; }
 .float-perf .float-card { animation-delay: -2s; }
 .float-live .float-card { animation-delay: -4s; }
 
 .explorer-card {
-  width: min(440px, calc(100vw - 40px));
+  width: 100%;
   overflow: hidden;
   border-radius: 14px;
-  background: linear-gradient(145deg, rgba(24, 28, 46, .97), rgba(12, 15, 29, .97));
+  background: linear-gradient(145deg, rgba(24, 28, 46, .78), rgba(12, 15, 29, .78));
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   color: #e7eaf5;
   font: 500 11px/1.4 'Segoe UI', var(--font-body);
   animation: none;
@@ -1097,6 +1099,12 @@ body.no-webgl .hero-visual::before {
 
 @media (max-width: 1100px) {
   /* Mobilā izvēlne */
+  .float-code { top: -20%; }
+  .explorer-search { display: none; }
+  .explorer-sidebar { flex-basis: 98px; }
+  .explorer-columns, .explorer-file { grid-template-columns: minmax(0, 1fr); }
+  .explorer-columns span:last-child, .file-type { display: none; }
+  .file-name { overflow: hidden; text-overflow: ellipsis; }
   .burger { display: block; }
   .nav { padding: 0 9px 0 18px; }
   .nav-menu {
