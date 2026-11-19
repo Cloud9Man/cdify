@@ -1798,6 +1798,7 @@
     try {
       renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
     } catch (err) {
+      console.warn('[CDify] WebGL disks unavailable; using the CSS fallback.', err);
       document.body.classList.add('no-webgl');
       canvas.remove();
       return;
