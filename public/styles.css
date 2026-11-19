@@ -342,7 +342,7 @@ main, .footer { position: relative; z-index: 1; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: .75rem;
   width: min(100%, 1120px);
   height: var(--nav-h);
   padding: 0 9px 0 22px;
@@ -363,7 +363,7 @@ main, .footer { position: relative; z-index: 1; }
   box-shadow: var(--nav-shadow);
   transition: background .4s, border-color .4s;
 }
-.nav-wrap.is-scrolled .nav { width: min(100%, 980px); height: 56px; }
+.nav-wrap.is-scrolled .nav { width: min(100%, 1120px); height: 56px; }
 .nav-wrap.is-scrolled .nav::before { background: var(--nav-bg-scrolled); border-color: var(--nav-border-scrolled); }
 
 .logo { position: relative; z-index: 2; display: inline-flex; align-items: center; gap: .65rem; font: 700 1.3rem var(--font-head); letter-spacing: -.02em; }
