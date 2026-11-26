@@ -35,6 +35,7 @@ const R2_SECRET_ACCESS_KEY = defineSecret("R2_SECRET_ACCESS_KEY");
 const GMAIL_USER = defineSecret("GMAIL_USER");
 const GMAIL_APP_PASSWORD = defineSecret("GMAIL_APP_PASSWORD");
 const ORDER_NOTIFICATION_EMAIL = defineSecret("ORDER_NOTIFICATION_EMAIL");
+const ORDER_NOTIFICATION_EMAIL_EXTRA = defineSecret("ORDER_NOTIFICATION_EMAIL_EXTRA");
 const MAX_FILE_SIZE = 700 * 1024 * 1024;
 const ORDER_NUMBER_PATTERN = /^\d+-[A-Za-z0-9-]{1,60}-(?:Vinila-\d+(?:-Parastie-\d+)?(?:-Parastais-dead-\d+)?(?:-Futlari-\d+)?(?:-PlanieFutlari-\d+)?|Parastie-\d+(?:-Parastais-dead-\d+)?(?:-Futlari-\d+)?(?:-PlanieFutlari-\d+)?|Parastais-dead-\d+(?:-Futlari-\d+)?(?:-PlanieFutlari-\d+)?|Futlari-\d+(?:-PlanieFutlari-\d+)?|PlanieFutlari-\d+|Pasutijums)$/;
 
@@ -45,7 +46,7 @@ const ORDER_PRODUCTS = {
     options: { optionStandardSurface: 0.5, optionStandardBurn: 0.25, optionStandardImageBurn: 0.25 },
   },
   "parastais-dead": { unitPrice: 0.5, options: { optionStandardPrintSurface: 0.5 } },
-  cases: { unitPrice: 1, options: { optionCasesFinish: 0.5 } },
+  cases: { unitPrice: 2, options: { optionCasesFinish: 0.5 } },
   slimCases: { unitPrice: 0.5, options: { optionSlimCaseFinish: 0.5 } },
 };
 
@@ -384,7 +385,7 @@ async function sendOrderNotification(submission) {
 
   await transporter.sendMail({
     from: `"CDify pasūtījumi" <${gmailUser}>`,
-    to: ORDER_NOTIFICATION_EMAIL.value(),
+    to: [ORDER_NOTIFICATION_EMAIL.value(), ORDER_NOTIFICATION_EMAIL_EXTRA.value()],
     replyTo: submission.email,
     subject: `Jauns pasūtījums ${submission.orderNumber}`,
     text: [
@@ -412,6 +413,7 @@ exports.api = onRequest({
     GMAIL_USER,
     GMAIL_APP_PASSWORD,
     ORDER_NOTIFICATION_EMAIL,
+    ORDER_NOTIFICATION_EMAIL_EXTRA,
   ],
 }, async (req, res) => {
   return cors(req, res, async () => {

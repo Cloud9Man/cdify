@@ -43,7 +43,7 @@ CDify vietne tiek publicēta Firebase Hosting un izmanto pasūtījuma formu, Fir
    ```
 
    `R2_PUBLIC_DOMAIN` nav obligāts. Ja tas nav iestatīts, augšupielādētie objekti paliek privāti, un metadatos tiek saglabātas tikai R2 objektu atslēgas.
-4. Nomainītās R2 atslēgas un Gmail piekļuves datus iestati kā Firebase Functions noslēpumus. Gmail kontā vispirms ieslēdz divpakāpju verifikāciju un izveido lietotnes paroli. `GMAIL_USER` ir Gmail sūtītāja adrese, `GMAIL_APP_PASSWORD` ir šī lietotnes parole, bet `ORDER_NOTIFICATION_EMAIL` ir adrese, kas saņems jauno pasūtījumu paziņojumus. Izpildi komandas un ievadi vērtības drošajā uzvednē; neglabā piekļuves datus kodā vai `.env` failos:
+4. Nomainītās R2 atslēgas un Gmail piekļuves datus iestati kā Firebase Functions noslēpumus. Gmail kontā vispirms ieslēdz divpakāpju verifikāciju un izveido lietotnes paroli. `GMAIL_USER` ir Gmail sūtītāja adrese, `GMAIL_APP_PASSWORD` ir šī lietotnes parole, `ORDER_NOTIFICATION_EMAIL` ir galvenā paziņojumu adrese, bet `ORDER_NOTIFICATION_EMAIL_EXTRA` ir papildu saņēmējs. Abi saņems paziņojumu par katru pasūtījumu. Izpildi komandas un ievadi vērtības drošajā uzvednē; neglabā piekļuves datus kodā vai `.env` failos:
 
    ```powershell
    npx firebase-tools functions:secrets:set R2_ACCESS_KEY_ID
@@ -51,6 +51,7 @@ CDify vietne tiek publicēta Firebase Hosting un izmanto pasūtījuma formu, Fir
    npx firebase-tools functions:secrets:set GMAIL_USER
    npx firebase-tools functions:secrets:set GMAIL_APP_PASSWORD
    npx firebase-tools functions:secrets:set ORDER_NOTIFICATION_EMAIL
+   npx firebase-tools functions:secrets:set ORDER_NOTIFICATION_EMAIL_EXTRA
    ```
 
 5. Instalē Functions atkarības, pēc tam publicē Firestore noteikumus, funkciju un vietni:
